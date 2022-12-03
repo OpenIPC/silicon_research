@@ -1,0 +1,84 @@
+/*
+ * Copyright (c) Hunan Goke,Chengdu Goke,Shandong Goke. 2021. All rights reserved.
+ */
+
+
+#ifndef  __COMM_AENC_H__
+#define  __COMM_AENC_H__
+
+#include "type.h"
+#include "common.h"
+#include "comm_aio.h"
+
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+typedef struct AENC_ATTR_G711_S {
+    GK_U32 resv;
+} AENC_ATTR_G711_S;
+
+typedef struct AENC_ATTR_G726_S {
+    G726_BPS_E enG726bps;
+} AENC_ATTR_G726_S;
+
+typedef struct AENC_ATTR_ADPCM_S {
+    ADPCM_TYPE_E enADPCMType;
+} AENC_ATTR_ADPCM_S;
+
+typedef struct AENC_ATTR_LPCM_S {
+    GK_U32 resv;
+} AENC_ATTR_LPCM_S;
+
+typedef struct AENC_ENCODER_S {
+    PAYLOAD_TYPE_E  enType;
+    GK_U32          u32MaxFrmLen;
+    GK_CHAR         aszName[17];
+    GK_S32          (*pfnOpenEncoder)(GK_VOID *pEncoderAttr, GK_VOID **ppEncoder);
+    GK_S32          (*pfnEncodeFrm)(GK_VOID *pEncoder, const AUDIO_FRAME_S *pstData,
+                        GK_U8 *pu8Outbuf, GK_U32 *pu32OutLen);
+    GK_S32          (*pfnCloseEncoder)(GK_VOID *pEncoder);
+} AENC_ENCODER_S;
+
+typedef struct AENC_CHN_ATTR_S {
+    PAYLOAD_TYPE_E      enType;
+    GK_U32              u32PtNumPerFrm;
+    GK_U32              u32BufSize;
+    GK_VOID ATTRIBUTE   *pValue;
+} AENC_CHN_ATTR_S;
+
+typedef enum EN_AENC_ERR_CODE_E {
+    AENC_ERR_ENCODER_ERR     = 64,
+    AENC_ERR_VQE_ERR         = 65,
+} EN_AENC_ERR_CODE_E;
+
+
+#define ERR_CODE_AENC_INVALID_DEVID     DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_INVALID_DEVID)
+#define ERR_CODE_AENC_INVALID_CHNID     DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_INVALID_CHNID)
+#define ERR_CODE_AENC_ILLEGAL_PARAM     DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_ILLEGAL_PARAM)
+#define ERR_CODE_AENC_EXIST             DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_EXIST)
+#define ERR_CODE_AENC_UNEXIST           DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_UNEXIST)
+#define ERR_CODE_AENC_NULL_PTR          DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_NULL_PTR)
+#define ERR_CODE_AENC_NOT_CONFIG        DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_CONFIG)
+#define ERR_CODE_AENC_NOT_SUPPORT       DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_SUPPORT)
+#define ERR_CODE_AENC_NOT_PERM          DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_PERM)
+#define ERR_CODE_AENC_NOMEM             DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_NOMEM)
+#define ERR_CODE_AENC_NOBUF             DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_NOBUF)
+#define ERR_CODE_AENC_BUF_EMPTY         DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_BUF_EMPTY)
+#define ERR_CODE_AENC_BUF_FULL          DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_BUF_FULL)
+#define ERR_CODE_AENC_SYS_NOTREADY      DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, EN_ERR_SYS_NOTREADY)
+#define ERR_CODE_AENC_ENCODER_ERR       DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, AENC_ERR_ENCODER_ERR)
+#define ERR_CODE_AENC_VQE_ERR       DEFINE_ERR_CODE(MOD_ID_AENC, EN_ERR_LEVEL_ERROR, AENC_ERR_VQE_ERR)
+
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
+
+#endif
+

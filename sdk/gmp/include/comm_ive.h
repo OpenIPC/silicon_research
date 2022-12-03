@@ -1,0 +1,344 @@
+/*
+ * Copyright (c) Hunan Goke,Chengdu Goke,Shandong Goke. 2021. All rights reserved.
+ */
+#ifndef _COMM_IVE_H_
+#define _COMM_IVE_H_
+
+#include "type.h"
+#include "errcode.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+typedef unsigned char GK_U0Q8;
+typedef unsigned char GK_U1Q7;
+typedef unsigned char GK_U5Q3;
+typedef unsigned char GK_U3Q5;
+
+typedef unsigned short GK_U0Q16;
+typedef unsigned short GK_U4Q12;
+typedef unsigned short GK_U6Q10;
+typedef unsigned short GK_U8Q8;
+typedef unsigned short GK_U9Q7;
+typedef unsigned short GK_U12Q4;
+typedef unsigned short GK_U14Q2;
+typedef unsigned short GK_U5Q11;
+typedef unsigned short GK_U1Q15;
+typedef unsigned short GK_U2Q14;
+typedef GK_U6Q10 GK_UFP16;
+typedef short GK_S9Q7;
+typedef short GK_S14Q2;
+typedef short GK_S1Q15;
+
+typedef unsigned int GK_U22Q10;
+typedef unsigned int GK_U25Q7;
+typedef unsigned int GK_U21Q11;
+typedef unsigned int GK_U14Q18;
+typedef unsigned int GK_U8Q24;
+typedef unsigned int GK_U4Q28;
+
+typedef int GK_S25Q7;
+typedef int GK_S16Q16;
+typedef int GK_S14Q18;
+typedef int GK_S20Q12;
+
+typedef int GK_S24Q8;
+
+typedef unsigned short GK_U8Q4F4;
+
+/* -----------------------------------------------*
+ * The fixed-point data type, will be used to    *
+ * represent float data in hardware calculations. linux code style.*
+ * ----------------------------------------------- */
+/* --u8bit---------------------------------------- */
+typedef GK_U0Q8 gk_u0q8;
+typedef GK_U1Q7 gk_u1q7;
+typedef GK_U5Q3 gk_u5q3;
+typedef GK_U3Q5 gk_u3q5;
+
+/* --u16bit--------------------------------------- */
+typedef GK_U0Q16 gk_u0q16;
+typedef GK_U4Q12 gk_u4q12;
+typedef GK_U6Q10 gk_u6q10;
+typedef GK_U8Q8  gk_u8q8;
+typedef GK_U9Q7  gk_u9q7;
+typedef GK_U12Q4 gk_u12q4;
+typedef GK_U14Q2 gk_u14q2;
+typedef GK_U5Q11 gk_u5q11;
+typedef GK_U1Q15 gk_u1q15;
+typedef GK_U2Q14 gk_u2q14;
+typedef GK_UFP16 gk_ufp16;
+/* 8bits unsigned integer,4bits decimal fraction,4bits flag_bits */
+typedef GK_U8Q4F4 gk_u8q4f4;
+
+/* --s16bit--------------------------------------- */
+typedef GK_S9Q7  gk_s9q7;
+typedef GK_S14Q2 gk_s14q2;
+typedef GK_S1Q15 gk_s1q15;
+
+/* --u32bit--------------------------------------- */
+typedef GK_U22Q10 gk_u22q10;
+typedef GK_U25Q7  gk_u25q7;
+typedef GK_U21Q11 gk_u21q11;
+typedef GK_U14Q18 gk_u14q18;
+typedef GK_U8Q24  gk_u8q24;
+typedef GK_U4Q28  gk_u4q28;
+
+/* --s32bit--------------------------------------- */
+typedef GK_S25Q7  gk_s25q7;
+typedef GK_S16Q16 gk_s16q16;
+typedef GK_S14Q18 gk_s14q18;
+typedef GK_S20Q12 gk_s20q12;
+typedef GK_S24Q8  gk_s24q8;
+
+
+typedef enum IVE_IMAGE_TYPE_E {
+    IVE_IMAGE_TYPE_U8C1 = 0x0,
+    IVE_IMAGE_TYPE_S8C1 = 0x1,
+
+    IVE_IMAGE_TYPE_YUV420SP = 0x2,
+    IVE_IMAGE_TYPE_YUV422SP = 0x3,
+    IVE_IMAGE_TYPE_YUV420P = 0x4,
+    IVE_IMAGE_TYPE_YUV422P = 0x5,
+
+    IVE_IMAGE_TYPE_S8C2_PACKAGE = 0x6,
+    IVE_IMAGE_TYPE_S8C2_PLANAR = 0x7,
+
+    IVE_IMAGE_TYPE_S16C1 = 0x8,
+    IVE_IMAGE_TYPE_U16C1 = 0x9,
+
+    IVE_IMAGE_TYPE_U8C3_PACKAGE = 0xa,
+    IVE_IMAGE_TYPE_U8C3_PLANAR = 0xb,
+
+    IVE_IMAGE_TYPE_S32C1 = 0xc,
+    IVE_IMAGE_TYPE_U32C1 = 0xd,
+
+    IVE_IMAGE_TYPE_S64C1 = 0xe,
+    IVE_IMAGE_TYPE_U64C1 = 0xf,
+
+    IVE_IMAGE_TYPE_BUTT
+
+} IVE_IMAGE_TYPE_E;
+
+typedef struct IVE_IMAGE_S {
+    GK_U64 au64PhyAddr[3];
+    GK_U64 au64VirAddr[3];
+    GK_U32 au32Stride[3];
+    GK_U32 u32Width;
+    GK_U32 u32Height;
+    IVE_IMAGE_TYPE_E enType;
+} IVE_IMAGE_S;
+
+typedef IVE_IMAGE_S IVE_SRC_IMAGE_S;
+typedef IVE_IMAGE_S IVE_DST_IMAGE_S;
+
+
+typedef struct IVE_MEM_INFO_S {
+    GK_U64 u64PhyAddr;
+    GK_U64 u64VirAddr;
+    GK_U32 u32Size;
+} IVE_MEM_INFO_S;
+typedef IVE_MEM_INFO_S IVE_SRC_MEM_INFO_S;
+typedef IVE_MEM_INFO_S IVE_DST_MEM_INFO_S;
+
+typedef struct IVE_DATA_S {
+    GK_U64 u64PhyAddr;
+    GK_U64 u64VirAddr;
+
+    GK_U32 u32Stride;
+    GK_U32 u32Width;
+    GK_U32 u32Height;
+
+    GK_U32 u32Reserved;
+} IVE_DATA_S;
+typedef IVE_DATA_S IVE_SRC_DATA_S;
+typedef IVE_DATA_S IVE_DST_DATA_S;
+
+typedef union IVE_8BIT_U {
+    GK_S8 s8Val;
+    GK_U8 u8Val;
+} IVE_8BIT_U;
+
+typedef struct IVE_POINT_U16_S {
+    GK_U16 u16X;
+    GK_U16 u16Y;
+} IVE_POINT_U16_S;
+
+typedef struct IVE_POINT_S16_S {
+    GK_U16 s16X;
+    GK_U16 s16Y;
+} IVE_POINT_S16_S;
+
+typedef struct IVE_POINT_S25Q7_S {
+    GK_S25Q7 s25q7X;
+    GK_S25Q7 s25q7Y;
+} IVE_POINT_S25Q7_S;
+
+typedef struct IVE_POINT_U14Q2_S {
+    GK_U14Q2 u14q2X;
+    GK_U14Q2 u14q2Y;
+} IVE_POINT_U14Q2_S;
+
+typedef struct IVE_RECT_U16_S {
+    GK_U16 u16X;
+    GK_U16 u16Y;
+    GK_U16 u16Width;
+    GK_U16 u16Height;
+} IVE_RECT_U16_S;
+
+typedef struct IVE_RECT_U32_S {
+    GK_U32 u32X;
+    GK_U32 u32Y;
+    GK_U32 u32Width;
+    GK_U32 u32Height;
+} IVE_RECT_U32_S;
+
+typedef struct IVE_RECT_S24Q8_S {
+    GK_S24Q8 s24q8X;
+    GK_S24Q8 s24q8Y;
+    GK_U32 u32Width;
+    GK_U32 u32Height;
+} IVE_RECT_S24Q8_S;
+
+typedef struct IVE_LOOK_UP_TABLE_S {
+    IVE_MEM_INFO_S stTable;
+    GK_U16 u16ElemNum;
+
+    GK_U8 u8TabInPreci;
+    GK_U8 u8TabOutNorm;
+
+    GK_S32 s32TabInLower;
+    GK_S32 s32TabInUpper;
+} IVE_LOOK_UP_TABLE_S;
+
+typedef enum IVE_BLOB_TYPE_E {
+    IVE_BLOB_TYPE_S32 = 0x0,
+
+    IVE_BLOB_TYPE_U8 = 0x1,
+
+    IVE_BLOB_TYPE_YVU420SP = 0x2,
+    IVE_BLOB_TYPE_YVU422SP = 0x3,
+
+    IVE_BLOB_TYPE_VEC_S32 = 0x4,
+
+    IVE_BLOB_TYPE_SEQ_S32 = 0x5,
+
+    IVE_BLOB_TYPE_U16 = 0x6,
+
+    IVE_BLOB_TYPE_S8 = 0x7,
+
+    IVE_BLOB_TYPE_F32 = 0x8,
+
+    IVE_BLOB_TYPE_BUTT
+} IVE_BLOB_TYPE_E;
+
+
+typedef struct IVE_BLOB_S {
+    IVE_BLOB_TYPE_E enType;
+    GK_U32 u32Stride;
+
+    GK_U64 u64VirAddr;
+    GK_U64 u64PhyAddr;
+
+    GK_U32 u32Num;
+    union {
+        struct {
+            GK_U32 u32Width;
+            GK_U32 u32Height;
+            GK_U32 u32Chn;
+        } stWhc;
+        struct {
+            GK_U32 u32Dim;
+            GK_U64 u64VirAddrStep;
+        } stSeq;
+    } unShape;
+
+} IVE_BLOB_S;
+
+typedef IVE_BLOB_S IVE_SRC_BLOB_S;
+typedef IVE_BLOB_S IVE_DST_BLOB_S;
+
+typedef enum EN_IVE_ERR_CODE_E {
+    ERR_IVE_SYS_TIMEOUT = 0x40,
+    ERR_IVE_QUERY_TIMEOUT = 0x41,
+    ERR_IVE_OPEN_FILE = 0x42,
+    ERR_IVE_READ_FILE = 0x43,
+    ERR_IVE_WRITE_FILE = 0x44,
+    ERR_IVE_BUS_ERR = 0x45,
+
+    ERR_IVE_BUTT
+} EN_IVE_ERR_CODE_E;
+
+typedef enum EN_FD_ERR_CODE_E {
+    ERR_FD_SYS_TIMEOUT = 0x40,
+    ERR_FD_CFG = 0x41,
+    ERR_FD_FACE_NUM_OVER = 0x42,
+    ERR_FD_OPEN_FILE = 0x43,
+    ERR_FD_READ_FILE = 0x44,
+    ERR_FD_WRITE_FILE = 0x45,
+
+    ERR_FD_BUTT
+} EN_FD_ERR_CODE_E;
+
+#define ERR_CODE_IVE_INVALID_DEVID DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_INVALID_DEVID)
+#define ERR_CODE_IVE_INVALID_CHNID DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_INVALID_CHNID)
+#define ERR_CODE_IVE_ILLEGAL_PARAM DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_ILLEGAL_PARAM)
+#define ERR_CODE_IVE_EXIST DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_EXIST)
+#define ERR_CODE_IVE_UNEXIST DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_UNEXIST)
+#define ERR_CODE_IVE_NULL_PTR DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_NULL_PTR)
+#define ERR_CODE_IVE_NOT_CONFIG DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_CONFIG)
+#define ERR_CODE_IVE_NOT_SURPPORT DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_SUPPORT)
+#define ERR_CODE_IVE_NOT_PERM DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_PERM)
+#define ERR_CODE_IVE_NOMEM DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_NOMEM)
+#define ERR_CODE_IVE_NOBUF DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_NOBUF)
+#define ERR_CODE_IVE_BUF_EMPTY DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_BUF_EMPTY)
+#define ERR_CODE_IVE_BUF_FULL DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_BUF_FULL)
+#define ERR_CODE_IVE_NOTREADY DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_SYS_NOTREADY)
+#define ERR_CODE_IVE_BADADDR DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_BADADDR)
+#define ERR_CODE_IVE_BUSY DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, EN_ERR_BUSY)
+#define ERR_CODE_IVE_SYS_TIMEOUT DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, ERR_IVE_SYS_TIMEOUT)
+#define ERR_CODE_IVE_QUERY_TIMEOUT DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, ERR_IVE_QUERY_TIMEOUT)
+#define ERR_CODE_IVE_OPEN_FILE DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, ERR_IVE_OPEN_FILE)
+#define ERR_CODE_IVE_READ_FILE DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, ERR_IVE_READ_FILE)
+#define ERR_CODE_IVE_WRITE_FILE DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, ERR_IVE_WRITE_FILE)
+#define ERR_CODE_IVE_BUS_ERR DEFINE_ERR_CODE(MOD_ID_IVE, EN_ERR_LEVEL_ERROR, ERR_IVE_BUS_ERR)
+
+#define ERR_CODE_FD_INVALID_DEVID DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_INVALID_DEVID)
+#define ERR_CODE_FD_INVALID_CHNID DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_INVALID_CHNID)
+#define ERR_CODE_FD_ILLEGAL_PARAM DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_ILLEGAL_PARAM)
+#define ERR_CODE_FD_EXIST DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_EXIST)
+#define ERR_CODE_FD_UNEXIST DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_UNEXIST)
+#define ERR_CODE_FD_NULL_PTR DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_NULL_PTR)
+#define ERR_CODE_FD_NOT_CONFIG DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_CONFIG)
+#define ERR_CODE_FD_NOT_SURPPORT DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_SUPPORT)
+#define ERR_CODE_FD_NOT_PERM DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_PERM)
+#define ERR_CODE_FD_NOMEM DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_NOMEM)
+#define ERR_CODE_FD_NOBUF DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_NOBUF)
+#define ERR_CODE_FD_BUF_EMPTY DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_BUF_EMPTY)
+#define ERR_CODE_FD_BUF_FULL DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_BUF_FULL)
+#define ERR_CODE_FD_NOTREADY DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_SYS_NOTREADY)
+#define ERR_CODE_FD_BADADDR DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_BADADDR)
+#define ERR_CODE_FD_BUSY DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, EN_ERR_BUSY)
+#define ERR_CODE_FD_SYS_TIMEOUT DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, ERR_FD_SYS_TIMEOUT)
+#define ERR_CODE_FD_CFG DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, ERR_FD_CFG)
+#define ERR_CODE_FD_FACE_NUM_OVER DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, ERR_FD_FACE_NUM_OVER)
+#define ERR_CODE_FD_OPEN_FILE DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, ERR_FD_OPEN_FILE)
+#define ERR_CODE_FD_READ_FILE DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, ERR_FD_READ_FILE)
+#define ERR_CODE_FD_WRITE_FILE DEFINE_ERR_CODE(MOD_ID_FD, EN_ERR_LEVEL_ERROR, ERR_FD_WRITE_FILE)
+
+#define ERR_CODE_ODT_INVALID_CHNID DEFINE_ERR_CODE(MOD_ID_ODT, EN_ERR_LEVEL_ERROR, EN_ERR_INVALID_CHNID)
+#define ERR_CODE_ODT_EXIST DEFINE_ERR_CODE(MOD_ID_ODT, EN_ERR_LEVEL_ERROR, EN_ERR_EXIST)
+#define ERR_CODE_ODT_UNEXIST DEFINE_ERR_CODE(MOD_ID_ODT, EN_ERR_LEVEL_ERROR, EN_ERR_UNEXIST)
+#define ERR_CODE_ODT_NOT_PERM DEFINE_ERR_CODE(MOD_ID_ODT, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_PERM)
+#define ERR_CODE_ODT_NOTREADY DEFINE_ERR_CODE(MOD_ID_ODT, EN_ERR_LEVEL_ERROR, EN_ERR_SYS_NOTREADY)
+#define ERR_CODE_ODT_BUSY DEFINE_ERR_CODE(MOD_ID_ODT, EN_ERR_LEVEL_ERROR, EN_ERR_BUSY)
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
+#endif
+

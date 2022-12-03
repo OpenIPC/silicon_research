@@ -1,0 +1,228 @@
+/*
+ * Copyright (c) Hunan Goke,Chengdu Goke,Shandong Goke. 2021. All rights reserved.
+ */
+#ifndef __COMM_REGION_H__
+#define __COMM_REGION_H__
+
+#include "common.h"
+#include "comm_video.h"
+#include "errcode.h"
+#include "defines.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+#define RGN_COLOR_LUT_NUM      2
+#define RGN_MAX_BMP_UPDATE_NUM 16
+#define RGN_BATCHHANDLE_MAX    24
+
+typedef GK_U32 RGN_HANDLE;
+typedef GK_U32 RGN_HANDLEGROUP;
+
+typedef enum RGN_TYPE_E {
+    OVERLAY_RGN = 0,
+    COVER_RGN,
+    COVEREX_RGN,
+    OVERLAYEX_RGN,
+    MOSAIC_RGN,
+    RGN_BUTT
+} RGN_TYPE_E;
+
+typedef enum INVERT_COLOR_MODE_E {
+    LESSTHAN_LUM_THRESH = 0,
+    MORETHAN_LUM_THRESH,
+    INVERT_COLOR_BUTT
+} INVERT_COLOR_MODE_E;
+
+typedef struct OVERLAY_QP_INFO_S {
+    GK_BOOL bAbsQp;
+    GK_S32 s32Qp;
+    GK_BOOL bQpDisable;
+} OVERLAY_QP_INFO_S;
+
+typedef struct OVERLAY_INVERT_COLOR_S {
+    SIZE_S stInvColArea;
+    GK_U32 u32LumThresh;
+    INVERT_COLOR_MODE_E enChgMod;
+    GK_BOOL bInvColEn;
+} OVERLAY_INVERT_COLOR_S;
+
+typedef enum ATTACH_DEST_E {
+    ATTACH_JPEG_MAIN = 0,
+    ATTACH_JPEG_MPF0,
+    ATTACH_JPEG_MPF1,
+    ATTACH_JPEG_BUTT
+} ATTACH_DEST_E;
+
+typedef struct OVERLAY_ATTR_S {
+    PIXEL_FORMAT_E enPixelFmt;
+
+    GK_U32 u32BgColor;
+
+    SIZE_S stSize;
+    GK_U32 u32CanvasNum;
+} OVERLAY_ATTR_S;
+
+typedef struct OVERLAY_CHN_ATTR_S {
+    POINT_S stPoint;
+
+    GK_U32 u32FgAlpha;
+
+    GK_U32 u32BgAlpha;
+
+    GK_U32 u32Layer;
+
+    OVERLAY_QP_INFO_S stQpInfo;
+
+    OVERLAY_INVERT_COLOR_S stInvertColor;
+
+    ATTACH_DEST_E enAttachDest;
+
+    GK_U16 u16ColorLUT[RGN_COLOR_LUT_NUM];
+} OVERLAY_CHN_ATTR_S;
+
+typedef enum RGN_AREA_TYPE_E {
+    AREA_RECT = 0,
+    AREA_QUAD_RANGLE,
+    AREA_BUTT
+} RGN_AREA_TYPE_E;
+
+typedef enum RGN_COORDINATE_E {
+    RGN_ABS_COOR = 0,
+    RGN_RATIO_COOR
+} RGN_COORDINATE_E;
+
+typedef struct RGN_QUADRANGLE_S {
+    GK_BOOL bSolid;
+    GK_U32 u32Thick;
+    POINT_S stPoint[4];
+} RGN_QUADRANGLE_S;
+
+typedef struct COVER_CHN_ATTR_S {
+    RGN_AREA_TYPE_E enCoverType;
+    union {
+        RECT_S stRect;
+        RGN_QUADRANGLE_S stQuadRangle;
+    };
+    GK_U32 u32Color;
+    GK_U32 u32Layer;
+    RGN_COORDINATE_E enCoordinate;
+} COVER_CHN_ATTR_S;
+
+typedef struct COVEREX_CHN_ATTR_S {
+    RGN_AREA_TYPE_E enCoverType;
+    union {
+        RECT_S stRect;
+        RGN_QUADRANGLE_S stQuadRangle;
+    };
+    GK_U32 u32Color;
+    GK_U32 u32Layer;
+} COVEREX_CHN_ATTR_S;
+
+typedef enum MOSAIC_BLK_SIZE_E {
+    MOSAIC_BLK_SIZE_8 = 0,
+    MOSAIC_BLK_SIZE_16,
+    MOSAIC_BLK_SIZE_32,
+    MOSAIC_BLK_SIZE_64,
+    MOSAIC_BLK_SIZE_BUTT
+} MOSAIC_BLK_SIZE_E;
+
+typedef struct MOSAIC_CHN_ATTR_S {
+    RECT_S stRect;
+    MOSAIC_BLK_SIZE_E enBlkSize;
+    GK_U32 u32Layer;
+} MOSAIC_CHN_ATTR_S;
+
+typedef struct OVERLAYEX_COMM_ATTR_S {
+    PIXEL_FORMAT_E enPixelFmt;
+
+    GK_U32 u32BgColor;
+
+    SIZE_S stSize;
+    GK_U32 u32CanvasNum;
+} OVERLAYEX_ATTR_S;
+
+typedef struct OVERLAYEX_CHN_ATTR_S {
+    POINT_S stPoint;
+
+    GK_U32 u32FgAlpha;
+
+    GK_U32 u32BgAlpha;
+
+    GK_U32 u32Layer;
+
+    GK_U16 u16ColorLUT[RGN_COLOR_LUT_NUM];
+} OVERLAYEX_CHN_ATTR_S;
+
+typedef union RGN_ATTR_U {
+    OVERLAY_ATTR_S stOverlay;
+    OVERLAYEX_ATTR_S stOverlayEx;
+} RGN_ATTR_U;
+
+typedef union RGN_CHN_ATTR_U {
+    OVERLAY_CHN_ATTR_S stOverlayChn;
+    COVER_CHN_ATTR_S stCoverChn;
+    COVEREX_CHN_ATTR_S stCoverExChn;
+    OVERLAYEX_CHN_ATTR_S stOverlayExChn;
+    MOSAIC_CHN_ATTR_S stMosaicChn;
+} RGN_CHN_ATTR_U;
+
+typedef struct RGN_ATTR_S {
+    RGN_TYPE_E enType;
+    RGN_ATTR_U unAttr;
+} RGN_ATTR_S;
+
+typedef struct RGN_CHN_ATTR_S {
+    GK_BOOL bShow;
+    RGN_TYPE_E enType;
+    RGN_CHN_ATTR_U unChnAttr;
+} RGN_CHN_ATTR_S;
+
+typedef struct RGN_BMP_UPDATE_S {
+    POINT_S stPoint;
+    BITMAP_S stBmp;
+    GK_U32 u32Stride;
+} RGN_BMP_UPDATE_S;
+
+typedef struct RGN_BMP_UPDATE_CFG_S {
+    GK_U32 u32BmpCnt;
+    RGN_BMP_UPDATE_S astBmpUpdate[RGN_MAX_BMP_UPDATE_NUM];
+} RGN_BMP_UPDATE_CFG_S;
+
+typedef struct RGN_CANVAS_INFO_S {
+    GK_U64 u64PhyAddr;
+    GK_U64 u64VirtAddr;
+    SIZE_S stSize;
+    GK_U32 u32Stride;
+    PIXEL_FORMAT_E enPixelFmt;
+} RGN_CANVAS_INFO_S;
+
+#define NOTICE_RGN_BUFFER_CHANGE DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_NOTICE, GK_SUCCESS)
+
+#define ERR_CODE_RGN_INVALID_DEVID DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_INVALID_DEVID)
+#define ERR_CODE_RGN_INVALID_CHNID DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_INVALID_CHNID)
+#define ERR_CODE_RGN_ILLEGAL_PARAM DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_ILLEGAL_PARAM)
+#define ERR_CODE_RGN_EXIST DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_EXIST)
+#define ERR_CODE_RGN_UNEXIST DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_UNEXIST)
+#define ERR_CODE_RGN_NULL_PTR DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_NULL_PTR)
+#define ERR_CODE_RGN_NOT_CONFIG DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_CONFIG)
+#define ERR_CODE_RGN_NOT_SUPPORT DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_SUPPORT)
+#define ERR_CODE_RGN_NOT_PERM DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_NOT_PERM)
+#define ERR_CODE_RGN_NOMEM DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_NOMEM)
+#define ERR_CODE_RGN_NOBUF DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_NOBUF)
+#define ERR_CODE_RGN_BUF_EMPTY DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_BUF_EMPTY)
+#define ERR_CODE_RGN_BUF_FULL DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_BUF_FULL)
+#define ERR_CODE_RGN_BADADDR DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_BADADDR)
+#define ERR_CODE_RGN_BUSY DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_BUSY)
+
+#define ERR_CODE_RGN_NOTREADY DEFINE_ERR_CODE(MOD_ID_RGN, EN_ERR_LEVEL_ERROR, EN_ERR_SYS_NOTREADY)
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
+#endif

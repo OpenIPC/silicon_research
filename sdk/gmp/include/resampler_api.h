@@ -1,0 +1,51 @@
+/*
+ * Copyright (c) Hunan Goke,Chengdu Goke,Shandong Goke. 2021. All rights reserved.
+ */
+#ifndef _RESAMPLER_API_H_
+#define _RESAMPLER_API_H_
+
+#include "type.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MAXFRAMESIZE 2048
+
+#ifndef ERR_CODE_RESAMPLE_PREFIX
+#define ERR_CODE_RESAMPLE_PREFIX 0x80000000
+#endif
+
+#define ERR_CODE_RESAMPLE_HANDLE (ERR_CODE_RESAMPLE_PREFIX | 0x0001)
+
+#define ERR_CODE_RESAMPLE_PCMBUF (ERR_CODE_RESAMPLE_PREFIX | 0x0002)
+
+#define ERR_CODE_RESAMPLE_SAMPLE_NUMBER (ERR_CODE_RESAMPLE_PREFIX | 0x0003)
+
+#define ERR_CODE_RESAMPLE_OUTPCM_SPACE (ERR_CODE_RESAMPLE_PREFIX | 0x0004)
+
+#define ERR_CODE_PCM_CHANNEL (ERR_CODE_RESAMPLE_PREFIX | 0x0005)
+
+#define ERR_CODE_PCM_FORMAT (ERR_CODE_RESAMPLE_PREFIX | 0x0006)
+
+#define ERR_CODE_INVALID_BYPASSFLAG (ERR_CODE_RESAMPLE_PREFIX | 0x0007)
+
+#define ERR_CODE_UNKNOWN (ERR_CODE_RESAMPLE_PREFIX | 0x0008)
+
+#define ERR_CODE_INPUT_EMPTY_POINTER (ERR_CODE_RESAMPLE_PREFIX | 0x0009)
+
+GK_VOID *AUDIO_Resampler_Create(GK_S32 s32Inrate, GK_S32 s32Outrate, GK_S32 s32Chans);
+
+
+
+GK_S32 AUDIO_Resampler_Process(GK_VOID *inst, GK_S16 *s16Inbuf, GK_S32 s32Insamps, GK_S16 *s16Outbuf);
+
+GK_VOID AUDIO_Resampler_Destroy(GK_VOID *inst);
+
+GK_S32 AUDIO_Resampler_GetMaxOutputNum(GK_VOID *inst, GK_S32 s32Insamps);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

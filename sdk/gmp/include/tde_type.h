@@ -1,0 +1,450 @@
+/*
+ * Copyright (c) Hunan Goke,Chengdu Goke,Shandong Goke. 2021. All rights reserved.
+ */
+#ifndef __TDE_TYPE_H__
+#define __TDE_TYPE_H__
+
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+#include "tde_errcode.h"
+
+
+
+
+typedef GK_S32 TDE_HANDLE;
+
+
+typedef GK_VOID (* TDE_FUNC_CB) (GK_U32 enCallModId, GK_U32 u32CallDevId, GK_U32 u32CallChnId,
+                            GK_VOID* pJobData);
+
+
+typedef GK_VOID (* TDE_TRIG_SEL)(GK_U32);
+
+typedef enum TDE2_COLOR_FMT_E
+{
+    TDE2_COLOR_FMT_RGB444 = 0,
+    TDE2_COLOR_FMT_BGR444,
+    TDE2_COLOR_FMT_RGB555,
+    TDE2_COLOR_FMT_BGR555,
+    TDE2_COLOR_FMT_RGB565,
+    TDE2_COLOR_FMT_BGR565,
+    TDE2_COLOR_FMT_RGB888,
+    TDE2_COLOR_FMT_BGR888,
+    TDE2_COLOR_FMT_ARGB4444,
+    TDE2_COLOR_FMT_ABGR4444,
+    TDE2_COLOR_FMT_RGBA4444,
+    TDE2_COLOR_FMT_BGRA4444,
+    TDE2_COLOR_FMT_ARGB1555,
+    TDE2_COLOR_FMT_ABGR1555,
+    TDE2_COLOR_FMT_RGBA1555,
+    TDE2_COLOR_FMT_BGRA1555,
+    TDE2_COLOR_FMT_ARGB8565,
+    TDE2_COLOR_FMT_ABGR8565,
+    TDE2_COLOR_FMT_RGBA8565,
+    TDE2_COLOR_FMT_BGRA8565,
+    TDE2_COLOR_FMT_ARGB8888,
+    TDE2_COLOR_FMT_ABGR8888,
+    TDE2_COLOR_FMT_RGBA8888,
+    TDE2_COLOR_FMT_BGRA8888,
+    TDE2_COLOR_FMT_RABG8888,
+    TDE2_COLOR_FMT_CLUT1,
+    TDE2_COLOR_FMT_CLUT2,
+    TDE2_COLOR_FMT_CLUT4,
+    TDE2_COLOR_FMT_CLUT8,
+    TDE2_COLOR_FMT_ACLUT44,
+    TDE2_COLOR_FMT_ACLUT88,
+    TDE2_COLOR_FMT_A1,
+    TDE2_COLOR_FMT_A8,
+    TDE2_COLOR_FMT_YCbCr888,
+    TDE2_COLOR_FMT_AYCbCr8888,
+    TDE2_COLOR_FMT_YCbCr422,
+    TDE2_COLOR_FMT_PKGVYUY,
+    TDE2_COLOR_FMT_byte,
+	TDE2_COLOR_FMT_halfword,
+    TDE2_COLOR_FMT_JPG_YCbCr400MBP,
+    TDE2_COLOR_FMT_JPG_YCbCr422MBHP,
+    TDE2_COLOR_FMT_JPG_YCbCr422MBVP,
+    TDE2_COLOR_FMT_MP1_YCbCr420MBP,
+    TDE2_COLOR_FMT_MP2_YCbCr420MBP,
+    TDE2_COLOR_FMT_MP2_YCbCr420MBI,
+    TDE2_COLOR_FMT_JPG_YCbCr420MBP,
+    TDE2_COLOR_FMT_JPG_YCbCr444MBP,
+    TDE2_COLOR_FMT_BUTT
+} TDE2_COLOR_FMT_E;
+
+typedef enum TDE2_MB_COLORFMT_E
+{
+    TDE2_MB_COLOR_FMT_JPG_YCbCr400MBP = 0,
+    TDE2_MB_COLOR_FMT_JPG_YCbCr422MBHP,
+    TDE2_MB_COLOR_FMT_JPG_YCbCr422MBVP,
+    TDE2_MB_COLOR_FMT_MP1_YCbCr420MBP,
+    TDE2_MB_COLOR_FMT_MP2_YCbCr420MBP,
+    TDE2_MB_COLOR_FMT_MP2_YCbCr420MBI,
+    TDE2_MB_COLOR_FMT_JPG_YCbCr420MBP,
+    TDE2_MB_COLOR_FMT_JPG_YCbCr444MBP,
+    TDE2_MB_COLOR_FMT_BUTT
+} TDE2_MB_COLOR_FMT_E;
+
+typedef struct TDE2_SURFACE_S
+{
+    GK_U64 PhyAddr;
+
+    TDE2_COLOR_FMT_E enColorFmt;
+
+    GK_U32 u32Height;
+
+    GK_U32 u32Width;
+
+    GK_U32 u32Stride;
+
+    GK_BOOL bYCbCrClut;
+
+    GK_BOOL bAlphaMax255;
+
+    GK_BOOL bAlphaExt1555;
+    GK_U8 u8Alpha0;
+    GK_U8 u8Alpha1;
+    GK_U64 CbCrPhyAddr;
+    GK_U32 u32CbCrStride;
+    GK_U64 ClutPhyAddr;
+} TDE2_SURFACE_S;
+
+typedef struct TDE2_MB_S
+{
+    TDE2_MB_COLOR_FMT_E enMbFmt;
+    GK_U64              YPhyAddr;
+    GK_U32              u32YWidth;
+    GK_U32              u32YHeight;
+    GK_U32              u32YStride;
+    GK_U64              CbCrPhyAddr;
+    GK_U32              u32CbCrStride;
+} TDE2_MB_S;
+
+typedef struct TDE2_RECT_S
+{
+    GK_S32 s32Xpos;
+    GK_S32 s32Ypos;
+    GK_U32 u32Width;
+    GK_U32 u32Height;
+} TDE2_RECT_S;
+
+typedef enum TDE2_ALUCMD_E
+{
+    TDE2_ALUCMD_NONE = 0x0,
+    TDE2_ALUCMD_BLEND = 0x1,
+    TDE2_ALUCMD_ROP = 0x2,
+    TDE2_ALUCMD_COLORIZE = 0x4,
+    TDE2_ALUCMD_BUTT = 0x8
+} TDE2_ALUCMD_E;
+
+typedef enum TDE2_ROP_CODE_E
+{
+    TDE2_ROP_BLACK = 0,
+    TDE2_ROP_NOTMERGEPEN,
+    TDE2_ROP_MASKNOTPEN,
+    TDE2_ROP_NOTCOPYPEN,
+    TDE2_ROP_MASKPENNOT,
+    TDE2_ROP_NOT,
+    TDE2_ROP_XORPEN,
+    TDE2_ROP_NOTMASKPEN,
+    TDE2_ROP_MASKPEN,
+    TDE2_ROP_NOTXORPEN,
+    TDE2_ROP_NOP,
+    TDE2_ROP_MERGENOTPEN,
+    TDE2_ROP_COPYPEN,
+    TDE2_ROP_MERGEPENNOT,
+    TDE2_ROP_MERGEPEN,
+    TDE2_ROP_WHITE,
+    TDE2_ROP_BUTT
+} TDE2_ROP_CODE_E;
+
+typedef enum TDE2_MIRROR_E
+{
+    TDE2_MIRROR_NONE = 0,
+    TDE2_MIRROR_HORIZONTAL,
+    TDE2_MIRROR_VERTICAL,
+    TDE2_MIRROR_BOTH,
+    TDE2_MIRROR_BUTT
+} TDE2_MIRROR_E;
+
+typedef enum TDE2_CLIPMODE_E
+{
+    TDE2_CLIPMODE_NONE = 0,
+    TDE2_CLIPMODE_INSIDE,
+    TDE2_CLIPMODE_OUTSIDE,
+    TDE2_CLIPMODE_BUTT
+} TDE2_CLIPMODE_E;
+
+typedef enum TDE2_MBRESIZE_E
+{
+    TDE2_MBRESIZE_NONE = 0,
+    TDE2_MBRESIZE_QUALITY_LOW,
+    TDE2_MBRESIZE_QUALITY_MIDDLE,
+    TDE2_MBRESIZE_QUALITY_HIGH,
+    TDE2_MBRESIZE_BUTT
+} TDE2_MBRESIZE_E;
+
+typedef struct TDE2_FILLCOLOR_S
+{
+    TDE2_COLOR_FMT_E enColorFmt;
+    GK_U32           u32FillColor;
+} TDE2_FILLCOLOR_S;
+
+typedef enum TDE2_COLORKEY_MODE_E
+{
+    TDE2_COLORKEY_MODE_NONE = 0,
+    TDE2_COLORKEY_MODE_FOREGROUND,
+    TDE2_COLORKEY_MODE_BACKGROUND,
+    TDE2_COLORKEY_MODE_BUTT
+} TDE2_COLORKEY_MODE_E;
+
+typedef struct TDE2_COLORKEY_COMP_S
+{
+    GK_U8 u8CompMin;
+    GK_U8 u8CompMax;
+    GK_U8 bCompOut;
+    GK_U8 bCompIgnore;
+    GK_U8 u8CompMask;
+    GK_U8 u8Reserved;
+    GK_U8 u8Reserved1;
+    GK_U8 u8Reserved2;
+} TDE2_COLORKEY_COMP_S;
+
+typedef union TDE2_COLORKEY_U
+{
+    struct
+    {
+        TDE2_COLORKEY_COMP_S stAlpha;
+        TDE2_COLORKEY_COMP_S stRed;
+        TDE2_COLORKEY_COMP_S stGreen;
+        TDE2_COLORKEY_COMP_S stBlue;
+    } struCkARGB;
+    struct
+    {
+        TDE2_COLORKEY_COMP_S stAlpha;
+        TDE2_COLORKEY_COMP_S stY;
+        TDE2_COLORKEY_COMP_S stCb;
+        TDE2_COLORKEY_COMP_S stCr;
+    } struCkYCbCr;
+    struct
+    {
+        TDE2_COLORKEY_COMP_S stAlpha;
+        TDE2_COLORKEY_COMP_S stClut;
+    } struCkClut;
+} TDE2_COLORKEY_U;
+
+typedef enum TDE2_OUTALPHA_FROM_E
+{
+    TDE2_OUTALPHA_FROM_NORM = 0,
+    TDE2_OUTALPHA_FROM_BACKGROUND,
+    TDE2_OUTALPHA_FROM_FOREGROUND,
+    TDE2_OUTALPHA_FROM_GLOBALALPHA,
+    TDE2_OUTALPHA_FROM_BUTT
+} TDE2_OUTALPHA_FROM_E;
+
+typedef enum TDE2_FILTER_MODE_E
+{
+    TDE2_FILTER_MODE_COLOR = 0,
+    TDE2_FILTER_MODE_ALPHA,
+    TDE2_FILTER_MODE_BOTH,
+    TDE2_FILTER_MODE_NONE,
+    TDE2_FILTER_MODE_BUTT
+} TDE2_FILTER_MODE_E;
+
+typedef enum TDE2_DEFLICKER_MODE_E
+{
+    TDE2_DEFLICKER_MODE_NONE = 0,
+    TDE2_DEFLICKER_MODE_RGB,
+    TDE2_DEFLICKER_MODE_BOTH,
+    TDE2_DEFLICKER_MODE_BUTT
+} TDE2_DEFLICKER_MODE_E;
+
+typedef enum TDE2_BLEND_MODE_E
+{
+    TDE2_BLEND_ZERO = 0x0,
+    TDE2_BLEND_ONE,
+    TDE2_BLEND_SRC2COLOR,
+    TDE2_BLEND_INVSRC2COLOR,
+    TDE2_BLEND_SRC2ALPHA,
+    TDE2_BLEND_INVSRC2ALPHA,
+    TDE2_BLEND_SRC1COLOR,
+    TDE2_BLEND_INVSRC1COLOR,
+    TDE2_BLEND_SRC1ALPHA,
+    TDE2_BLEND_INVSRC1ALPHA,
+    TDE2_BLEND_SRC2ALPHASAT,
+    TDE2_BLEND_BUTT
+} TDE2_BLEND_MODE_E;
+
+typedef enum TDE2_BLENDCMD_E
+{
+    TDE2_BLENDCMD_NONE = 0x0,
+    TDE2_BLENDCMD_CLEAR,
+    TDE2_BLENDCMD_SRC,
+    TDE2_BLENDCMD_SRCOVER,
+    TDE2_BLENDCMD_DSTOVER,
+    TDE2_BLENDCMD_SRCIN,
+    TDE2_BLENDCMD_DSTIN,
+    TDE2_BLENDCMD_SRCOUT,
+    TDE2_BLENDCMD_DSTOUT,
+    TDE2_BLENDCMD_SRCATOP,
+    TDE2_BLENDCMD_DSTATOP,
+    TDE2_BLENDCMD_ADD,
+    TDE2_BLENDCMD_XOR,
+    TDE2_BLENDCMD_DST,
+    TDE2_BLENDCMD_CONFIG,
+    TDE2_BLENDCMD_BUTT
+} TDE2_BLENDCMD_E;
+
+typedef struct TDE2_BLEND_OPT_S
+{
+    GK_BOOL  bGlobalAlphaEnable;
+    GK_BOOL  bPixelAlphaEnable;
+    GK_BOOL bSrc1AlphaPremulti;
+    GK_BOOL bSrc2AlphaPremulti;
+    TDE2_BLENDCMD_E eBlendCmd;
+    TDE2_BLEND_MODE_E eSrc1BlendMode;
+    TDE2_BLEND_MODE_E eSrc2BlendMode;
+} TDE2_BLEND_OPT_S;
+
+typedef struct TDE2_CSC_OPT_S
+{
+    GK_BOOL bICSCUserEnable;
+    GK_BOOL bICSCParamReload;
+    GK_BOOL bOCSCUserEnable;
+    GK_BOOL bOCSCParamReload;
+    GK_U64 ICSCParamAddr;
+    GK_U64 OCSCParamAddr;
+} TDE2_CSC_OPT_S;
+
+typedef struct TDE2_OPT_S
+{
+    TDE2_ALUCMD_E enAluCmd;
+
+    TDE2_ROP_CODE_E enRopCode_Color;
+
+    TDE2_ROP_CODE_E enRopCode_Alpha;
+
+    TDE2_COLORKEY_MODE_E enColorKeyMode;
+
+    TDE2_COLORKEY_U unColorKeyValue;
+
+    TDE2_CLIPMODE_E enClipMode;
+
+    TDE2_RECT_S stClipRect;
+
+    TDE2_DEFLICKER_MODE_E enDeflickerMode;
+
+    GK_BOOL bResize;
+
+    TDE2_FILTER_MODE_E enFilterMode;
+
+    TDE2_MIRROR_E enMirror;
+
+    GK_BOOL bClutReload;
+
+    GK_U8   u8GlobalAlpha;
+
+    TDE2_OUTALPHA_FROM_E enOutAlphaFrom;
+
+    GK_U32 u32Colorize;
+
+    TDE2_BLEND_OPT_S stBlendOpt;
+
+    TDE2_CSC_OPT_S stCscOpt;
+    GK_BOOL bCompress;
+    GK_BOOL bDecompress;
+} TDE2_OPT_S;
+
+typedef struct TDE2_MBOPT_S
+{
+    TDE2_CLIPMODE_E enClipMode;
+
+    TDE2_RECT_S stClipRect;
+
+    GK_BOOL bDeflicker;
+
+    TDE2_MBRESIZE_E enResize;
+
+    GK_BOOL bSetOutAlpha;
+
+    GK_U8   u8OutAlpha;
+} TDE2_MBOPT_S;
+
+typedef struct TDE2_PATTERN_FILL_OPT_S
+{
+    TDE2_ALUCMD_E enAluCmd;
+
+    TDE2_ROP_CODE_E enRopCode_Color;
+
+    TDE2_ROP_CODE_E enRopCode_Alpha;
+
+    TDE2_COLORKEY_MODE_E enColorKeyMode;
+
+    TDE2_COLORKEY_U unColorKeyValue;
+
+    TDE2_CLIPMODE_E enClipMode;
+
+    TDE2_RECT_S stClipRect;
+
+    GK_BOOL bClutReload;
+
+    GK_U8 u8GlobalAlpha;
+
+    TDE2_OUTALPHA_FROM_E enOutAlphaFrom;
+
+    GK_U32 u32Colorize;
+
+    TDE2_BLEND_OPT_S stBlendOpt;
+
+    TDE2_CSC_OPT_S stCscOpt;
+
+} TDE2_PATTERN_FILL_OPT_S;
+
+typedef enum TDE_ROTATE_ANGLE_E
+{
+    TDE_ROTATE_CLOCKWISE_90 = 0,
+    TDE_ROTATE_CLOCKWISE_180,
+    TDE_ROTATE_CLOCKWISE_270,
+    TDE_ROTATE_BUTT
+} TDE_ROTATE_ANGLE_E;
+
+typedef enum TDE_DEFLICKER_LEVEL_E
+{
+    TDE_DEFLICKER_AUTO = 0,
+    TDE_DEFLICKER_LOW,
+    TDE_DEFLICKER_MIDDLE,
+    TDE_DEFLICKER_HIGH,
+    TDE_DEFLICKER_BUTT
+} TDE_DEFLICKER_LEVEL_E;
+
+typedef struct TDE_COMPOSOR_S
+{
+    TDE2_SURFACE_S stSrcSurface;
+    TDE2_RECT_S stInRect;
+    TDE2_RECT_S stOutRect;
+    TDE2_OPT_S stOpt;
+} TDE_COMPOSOR_S;
+
+
+
+typedef struct TDE_SURFACE_LIST_S
+{
+    GK_U32 u32SurfaceNum;
+    TDE2_SURFACE_S *pDstSurface;
+    TDE_COMPOSOR_S *pstComposor;
+} TDE_SURFACE_LIST_S;
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
+
+
+#endif
+
+
