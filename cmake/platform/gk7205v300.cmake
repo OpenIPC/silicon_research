@@ -11,4 +11,4 @@ set (TOOLCHAIN_COMPILER_OPTIONS_RELEASE "-Os -s")
 
 set (TARGET_PLATFORM_TOOLCHAIN          "gcc")
 set (TARGET_PLATFORM_TOOLCHAIN_GCC_TYPE "arm-openipc-linux-musleabi")
-set (TARGET_PLATFORM_TOOLCHAIN_GCC_PATH "/system/hdd/projects/openipc/output/host/bin")
+#set (TARGET_PLATFORM_TOOLCHAIN_GCC_PATH "/system/hdd/projects/openipc/output/host/bin")
