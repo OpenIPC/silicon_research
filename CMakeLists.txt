@@ -15,7 +15,14 @@ set(CMAKE_STATIC_LIBRARY_PREFIX "" CACHE STRING "" FORCE)
 # - Include framework
 include("${CMAKE_SOURCE_DIR}/cmake/framework.cmake")
 
-add_subdirectory(venc)
+# - Detect platform
+if (${TARGET_CPU_MODEL} STREQUAL "GK7205v300") 
+  add_subdirectory(gk7205v300)
+  
+elseif(${TARGET_CPU_MODEL} STREQUAL "HI3536Dv100")
+  add_subdirectory(hi3536dv100)
+  
+endif ()
 
 # - Create compile command symlink in workspace directory
 execute_process(

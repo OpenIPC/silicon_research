@@ -27,8 +27,8 @@ int main(int argc, const char* argv[]) {
   uint32_t  sensor_height     = 1520;
   uint32_t  sensor_framerate  = 30;
   
-  uint32_t  image_width       = 2592; // - Encoded image width
-  uint32_t  image_height      = 1520; // - Encoded image height
+  uint32_t  image_width       = 1280; // - Encoded image width
+  uint32_t  image_height      = 720;  // - Encoded image height
   
   VI_DEV    vi_dev_id         = 0;
   VI_PIPE   vi_pipe_id        = 0;
@@ -37,17 +37,18 @@ int main(int argc, const char* argv[]) {
   uint32_t  vi_vpss_mode      = VI_OFFLINE_VPSS_ONLINE;
   
   VPSS_GRP  vpss_group_id     = 0;
-  VPSS_CHN  vpss_first_ch_id  = 1;  // - Channel for primary stream
-  VPSS_CHN  vpss_second_ch_id = 0;  // - Channel for secondary stream
+  VPSS_CHN  vpss_first_ch_id  = 0;  // - Channel for primary stream
+  VPSS_CHN  vpss_second_ch_id = 1;  // - Channel for secondary stream
   
   uint32_t  venc_gop_size     = 30;
   uint32_t  venc_max_rate     = 8192;
 
   VENC_CHN  venc_first_ch_id  = 0;
   VENC_CHN  venc_second_ch_id = 1;
+  HI_BOOL   venc_by_frame     = HI_TRUE;
   
-  uint32_t  udp_sink_ip       = inet_addr("172.16.30.2");
-  uint16_t  udp_sink_port     = 5001;
+  uint32_t  udp_sink_ip       = inet_addr("10.42.0.233");
+  uint16_t  udp_sink_port     = 5000;
   
   // --------------------------------------------------------------
   // --- Board configuration
@@ -337,8 +338,8 @@ int main(int argc, const char* argv[]) {
     config.stVencAttr.u32PicWidth     = image_width;  // - Normal image size
     config.stVencAttr.u32PicHeight    = image_height;
     config.stVencAttr.u32BufSize      = ALIGN_UP(image_width * image_height * 3 / 4, 64);  /*stream buffer size*/
-    config.stVencAttr.u32Profile      = 0;            // - Baseline (0), Main(1), High(1)
-    config.stVencAttr.bByFrame        = HI_FALSE;     // - TRUE for get per-frame, FALSE for get per-slice
+    config.stVencAttr.u32Profile      = 0;              // - Baseline (0), Main(1), High(1)
+    config.stVencAttr.bByFrame        = venc_by_frame;  // - TRUE for get per-frame, FALSE for get per-slice
     
     // - Set rate control mode
     config.stRcAttr.enRcMode          = VENC_RC_MODE_H264AVBR;
@@ -347,6 +348,7 @@ int main(int argc, const char* argv[]) {
     config.stRcAttr.stH264AVbr.u32StatTime      = 1;
     config.stRcAttr.stH264AVbr.u32SrcFrameRate  = sensor_framerate;
     config.stRcAttr.stH264AVbr.fr32DstFrameRate = sensor_framerate;
+    
     
     // - Set GOP
     config.stGopAttr                  = gop_attr;
@@ -410,6 +412,7 @@ int main(int argc, const char* argv[]) {
   // --------------------------------------------------------------
   // --- Start polling
   // --------------------------------------------------------------
+  printf("> Ready for streaming\n");
   while (1) {
     // - Process stream on encoder channel #1
     processStream(venc_second_ch_id, socket_handle, (struct sockaddr*)&dst_addr);
@@ -444,20 +447,20 @@ void processStream(VENC_CHN channel_id, int socket_handle, struct sockaddr* dst_
   // --- Stream packets descriptors
   // - Per-Slice mode always return one slice at a time.
   // - Per-Frame mode may return multiple slices, we need to allocate memory for all reported slices.
-  VENC_PACK_S   packet_descriptor;
+  VENC_PACK_S   packet_descriptor[4];
   
   // - Stream buffer 
   VENC_STREAM_S stream;
   memset(&stream, 0x00, sizeof(stream));
-  stream.pstPack      = &packet_descriptor;
-  stream.u32PackCount = 1;
+  stream.pstPack      = packet_descriptor;
+  stream.u32PackCount = 4;
   
   // - Acquire stream
   HI_MPI_VENC_GetStream(channel_id, &stream, 0);
 
   // - Send encoded packets
   for (uint32_t i = 0; i < stream.u32PackCount; i++) {
-    printf("> SEQ: %d : Packet = %d, Size = %d, NAL = ", stream.u32Seq,  i, stream.pstPack[i].u32Len  - stream.pstPack[i].u32Offset);
+    printf("> SEQ: %d : %d, Size = %d, NAL = ", stream.u32Seq,  i, stream.pstPack[i].u32Len  - stream.pstPack[i].u32Offset);
     sendPacket(
       stream.pstPack[i].pu8Addr + stream.pstPack[i].u32Offset, 
       stream.pstPack[i].u32Len  - stream.pstPack[i].u32Offset,
