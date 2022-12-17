@@ -1,22 +1,42 @@
 # goke_venc
 
 ## EN
-Example how to bring up GK7205V300 using only HiMPP low level API.
+Here is an example of getting video from a GK7205V300 board using only HiMPP low level API.
 
-This example configured and tested on IP camera with IMX335 onboard. If you want to use another sensor, you should change board configuration profiles in source code. Example contains profiles for most popular sensors.
+This example is configured for and tested on an IP camera using IMX335 image sensor. If your module has another sensor, you need to adjust board configuration profile in the source code. This example includes profiles for most popular sensors.
 
-Output video format is h264 over UDP with NAL fragmentation as in RTP with cutted NAL prefixes too. Keep in mind that this is not a valid RTP stream. To receive and display video stream extra coding needed. NAL defragmentation algorithm described in **udp_depay.c**.
+Video output format is H.264 over UDP with NAL fragmentation like in RTP, although NAL prefixes are omitted. Keep in mind that this is not a valid RTP stream! To receive and display video stream extra coding is needed. The NAL defragmentation algorithm is described in **udp_depay.c**.
 
 ### How to build
-Before start, make shure that you have toolchain for you camera (given from OpenIPC). Also you need apropriate camera with OpenIPC firmware installed.
+Before starting, please make sure that you have a proper toolchain for you camera (grab `cortex_a7_thumb2-gcc8.4.0-musl-4_9-xxxxxxxx.tgz` from [OpenIPC releases](https://github.com/OpenIPC/firmware/releases/tag/latest)). You will also need a GK7205V300 camera module flashed with OpenIPC firmware.
+
+Compile the code into a binary.
 ```bash
-cmake -Bbuild-gk7205v300-release -DTARGET_PLATFORM=gk7205v300 -DTARGET_BUILD=Release -DTARGET_PLATFORM_TOOLCHAIN_GCC_PATH={PATH_TO}/openipc/output/host/bin
+### on desktop
+cmake -Bbuild-gk7205v300-release -DTARGET_PLATFORM=gk7205v300 -DTARGET_BUILD=Release \
+  -DTARGET_PLATFORM_TOOLCHAIN_GCC_PATH=/path/to/toolchain/bin
 cmake --build build-gk7205v300-release
 ```
-Before start binary on your camera, please don't forget to stop standard OpneIPC streamer - majestic.
+Upload the compiled binary onto your camera.
+```bash
+### on desktop
+scp build-gk7205v300-release/Release/bin/vec yourcameraip:/tmp/
+```
+Run it there but don't forget to stop majestic (pre-packaged OpenIPC streamer) first.
+```sh
+### on camera
+cd /tmp
+killall majestic
+./venc
+```
 
 ### Known bugs
-Probably you will need to add symlink /dev/venc -> /dev/ven on your IP camera.
+You might be needing to add a symlink from `/dev/venc` to `/dev/ven` on your IP camera in order to make it work.
+```sh
+### on camera
+ln -s /dev/venc /dev/ven
+```
+
 
 ## RU
 Пример того, как запустить GK7205V300, используя только низкоуровневый API HiMPP.
@@ -28,7 +48,8 @@ Probably you will need to add symlink /dev/venc -> /dev/ven on your IP camera.
 ### Как собрать
 Перед началом убедитесь, что у вас есть набор инструментов для вашей камеры (собранный при помощи OpenIPC). Также вам потребуется соответствующая камера с установленной прошивкой OpenIPC.
 ``` bash
-cmake -Bbuild-gk7205v300-release -DTARGET_PLATFORM=gk7205v300 -DTARGET_BUILD=Release -DTARGET_PLATFORM_TOOLCHAIN_GCC_PATH={PATH_TO}/openipc/output/host/bin
+cmake -Bbuild-gk7205v300-release -DTARGET_PLATFORM=gk7205v300 -DTARGET_BUILD=Release \
+  -DTARGET_PLATFORM_TOOLCHAIN_GCC_PATH={PATH_TO}/openipc/output/host/bin
 cmake --build build-gk7205v300-release
 ```
 Перед запуском примера на камере необходимо остановить стандартный для прошивок OpenIPC стример - majestic. Если через некоторе время после его остановки камера уходит в перезагрузку - отключите WDT в конфигурационном файле маджестика.
