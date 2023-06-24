@@ -1,5 +1,5 @@
 /*****************************************************************************
-*             Copyright 2004 - 2050, Hisilicon Tech. Co., Ltd.
+*             Copyright 2004 - 2018, Hisilicon Tech. Co., Ltd.
 *                           ALL RIGHTS RESERVED
 * FileName: hi_spdif.h
 * Description:

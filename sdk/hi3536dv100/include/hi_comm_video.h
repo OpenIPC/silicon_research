@@ -33,9 +33,6 @@ extern "C"{
 #endif
 #endif /* __cplusplus */
 
-#define FISHEYE_MAX_REGION_NUM 	4
-#define FISHEYE_MAX_OFFSET 		127
-
 typedef enum hiPIC_SIZE_E
 {
     PIC_QCIF = 0,
@@ -249,85 +246,6 @@ typedef struct hiBITMAP_S
     HI_U32 u32Height;              /* Bitmap's height */
     HI_VOID *pData;                /* Address of Bitmap's data */
 } BITMAP_S;
-
-
-typedef enum hiFISHEYE_MOUNT_MODE_E
-{		
-	
-	FISHEYE_DESKTOP_MOUNT 	= 0,		/* desktop mount mode */
-	FISHEYE_CEILING_MOUNT	= 1,		/* ceiling mount mode */
-	FISHEYE_WALL_MOUNT   	= 2,		/* wall mount mode */
-	
-    FISHEYE_MOUNT_MODE_BUTT
-}FISHEYE_MOUNT_MODE_E;
-
-
-typedef enum hiFISHEYE_VIEW_MODE_E
-{
-	FISHEYE_VIEW_360_PANORAMA   = 0, 	/* 360 panorama mode of fisheye correction */
-	FISHEYE_VIEW_180_PANORAMA	= 1,	/* 180 panorama mode of fisheye correction */	
-	FISHEYE_VIEW_NORMAL   		= 2, 	/* normal mode of fisheye correction */
-	FISHEYE_NO_TRANSFORMATION 	= 3, 	/* no fisheye correction */
-	
-    FISHEYE_VIEW_MODE_BUTT
-}FISHEYE_VIEW_MODE_E;
-
-typedef enum hiFISHEYE_FILTER_MODE_E
-{
-	FISHEYE_FILTER_BILINEAR 	= 0,	/* bilinear filter */
-	FISHEYE_FILTER_LINEAR		= 1,	/* linear filter */
-	FISHEYE_FILTER_NEAREST		= 2,	/* nearest filter */
-	FISHEYE_FILTER_MODE_BUTT
-}FISHEYE_FILTER_MODE_E;
-
-typedef struct hiFISHEYE_GPU_PRI_S
-{
-	FISHEYE_FILTER_MODE_E	enYFilter;		/* Fiter mode for Luma */
-	FISHEYE_FILTER_MODE_E	enCbCrFilter;	/* Fiter mode for chroma */
-	HI_U32 					u32CCMPhyAddr;	/* Physical address of correction coordinate memory , the size is region's width x height x sizeof(float) x 2. */										   	
-}FISHEYE_GPU_PRI_S;
-
-
-typedef struct hiFISHEYE_REGION_ATTR_S
-{
-	FISHEYE_VIEW_MODE_E 	enViewMode;		/* fisheye view mode */
-	HI_U32 					u32InRadius;    /* inner radius of fisheye correction region [0, u32OutRadius) */
-	HI_U32 					u32OutRadius;   /* out radius of fisheye correction region [1, max(width/2 of input picture, height/2 of input picture)] */
-	HI_U32 					u32Pan;			/* [0, 360] */
-	HI_U32 					u32Tilt;		/* [0, 360] */
-	HI_U32 					u32HorZoom;		/* [1, 4095] */
-	HI_U32 					u32VerZoom;		/* [1, 4095] */
-	RECT_S                  stOutRect; 		/* output image info after fisheye correction range of width [960, 4608], 
-											   rang of height [360, 3456], rang of x [0, 4608), rang of y [0, 3456) */
-   FISHEYE_GPU_PRI_S		stGPUPrivate;	/* GPU related attribute. Only for GPU use */
-}FISHEYE_REGION_ATTR_S;
-
-
-typedef struct hiFISHEYE_ATTR_S
-{
-	HI_BOOL 				bEnable;			/* whether enable fisheye correction or not */
-	HI_BOOL 				bLMF; 				/* whether fisheye len's LMF coefficient is from user config 
-													 	or from default linear config */
-	HI_BOOL                 bBgColor;       	/* whether use background color or not */
-	HI_U32                  u32BgColor;			/* the background color ARGB8888 */
-
-	HI_S32 					s32HorOffset;   	/* the horizontal offset between image center and physical center of len */
-	HI_S32 					s32VerOffset;		/* the vertical offset between image center and physical center of len */
-	
-	HI_U32                  u32TrapezoidCoef;	/* strength coefficient of trapezoid correction */
-	
-	FISHEYE_MOUNT_MODE_E    enMountMode;		/* fisheye mount mode */	
-	
-	HI_U32               	u32RegionNum;       /* fisheye correction region number */
-	FISHEYE_REGION_ATTR_S 	astFisheyeRegionAttr[FISHEYE_MAX_REGION_NUM];/* attribution of fisheye correction region */	 
-}FISHEYE_ATTR_S;
-
-
-typedef struct hiFISHEYE_CONFIG_S
-{
-	HI_U16               	au16LMFCoef[128]; 	/* LMF coefficient of fisheye len */
-}FISHEYE_CONFIG_S;
-
 
 #ifdef __cplusplus
 #if __cplusplus

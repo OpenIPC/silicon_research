@@ -45,7 +45,7 @@ typedef struct hiMPP_SYS_CONF_S
     /* stride of picture buffer must be aligned with this value.
      * you can choose a value from 1 to 1024, and it must be multiple of 16.
      */
-    HI_U32 u32AlignWidth;  
+    HI_U32 u32AlignWidth;
 
 }MPP_SYS_CONF_S;
 
@@ -75,23 +75,17 @@ typedef enum hiCOEFF_LEVEL_E
 
 typedef struct hiSCALE_COEFF_LEVEL_S
 {
-    COEFF_LEVEL_E enHorLum; /* horizontal luminance   coefficient level */    
-    COEFF_LEVEL_E enHorChr; /* horizontal chrominance coefficient level */    
-    COEFF_LEVEL_E enVerLum; /* vertical   luminance   coefficient level */    
-    COEFF_LEVEL_E enVerChr; /* vertical   chrominance coefficient level */    
+    COEFF_LEVEL_E enHorLum; /* horizontal luminance   coefficient level */
+    COEFF_LEVEL_E enHorChr; /* horizontal chrominance coefficient level */
+    COEFF_LEVEL_E enVerLum; /* vertical   luminance   coefficient level */
+    COEFF_LEVEL_E enVerChr; /* vertical   chrominance coefficient level */
 } SCALE_COEFF_LEVEL_S;
 
 typedef struct hiSCALE_RANGE_S
 {
     SCALE_RANGE_E enHorizontal;
-    SCALE_RANGE_E enVertical;   
+    SCALE_RANGE_E enVertical;
 } SCALE_RANGE_S;
-
-typedef struct hiSCALE_COEFF_INFO_S
-{
-    SCALE_RANGE_S stScaleRange;
-    SCALE_COEFF_LEVEL_S stScaleCoeffLevel;   
-} SCALE_COEFF_INFO_S;
 
 
 #define HI_ERR_SYS_NULL_PTR         HI_DEF_ERR(HI_ID_SYS, EN_ERR_LEVEL_ERROR, EN_ERR_NULL_PTR)

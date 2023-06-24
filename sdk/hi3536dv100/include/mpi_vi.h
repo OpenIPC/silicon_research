@@ -78,8 +78,9 @@ HI_S32 HI_MPI_VI_GetSkipModeEx(VI_CHN ViChn, VI_SKIP_MODE_EX_S* pstModeEx);
 
 HI_S32 HI_MPI_VI_AttachVbPool(VI_CHN ViChn, VB_POOL hVbPool);
 HI_S32 HI_MPI_VI_DetachVbPool(VI_CHN ViChn);
+HI_S32 HI_MPI_VI_DetachVbPoolByPoolId(VI_CHN ViChn, VB_POOL hVbPool);
 
-HI_S32 HI_MPI_VI_SetModParam(VI_MOD_PARAM_S *pstModParam);
+HI_S32 HI_MPI_VI_SetModParam(const VI_MOD_PARAM_S *pstModParam);
 HI_S32 HI_MPI_VI_GetModParam(VI_MOD_PARAM_S *pstModParam);
 
 HI_S32 HI_MPI_VI_SetRotate(VI_CHN ViChn, const ROTATE_E enRotate);

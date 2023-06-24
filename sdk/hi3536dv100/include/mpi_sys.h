@@ -1,13 +1,13 @@
 /******************************************************************************
- 
+
   Copyright (C), 2001-2011, Hisilicon Tech. Co., Ltd.
- 
+
  ******************************************************************************
   File Name     : mpi_sys.h
   Version       : Initial Draft
   Author        : Hisilicon multimedia software group
   Created       : 2007/1/31
-  Description   : 
+  Description   :
   History       :
   1.Date        : 2006/1/31
     Author      : c42025
@@ -48,7 +48,7 @@ HI_S32 HI_MPI_SYS_GetVersion(MPP_VERSION_S *pstVersion);
 ** ADVICE:
 ** 1. Better to call HI_MPI_SYS_GetCurPts on the host board to get u64Base.
 ** 2. When os start up, call HI_MPI_SYS_InitPtsBase to set the init PTS.
-** 3. When media bussines is running, synchronize the PTS one time per minute 
+** 3. When media bussines is running, synchronize the PTS one time per minute
 **     by calling HI_MPI_SYS_SyncPts.
 */
 HI_S32 HI_MPI_SYS_GetCurPts(HI_U64 *pu64CurPts);
@@ -56,11 +56,11 @@ HI_S32 HI_MPI_SYS_InitPtsBase(HI_U64 u64PtsBase);
 HI_S32 HI_MPI_SYS_SyncPts(HI_U64 u64PtsBase);
 
 /* alloc mmz memory in user context                                         */
-HI_S32 HI_MPI_SYS_MmzAlloc(HI_U32 *pu32PhyAddr, HI_VOID **ppVirtAddr, 
+HI_S32 HI_MPI_SYS_MmzAlloc(HI_U32 *pu32PhyAddr, HI_VOID **ppVirtAddr,
         const HI_CHAR *strMmb, const HI_CHAR *strZone, HI_U32 u32Len);
 
 /* alloc mmz memory with cache */
-HI_S32 HI_MPI_SYS_MmzAlloc_Cached(HI_U32 *pu32PhyAddr, HI_VOID **ppVitAddr, 
+HI_S32 HI_MPI_SYS_MmzAlloc_Cached(HI_U32 *pu32PhyAddr, HI_VOID **ppVitAddr,
         const HI_CHAR *pstrMmb, const HI_CHAR *pstrZone, HI_U32 u32Len);
 
 /* free mmz memory in user context                                          */
@@ -77,14 +77,6 @@ HI_VOID * HI_MPI_SYS_Mmap(HI_U32 u32PhyAddr, HI_U32 u32Size);
 HI_VOID* HI_MPI_SYS_MmapCache(HI_U32 u32PhyAddr, HI_U32 u32Size);
 HI_S32 HI_MPI_SYS_Munmap(HI_VOID* pVirAddr, HI_U32 u32Size);
 HI_S32 HI_MPI_SYS_MflushCache(HI_U32 u32PhyAddr, HI_VOID *pVirAddr, HI_U32 u32Size);
-
-
-/*
-** Access the physical address.
-** You can use this function to access memory address or register address.
-*/
-HI_S32 HI_MPI_SYS_SetReg(HI_U32 u32Addr, HI_U32 u32Value);
-HI_S32 HI_MPI_SYS_GetReg(HI_U32 u32Addr, HI_U32 *pu32Value);
 
 HI_S32 HI_MPI_SYS_SetMemConf(MPP_CHN_S *pstMppChn,const HI_CHAR *pcMmzName);
 HI_S32 HI_MPI_SYS_GetMemConf(MPP_CHN_S *pstMppChn,HI_CHAR *pcMmzName);

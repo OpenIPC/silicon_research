@@ -63,6 +63,7 @@ typedef enum hiAUDIO_SAMPLE_RATE_E
     AUDIO_SAMPLE_RATE_32000  = 32000,   /* 32K samplerate*/
     AUDIO_SAMPLE_RATE_44100  = 44100,   /* 44.1K samplerate*/
     AUDIO_SAMPLE_RATE_48000  = 48000,   /* 48K samplerate*/
+    AUDIO_SAMPLE_RATE_64000  = 64000,   /* 64K samplerate*/
     AUDIO_SAMPLE_RATE_BUTT,
 } AUDIO_SAMPLE_RATE_E;
 

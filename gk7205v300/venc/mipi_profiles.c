@@ -209,15 +209,15 @@ combo_dev_attr_t MIPI_4lane_CHN0_SENSOR_IMX307_12BIT_2M_NOWDR_ATTR =
 {
     .devno = 0,
     .input_mode = INPUT_MODE_MIPI,
-    .data_rate = MIPI_DATA_RATE_X1,
-    .img_rect = {0, 4, 1920, 1080},
+    .data_rate  = MIPI_DATA_RATE_X1,
+    .img_rect   = {0, 0, 1280, 720},
 
     {
         .mipi_attr =
         {
-            DATA_TYPE_RAW_12BIT,
+            DATA_TYPE_RAW_10BIT,
             HI_MIPI_WDR_MODE_NONE,
-            {0, 1, 2, 3}
+            {0, 2, -1, -1}
         }
     }
 };

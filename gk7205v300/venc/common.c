@@ -62,7 +62,7 @@ HI_S32 getGOPAttributes(VENC_GOP_MODE_E enGopMode,VENC_GOP_ATTR_S *pstGopAttr) {
     switch(enGopMode) {
         case VENC_GOPMODE_NORMALP:
             pstGopAttr->enGopMode  = VENC_GOPMODE_NORMALP;
-            pstGopAttr->stNormalP.s32IPQpDelta = 2;
+            pstGopAttr->stNormalP.s32IPQpDelta = 4;
         break;
         case VENC_GOPMODE_SMARTP:
             pstGopAttr->enGopMode  = VENC_GOPMODE_SMARTP;

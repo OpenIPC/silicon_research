@@ -20,11 +20,11 @@ History       :
  3.Date        : 2008/06/18
    Author      : c42025
    Modification: add VB_UID_PCIV
-  
+
  4.Date                :   2008/10/31
    Author              :   z44949
-   Modification        :   Translate the chinese comment   
-   
+   Modification        :   Translate the chinese comment
+
  5.Date                :   2008/10/31
    Author              :   p00123320
    Modification        :   change commentary of u32MaxPoolCnt in VB_CONF_S
@@ -41,7 +41,7 @@ History       :
 extern "C"{
 #endif
 #endif /* End of #ifdef __cplusplus */
- 
+
 #define VB_MAX_POOLS 256
 #define VB_MAX_COMM_POOLS 16
 #define VB_MAX_MOD_COMM_POOLS 16
@@ -75,7 +75,7 @@ typedef enum hiVB_UID_E
 	VB_UID_USER 		= 20,
 	VB_UID_H265E		= 21,
     VB_UID_BUTT
-    
+
 } VB_UID_E;
 
 #define VB_INVALID_POOLID (-1UL)
@@ -87,14 +87,6 @@ typedef enum hiVB_UID_E
 /* Private pool use this owner id */
 #define POOL_OWNER_PRIVATE	-2
 
-typedef enum hiPOOL_TYPE_E
-{
-	POOL_TYPE_COMMON			= 0,
-	POOL_TYPE_PRIVATE			= 1,
-	POOL_TYPE_MODULE_COMMON		= 2,
-	POOL_TYPE_BUTT
-} POOL_TYPE_E;
-
 typedef HI_U32 VB_POOL;
 typedef HI_U32 VB_BLK;
 
@@ -102,7 +94,7 @@ typedef HI_U32 VB_BLK;
 
 typedef struct hiVB_CONF_S
 {
-    HI_U32 u32MaxPoolCnt;     /* max count of pools, (0,VB_MAX_POOLS]  */    
+    HI_U32 u32MaxPoolCnt;     /* max count of pools, (0,VB_MAX_POOLS]  */
     struct hiVB_CPOOL_S
     {
         HI_U32 u32BlkSize;

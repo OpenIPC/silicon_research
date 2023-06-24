@@ -29,13 +29,13 @@
 #include "hi_comm_video.h"
 
 /**the max audio capbility count*/
-#define HI_HDMI_MAX_AUDIO_CAP_COUNT       16
+#define HI_HDMI_MAX_AUDIO_CAP_COUNT     16
 
 /**the max audio smprate count*/
-#define HI_HDMI_MAX_SAMPE_RATE_NUM     8
+#define HI_HDMI_MAX_SAMPE_RATE_NUM 		8
 
 /**the max audio bit depth count*/
-#define HI_HDMI_MAX_BIT_DEPTH_NUM      6
+#define HI_HDMI_MAX_BIT_DEPTH_NUM  		6
 
 
 #ifdef __cplusplus
@@ -44,69 +44,71 @@ extern "C"{
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-typedef enum hiHDMI_VIDEO_FMT_E {
-  HI_HDMI_VIDEO_FMT_1080P_60 = 0,
-  HI_HDMI_VIDEO_FMT_1080P_50,
-  HI_HDMI_VIDEO_FMT_1080P_30,
-  HI_HDMI_VIDEO_FMT_1080P_25,
-  HI_HDMI_VIDEO_FMT_1080P_24,
+typedef enum hiHDMI_VIDEO_FMT_E
+{
+    HI_HDMI_VIDEO_FMT_1080P_60 = 0,
+    HI_HDMI_VIDEO_FMT_1080P_50,
+    HI_HDMI_VIDEO_FMT_1080P_30,
+    HI_HDMI_VIDEO_FMT_1080P_25,
+    HI_HDMI_VIDEO_FMT_1080P_24,
 
-  HI_HDMI_VIDEO_FMT_1080i_60,
-  HI_HDMI_VIDEO_FMT_1080i_50,
+    HI_HDMI_VIDEO_FMT_1080i_60,
+    HI_HDMI_VIDEO_FMT_1080i_50,
 
-  HI_HDMI_VIDEO_FMT_720P_60,
-  HI_HDMI_VIDEO_FMT_720P_50,
+    HI_HDMI_VIDEO_FMT_720P_60,
+    HI_HDMI_VIDEO_FMT_720P_50,
 
-  HI_HDMI_VIDEO_FMT_576P_50,
-  HI_HDMI_VIDEO_FMT_480P_60,
+    HI_HDMI_VIDEO_FMT_576P_50,
+    HI_HDMI_VIDEO_FMT_480P_60,
 
-  HI_HDMI_VIDEO_FMT_PAL,                  /* B D G H I PAL */
-  HI_HDMI_VIDEO_FMT_PAL_N,                /* (N)PAL        */
-  HI_HDMI_VIDEO_FMT_PAL_Nc,               /* (Nc)PAL       */
+    HI_HDMI_VIDEO_FMT_PAL,
+    HI_HDMI_VIDEO_FMT_PAL_N,
+    HI_HDMI_VIDEO_FMT_PAL_Nc,
 
-  HI_HDMI_VIDEO_FMT_NTSC,                 /* (M)NTSC       */
-  HI_HDMI_VIDEO_FMT_NTSC_J,               /* NTSC-J        */
-  HI_HDMI_VIDEO_FMT_NTSC_PAL_M,           /* (M)PAL        */
+    HI_HDMI_VIDEO_FMT_NTSC,
+    HI_HDMI_VIDEO_FMT_NTSC_J,
+    HI_HDMI_VIDEO_FMT_NTSC_PAL_M,
 
-  HI_HDMI_VIDEO_FMT_SECAM_SIN,            /**< SECAM_SIN*/
-  HI_HDMI_VIDEO_FMT_SECAM_COS,            /**< SECAM_COS*/
+    HI_HDMI_VIDEO_FMT_SECAM_SIN,
+    HI_HDMI_VIDEO_FMT_SECAM_COS,
 
-  HI_HDMI_VIDEO_FMT_861D_640X480_60,
-  HI_HDMI_VIDEO_FMT_VESA_800X600_60,
-  HI_HDMI_VIDEO_FMT_VESA_1024X768_60,
-  HI_HDMI_VIDEO_FMT_VESA_1280X720_60,
-  HI_HDMI_VIDEO_FMT_VESA_1280X800_60,
-  HI_HDMI_VIDEO_FMT_VESA_1280X1024_60,
-  HI_HDMI_VIDEO_FMT_VESA_1366X768_60,
-  HI_HDMI_VIDEO_FMT_VESA_1440X900_60,
-  HI_HDMI_VIDEO_FMT_VESA_1440X900_60_RB,
-  HI_HDMI_VIDEO_FMT_VESA_1600X900_60_RB,
-  HI_HDMI_VIDEO_FMT_VESA_1600X1200_60,
-  HI_HDMI_VIDEO_FMT_VESA_1680X1050_60,
-  HI_HDMI_VIDEO_FMT_VESA_1920X1080_60,
-  HI_HDMI_VIDEO_FMT_VESA_1920X1200_60,
-  HI_HDMI_VIDEO_FMT_VESA_2048X1152_60,    /* Currently, not support */
+    HI_HDMI_VIDEO_FMT_861D_640X480_60,
+    HI_HDMI_VIDEO_FMT_VESA_800X600_60,
+    HI_HDMI_VIDEO_FMT_VESA_1024X768_60,
+    HI_HDMI_VIDEO_FMT_VESA_1280X720_60,
+    HI_HDMI_VIDEO_FMT_VESA_1280X800_60,
+    HI_HDMI_VIDEO_FMT_VESA_1280X1024_60,
+    HI_HDMI_VIDEO_FMT_VESA_1366X768_60,
+    HI_HDMI_VIDEO_FMT_VESA_1440X900_60,
+    HI_HDMI_VIDEO_FMT_VESA_1440X900_60_RB,
+    HI_HDMI_VIDEO_FMT_VESA_1600X900_60_RB,
+    HI_HDMI_VIDEO_FMT_VESA_1600X1200_60,
+    HI_HDMI_VIDEO_FMT_VESA_1680X1050_60,
+    HI_HDMI_VIDEO_FMT_VESA_1920X1080_60,
+    HI_HDMI_VIDEO_FMT_VESA_1920X1200_60,
+    HI_HDMI_VIDEO_FMT_VESA_2048X1152_60,
+    HI_HDMI_VIDEO_FMT_2560x1440_30,
+    HI_HDMI_VIDEO_FMT_2560x1440_60,
+    HI_HDMI_VIDEO_FMT_2560x1600_60,
+    HI_HDMI_VIDEO_FMT_1920x2160_30,
 
-  HI_HDMI_VIDEO_FMT_2560x1440_30,
-  HI_HDMI_VIDEO_FMT_2560x1440_60,
-  HI_HDMI_VIDEO_FMT_2560x1600_60,
-  HI_HDMI_VIDEO_FMT_1920x2160_30,
+    HI_HDMI_VIDEO_FMT_3840X2160P_24,
+    HI_HDMI_VIDEO_FMT_3840X2160P_25,
+    HI_HDMI_VIDEO_FMT_3840X2160P_30,
+    HI_HDMI_VIDEO_FMT_3840X2160P_50,
+    HI_HDMI_VIDEO_FMT_3840X2160P_60,
 
-  HI_HDMI_VIDEO_FMT_3840X2160P_24,      /** 93:3840x2160p @ 24Hz  No Repetition */
-  HI_HDMI_VIDEO_FMT_3840X2160P_25,      /** 94:3840x2160p @ 25Hz  No Repetition */
-  HI_HDMI_VIDEO_FMT_3840X2160P_30,      /** 95:3840x2160p @ 30Hz  No Repetition */
-  HI_HDMI_VIDEO_FMT_3840X2160P_50,      /** 96:3840x2160p @ 50Hz  No Repetition */
-  HI_HDMI_VIDEO_FMT_3840X2160P_60,      /** 97:3840x2160p @ 60Hz  No Repetition */
+    HI_HDMI_VIDEO_FMT_4096X2160P_24,
+    HI_HDMI_VIDEO_FMT_4096X2160P_25,
+    HI_HDMI_VIDEO_FMT_4096X2160P_30,
+    HI_HDMI_VIDEO_FMT_4096X2160P_50,
+    HI_HDMI_VIDEO_FMT_4096X2160P_60,
 
-  HI_HDMI_VIDEO_FMT_4096X2160P_24,      /** 98:4096x2160p @ 24Hz  No Repetition */
-  HI_HDMI_VIDEO_FMT_4096X2160P_25,      /** 99:4096x2160p @ 25Hz  No Repetition */
-  HI_HDMI_VIDEO_FMT_4096X2160P_30,      /** 100:4096x2160p @ 30Hz  No Repetition */
-  HI_HDMI_VIDEO_FMT_4096X2160P_50,      /** 101:4096x2160p @ 50Hz  No Repetition */
-  HI_HDMI_VIDEO_FMT_4096X2160P_60,      /** 102:4096x2160p @ 60Hz  No Repetition */
 
-  HI_HDMI_VIDEO_FMT_VESA_CUSTOMER_DEFINE,
 
-  HI_HDMI_VIDEO_FMT_BUTT
+    HI_HDMI_VIDEO_FMT_VESA_CUSTOMER_DEFINE,
+
+    HI_HDMI_VIDEO_FMT_BUTT
 }HI_HDMI_VIDEO_FMT_E;
 
 
@@ -114,23 +116,23 @@ typedef enum hiHDMI_PIC_ASPECT_RATIO_E
 {
     HI_HDMI_PIC_ASP_RATIO_NO_DATA,        /**<Aspect Ratio unknown*/
     HI_HDMI_PIC_ASP_RATIO_4TO3,           /**<Aspect Ratio 4:3*/
-     HI_HDMI_PIC_ASP_RATIO_16TO9,          /**<Aspect Ratio 16:9*/
-     HI_HDMI_PIC_ASP_RATIO_64TO27,
-     HI_HDMI_PIC_ASP_RATIO_256TO135,
+   	HI_HDMI_PIC_ASP_RATIO_16TO9,          /**<Aspect Ratio 16:9*/
+   	HI_HDMI_PIC_ASP_RATIO_64TO27,
+   	HI_HDMI_PIC_ASP_RATIO_256TO135,
     HI_HDMI_PIC_ASP_RATIO_RESERVED,
 }HI_HDMI_PIC_ASPECT_RATIO_E;
 
 /* see CEA-861-D P67&P158 for details ,we base on DVB */
 typedef enum hiHDMI_ACT_ASPECT_RATIO_E
 {
-  HI_HDMI_ACT_ASP_RATIO_RESERVED_0,
-  HI_HDMI_ACT_ASP_RATIO_RESERVED_1,
-  HI_HDMI_ACT_ASP_RATIO_16TO9_TOP,
-  HI_HDMI_ACT_ASP_RATIO_14TO9_TOP,
-  HI_HDMI_ACT_ASP_RATIO_16TO9_BOX_CENTER,
-  HI_HDMI_ACT_ASP_RATIO_RESERVED_5,
-  HI_HDMI_ACT_ASP_RATIO_RESERVED_6,
-  HI_HDMI_ACT_ASP_RATIO_RESERVED_7,
+	HI_HDMI_ACT_ASP_RATIO_RESERVED_0,
+	HI_HDMI_ACT_ASP_RATIO_RESERVED_1,
+	HI_HDMI_ACT_ASP_RATIO_16TO9_TOP,
+	HI_HDMI_ACT_ASP_RATIO_14TO9_TOP,
+	HI_HDMI_ACT_ASP_RATIO_16TO9_BOX_CENTER,
+	HI_HDMI_ACT_ASP_RATIO_RESERVED_5,
+	HI_HDMI_ACT_ASP_RATIO_RESERVED_6,
+	HI_HDMI_ACT_ASP_RATIO_RESERVED_7,
     HI_HDMI_ACT_ASP_RATIO_SAME_PIC,
     HI_HDMI_ACT_ASP_RATIO_4TO3_CENTER,
     HI_HDMI_ACT_ASP_RATIO_16TO9_CENTER,
@@ -156,10 +158,10 @@ typedef enum hiHDMI_SAMPLE_RATE_E
     HI_HDMI_SAMPLE_RATE_48K   = 48000,      /**< 48K sample rate     */
     HI_HDMI_SAMPLE_RATE_88K   = 88200,      /**< 88.2K sample rate   */
     HI_HDMI_SAMPLE_RATE_96K   = 96000,      /**< 96K sample rate     */
-  HI_HDMI_SAMPLE_RATE_176K  = 176400,      /**< 176K sample rate   */
+	HI_HDMI_SAMPLE_RATE_176K  = 176400,	    /**< 176K sample rate	 */
     HI_HDMI_SAMPLE_RATE_192K  = 192000,     /**< 192K sample rate    */
     HI_HDMI_SAMPLE_RATE_768K  = 768000,     /**< 768K sample rate    */
-    HI_HDMI_SAMPLE_RATE_BUTT    ,
+    HI_HDMI_SAMPLE_RATE_BUTT		,
 }HI_HDMI_SAMPLE_RATE_E;
 
 /**EDID Audio type enum*/
@@ -238,8 +240,8 @@ typedef enum hiHDMI_COLOR_SPACE_E
     HI_HDMI_COLOR_SPACE_RGB444,
     HI_HDMI_COLOR_SPACE_YCBCR422,
     HI_HDMI_COLOR_SPACE_YCBCR444,
-     /*following is new featrue of CEA-861-F*/
-  HI_HDMI_COLOR_SPACE_YCBCR420,
+   	/*following is new featrue of CEA-861-F*/
+	HI_HDMI_COLOR_SPACE_YCBCR420,
 }HI_HDMI_COLOR_SPACE_E;
 
 
@@ -248,7 +250,7 @@ typedef enum hiHDMI_DEEP_COLOR_E
     HI_HDMI_DEEP_COLOR_24BIT = 0x00,        /**< HDMI Deep Color 24bit mode  */
     HI_HDMI_DEEP_COLOR_30BIT,               /**< HDMI Deep Color 30bit mode  */
     HI_HDMI_DEEP_COLOR_36BIT,               /**< HDMI Deep Color 36bit mode  */
-    HI_HDMI_DEEP_COLOR_OFF   = 0xff,    /**< HDMI Deep Color OFF mode(24bit).  */
+    HI_HDMI_DEEP_COLOR_OFF   = 0xff,		/**< HDMI Deep Color OFF mode(24bit).  */
     HI_HDMI_DEEP_COLOR_BUTT
 }HI_HDMI_DEEP_COLOR_E;
 
@@ -287,14 +289,14 @@ typedef enum hiHDMI_COLORIMETRY_E
 
 typedef enum hiHDMI_EXT_COLORIMETRY_E
 {
-     HDMI_COLORIMETRY_XVYCC_601,             /**<Colorimetry xvYCC601 extened option*/
+   	HDMI_COLORIMETRY_XVYCC_601,             /**<Colorimetry xvYCC601 extened option*/
     HDMI_COLORIMETRY_XVYCC_709,             /**<Colorimetry xvYCC709 extened option*/
-  HDMI_COLORIMETRY_S_YCC_601,             /**<Colorimetry S YCC 601 extened option*/
-  HDMI_COLORIMETRY_ADOBE_YCC_601,         /**<Colorimetry ADOBE YCC 601 extened option*/
-  HDMI_COLORIMETRY_ADOBE_RGB,             /**<Colorimetry ADOBE RGB extened option*/
-  HDMI_COLORIMETRY_2020_CONST_LUMINOUS,    /**<Colorimetry ITU2020 extened option*/
+	HDMI_COLORIMETRY_S_YCC_601,             /**<Colorimetry S YCC 601 extened option*/
+	HDMI_COLORIMETRY_ADOBE_YCC_601,         /**<Colorimetry ADOBE YCC 601 extened option*/
+	HDMI_COLORIMETRY_ADOBE_RGB,             /**<Colorimetry ADOBE RGB extened option*/
+	HDMI_COLORIMETRY_2020_CONST_LUMINOUS,    /**<Colorimetry ITU2020 extened option*/
     HDMI_COLORIMETRY_2020_NON_CONST_LUMINOUS,/**<Colorimetry ITU2020 extened option*/
-  HDMI_COLORIMETRY_RESERVED
+	HDMI_COLORIMETRY_RESERVED
 } HI_HDMI_EXT_COLORIMETRY_E;
 
 
@@ -304,7 +306,7 @@ typedef enum hiHDMI_RGB_QUAN_RAGE_E
     HDMI_RGB_QUANTIZATION_DEFAULT_RANGE,    /**< Defaulr range, it depends on the video format */
     HDMI_RGB_QUANTIZATION_LIMITED_RANGE,    /**< Limited quantization range of 220 levels when receiving a CE video format*/
     HDMI_RGB_QUANTIZATION_FULL_RANGE   ,    /**< Full quantization range of 256 levels when receiving an IT video format*/
-  HDMI_RGB_QUANTIZATION_FULL_RESERVED
+	HDMI_RGB_QUANTIZATION_FULL_RESERVED
 }HI_HDMI_RGB_QUAN_RAGE_E;
 
 /**see EIA-CEA-861-D/F*/
@@ -312,36 +314,36 @@ typedef enum hiHDMI_YCC_QUAN_RAGE_E
 {
     HDMI_YCC_QUANTIZATION_LIMITED_RANGE,    /**< Limited quantization range of 220 levels when receiving a CE video format*/
     HDMI_YCC_QUANTIZATION_FULL_RANGE,       /**< Full quantization range of 256 levels when receiving an IT video format*/
-  HDMI_YCC_QUANTIZATION_RESERVED_2,
-  HDMI_YCC_QUANTIZATION_RESERVED_3
+	HDMI_YCC_QUANTIZATION_RESERVED_2,
+	HDMI_YCC_QUANTIZATION_RESERVED_3
 }HI_HDMI_YCC_QUAN_RAGE_E;
 
 typedef enum hiHDMI_QUANTIZATION_E
 {
     HDMI_QUANTIZATION_LIMITED_RANGE,    /**< Limited quantization range of 220 levels when receiving a CE video format*/
     HDMI_QUANTIZATION_FULL_RANGE,       /**< Full quantization range of 256 levels when receiving an IT video format*/
-  HDMI_QUANTIZATION_BUTT
+	HDMI_QUANTIZATION_BUTT
 }HI_HDMI_QUANTIZATION_E;
 
 /**Pixel Repetition Factor  enum,see EIA-CEA-861-D*/
 typedef enum hiHDMI_PIXEL_REPETITION_E
 {
-     HDMI_PIXEL_REPET_NO,
-  HDMI_PIXEL_REPET_2_TIMES,
-  HDMI_PIXEL_REPET_3_TIMES,
-  HDMI_PIXEL_REPET_4_TIMES,
-  HDMI_PIXEL_REPET_5_TIMES,
-  HDMI_PIXEL_REPET_6_TIMES,
-  HDMI_PIXEL_REPET_7_TIMES,
-  HDMI_PIXEL_REPET_8_TIMES,
-  HDMI_PIXEL_REPET_9_TIMES,
-  HDMI_PIXEL_REPET_10_TIMES,
-  HDMI_PIXEL_REPET_RESERVED_A,
-  HDMI_PIXEL_REPET_RESERVED_B,
-  HDMI_PIXEL_REPET_RESERVED_C,
-  HDMI_PIXEL_REPET_RESERVED_D,
-  HDMI_PIXEL_REPET_RESERVED_E,
-  HDMI_PIXEL_REPET_RESERVED_F,
+   	HDMI_PIXEL_REPET_NO,
+	HDMI_PIXEL_REPET_2_TIMES,
+	HDMI_PIXEL_REPET_3_TIMES,
+	HDMI_PIXEL_REPET_4_TIMES,
+	HDMI_PIXEL_REPET_5_TIMES,
+	HDMI_PIXEL_REPET_6_TIMES,
+	HDMI_PIXEL_REPET_7_TIMES,
+	HDMI_PIXEL_REPET_8_TIMES,
+	HDMI_PIXEL_REPET_9_TIMES,
+	HDMI_PIXEL_REPET_10_TIMES,
+	HDMI_PIXEL_REPET_RESERVED_A,
+	HDMI_PIXEL_REPET_RESERVED_B,
+	HDMI_PIXEL_REPET_RESERVED_C,
+	HDMI_PIXEL_REPET_RESERVED_D,
+	HDMI_PIXEL_REPET_RESERVED_E,
+	HDMI_PIXEL_REPET_RESERVED_F,
 }HI_HDMI_PIXEL_REPETITION_E;
 
 /**IT Contents Type  enum,see EIA-CEA-861-F*/
@@ -405,82 +407,111 @@ typedef void (*HI_HDMI_CallBack)(HI_HDMI_EVENT_TYPE_E event, HI_VOID *pPrivateDa
 
 typedef struct hiHDMI_CALLBACK_FUNC_S
 {
-    HI_HDMI_CallBack   pfnHdmiEventCallback;    /**< Event handling callback function */
-    HI_VOID             *pPrivateData;          /**< Private data of the callback functions and parameters */
+    HI_HDMI_CallBack 	pfnHdmiEventCallback;    /**< Event handling callback function */
+    HI_VOID             *pPrivateData;       	 /**< Private data of the callback functions and parameters */
 }HI_HDMI_CALLBACK_FUNC_S;
 
 
 /**EDID Audio Info struct*/
 typedef struct hiHDMI_AUDIO_INFO_S
 {
-    HI_HDMI_AUDIO_FORMAT_CODE_E   enAudFmtCode;                     /**<Audio coding type*/
-    HI_HDMI_SAMPLE_RATE_E           enSupportSampleRate[HI_HDMI_MAX_SAMPE_RATE_NUM];   /**<Audio sample rate*/
-    HI_U8                           u8AudChannel;                        /**<Aud Channel of the coding type*/
-    HI_HDMI_BIT_DEPTH_E             bSupportBitDepth[HI_HDMI_MAX_BIT_DEPTH_NUM];    /**< sample bit depth,when audio format code is HI_UNF_EDID_AUDIO_FORMAT_CODE_PCM*/
-    HI_U32                          u32SupportBitDepthNum;                 /**< sample bit depth Num,when audio format code is HI_UNF_EDID_AUDIO_FORMAT_CODE_PCM*/
-    HI_U32                          u32MaxBitRate;                    /**< enter max bit rate,when audio format code is HI_UNF_EDID_AUDIO_FORMAT_CODE_AC3 - HI_UNF_EDID_AUDIO_FORMAT_CODE_ATRAC**/
+    HI_HDMI_AUDIO_FORMAT_CODE_E 	enAudFmtCode; 										/**<Audio coding type*/
+    HI_HDMI_SAMPLE_RATE_E           enSupportSampleRate[HI_HDMI_MAX_SAMPE_RATE_NUM]; 	/**<Audio sample rate*/
+    HI_U8                           u8AudChannel;      									/**<Aud Channel of the coding type*/
+    HI_HDMI_BIT_DEPTH_E             bSupportBitDepth[HI_HDMI_MAX_BIT_DEPTH_NUM];		/**< sample bit depth,when audio format code is HI_UNF_EDID_AUDIO_FORMAT_CODE_PCM*/
+    HI_U32                          u32SupportBitDepthNum; 								/**< sample bit depth Num,when audio format code is HI_UNF_EDID_AUDIO_FORMAT_CODE_PCM*/
+    HI_U32                          u32MaxBitRate;  									/**< enter max bit rate,when audio format code is HI_UNF_EDID_AUDIO_FORMAT_CODE_AC3 - HI_UNF_EDID_AUDIO_FORMAT_CODE_ATRAC**/
 }HI_HDMI_AUDIO_INFO_S;
 
 
-typedef struct hiHDMI_SINK_CAPABILITY_S {
-  HI_BOOL               bConnected;                                   /**< Whether the devices are connected. */
-  HI_BOOL               bSupportHdmi;                                 /**< Whether the HDMI is supported by the device. If the HDMI is not supported by the device, the device is DVI.*/
-  HI_BOOL               bIsSinkPowerOn;                               /**< Whether the sink device is powered on. */
-  HI_BOOL               bIsRealEDID;                                  /**< Whether the EDID obtains the flag from the sink device.HI_TRUE: The EDID information is correctly read.HI_FASE: default settings */
+/**EDID detailed Timing Info struct*/
+typedef struct hiHDMI_TIMING_INFO_S
+{
+    HI_U32                        u32VFB;          /**<vertical front blank*/
+    HI_U32                        u32VBB;          /**<vertical back blank*/
+    HI_U32                        u32VACT;         /**<vertical active area*/
+    HI_U32                        u32HFB;          /**<horizonal front blank*/
+    HI_U32                        u32HBB;          /**<horizonal back blank*/
+    HI_U32                        u32HACT;         /**<horizonal active area*/
+    HI_U32                        u32VPW;          /**<vertical sync pluse width*/
+    HI_U32                        u32HPW;          /**<horizonal sync pluse width*/
+    HI_BOOL                       bIDV;            /**<flag of data valid signal is needed flip*/
+    HI_BOOL                       bIHS;            /**<flag of horizonal sync pluse is needed flip*/
+    HI_BOOL                       bIVS;            /**<flag of vertical sync pluse is needed flip*/
+    HI_U32                        u32ImageWidth;   /**<image width */
+    HI_U32                        u32ImageHeight;  /**<image height */
+    HI_U32                        u32AspectRatioW; /**<aspect ratio width */
+    HI_U32                        u32AspectRatioH; /**<aspect ratio height */
+    HI_BOOL                       bInterlace;      /**<flag of interlace */
+    HI_S32                        u32PixelClk;     /**<pixelc clk for this timing, unit:KHz */
+} HI_HDMI_TIMING_INFO_S;
 
-  HI_HDMI_VIDEO_FMT_E   enNativeVideoFormat;                          /**< Physical resolution of the display device. */
-  HI_BOOL               bVideoFmtSupported[HI_HDMI_VIDEO_FMT_BUTT];   /**< Video capability set.HI_TRUE: This display format is supported.HI_FALSE: This display format is not supported. */
-  HI_BOOL               bSupportYCbCr;                                /**< Whether the YCBCR display is supported.HI_TRUE: The YCBCR display is supported.HI_FALSE: Only red-green-blue (RGB) is supported. */
+typedef struct hiHDMI_DET_TIMING_S
+{
+    HI_U32                      u32DetTimingNum;
+    HI_HDMI_TIMING_INFO_S       astDetTiming[10];
+}HI_HDMI_DET_TIMING_S;
 
-  HI_BOOL               bSupportxvYCC601;                             /**< Whether the xvYCC601 color format is supported. */
-  HI_BOOL               bSupportxvYCC709;                             /**< Whether the xvYCC709 color format is supported. */
-  HI_U8                 u8MDBit;                                      /**< Transfer profile supported by xvYCC601. 1: P0; 2: P1; 4: P2. */
-  
-  HI_U32                u32AudioInfoNum;                              /**< Num of audio Info*/
-  HI_HDMI_AUDIO_INFO_S stAudioInfo[HI_HDMI_MAX_AUDIO_CAP_COUNT];             /**< Audio Info.For details, see Table 37 in EIA-CEA-861-D. */
+typedef struct hiHDMI_SINK_CAPABILITY_S
+{
+    HI_BOOL             bConnected;               										/**< Whether the devices are connected. */
+    HI_BOOL             bSupportHdmi;             										/**< Whether the HDMI is supported by the device. If the HDMI is not supported by the device, the device is DVI.*/
+    HI_BOOL             bIsSinkPowerOn;          	 									/**< Whether the sink device is powered on. */
+    HI_BOOL             bIsRealEDID;              										/**< Whether the EDID obtains the flag from the sink device.HI_TRUE: The EDID information is correctly read.HI_FASE: default settings */
 
-  HI_BOOL             bSpeaker[HDMI_AUDIO_SPEAKER_BUTT];                        /**< Speaker position. For details, see the definition of SpeakerDATABlock in EIA-CEA-861-D. */
-    HI_U8               u8IDManufactureName[4];                       /**< Device vendor flag */
-    HI_U32              u32IDProductCode;                             /**< Device ID. */
-    HI_U32              u32IDSerialNumber;                            /**< Device sequence number. */
-    HI_U32              u32WeekOfManufacture;                         /**< Device production data (week). */
-    HI_U32              u32YearOfManufacture;                         /**< Set the production data (year). */
-    HI_U8               u8Version;                                    /**< Device version number */
-    HI_U8               u8Revision;                                   /**< Device sub version number */
-    HI_U8               u8EDIDExternBlockNum;                         /**< EDID extended block number */
+    HI_HDMI_VIDEO_FMT_E enNativeVideoFormat;      										/**< Physical resolution of the display device. */
+    HI_BOOL             bVideoFmtSupported[HI_HDMI_VIDEO_FMT_BUTT]; 					/**< Video capability set.HI_TRUE: This display format is supported.HI_FALSE: This display format is not supported. */
+    HI_BOOL             bSupportYCbCr;            										/**< Whether the YCBCR display is supported.HI_TRUE: The YCBCR display is supported.HI_FALSE: Only red-green-blue (RGB) is supported. */
 
-    HI_BOOL             bIsPhyAddrValid;                              /**< Valid flag of the consumer electronics control (CEC) physical address */
-    HI_U8               u8PhyAddr_A;                                  /**< CEC physical address A */
-    HI_U8               u8PhyAddr_B;                                  /**< CEC physical address B */
-    HI_U8               u8PhyAddr_C;                                  /**< CEC physical address C */
-    HI_U8               u8PhyAddr_D;                                  /**< CEC physical address D */
-    HI_BOOL             bSupportDVIDual;                              /**< Whether to support the DVI dual-link operation. */
-    HI_BOOL             bSupportDeepColorYCBCR444;                    /**< Whether to support the YCBCR 4:4:4 deep-color mode. */
-    HI_BOOL             bSupportDeepColor30Bit;                       /**< Whether to support the deep-color 30-bit mode.*/
-    HI_BOOL             bSupportDeepColor36Bit;                       /**< Whether to support the deep-color 36-bit mode. */
-    HI_BOOL             bSupportDeepColor48Bit;                       /**< Whether to support the deep-color 48-bit mode. */
-    HI_BOOL             bSupportAI;                                   /**< Whether to support the Supports_AI mode. */
-    HI_U32              u32MaxTMDSClock;                               /**< Maximum TMDS clock. */
+    HI_BOOL             bSupportxvYCC601;         										/**< Whether the xvYCC601 color format is supported. */
+    HI_BOOL             bSupportxvYCC709;         										/**< Whether the xvYCC709 color format is supported. */
+    HI_U8               u8MDBit;                  										/**< Transfer profile supported by xvYCC601. 1: P0; 2: P1; 4: P2. */
+	HI_U32				u32AudioInfoNum;		  										/**< Num of audio Info*/
+	HI_HDMI_AUDIO_INFO_S stAudioInfo[HI_HDMI_MAX_AUDIO_CAP_COUNT]; 						/**< Audio Info.For details, see Table 37 in EIA-CEA-861-D. */
 
-  HI_BOOL             bI_Latency_Fields_Present;                    /**< Delay flag bit. */
-    HI_BOOL             bLatency_Fields_Present;                      /**< whether Video_Latency and Audio_Latency fields are present */
-    HI_BOOL             bHDMI_Video_Present;                          /**< Special video format */
-    HI_U8               u8Video_Latency;                              /**< Video delay */
-    HI_U8               u8Audio_Latency;                              /**< Audio delay */
-    HI_U8               u8Interlaced_Video_Latency;                    /**< Video delay in interlaced video mode */
-    HI_U8               u8Interlaced_Audio_Latency;                    /**< Audio delay in interlaced video mode */
-    HI_BOOL             bSupportY420DC30Bit;                         /**< Whether to support the YUV420 deep-color 30-bit mode.*/
-    HI_BOOL             bSupportY420DC36Bit;                         /**< Whether to support the YUV420 deep-color 36-bit mode. */
-    HI_BOOL             bSupportY420DC48Bit;                         /**< Whether to support the YUV420 deep-color 48-bit mode. */
-    HI_BOOL             bSupportHdmi_2_0;                            /**< Whether to support HDMI2.0. */
-  HI_BOOL             bSupportY420Format[HI_HDMI_VIDEO_FMT_BUTT];           /**< the format support YUV420 */
-    HI_BOOL             bOnlySupportY420Format[HI_HDMI_VIDEO_FMT_BUTT];          /**< the format only support YUV420 */
+	HI_BOOL             bSpeaker[HDMI_AUDIO_SPEAKER_BUTT];                				/**< Speaker position. For details, see the definition of SpeakerDATABlock in EIA-CEA-861-D. */
+    HI_U8               u8IDManufactureName[4];   										/**< Device vendor flag */
+    HI_U32              u32IDProductCode;         										/**< Device ID. */
+    HI_U32              u32IDSerialNumber;        										/**< Device sequence number. */
+    HI_U32              u32WeekOfManufacture;     										/**< Device production data (week). */
+    HI_U32              u32YearOfManufacture;     										/**< Set the production data (year). */
+    HI_U8               u8Version;                										/**< Device version number */
+    HI_U8               u8Revision;               										/**< Device sub version number */
+    HI_U8               u8EDIDExternBlockNum;     										/**< EDID extended block number */
+
+    HI_BOOL             bIsPhyAddrValid;          										/**< Valid flag of the consumer electronics control (CEC) physical address */
+    HI_U8               u8PhyAddr_A;              										/**< CEC physical address A */
+    HI_U8               u8PhyAddr_B;              										/**< CEC physical address B */
+    HI_U8               u8PhyAddr_C;              										/**< CEC physical address C */
+    HI_U8               u8PhyAddr_D;              										/**< CEC physical address D */
+    HI_BOOL             bSupportDVIDual;          										/**< Whether to support the DVI dual-link operation. */
+    HI_BOOL             bSupportDeepColorYCBCR444;										/**< Whether to support the YCBCR 4:4:4 deep-color mode. */
+    HI_BOOL             bSupportDeepColor30Bit;   										/**< Whether to support the deep-color 30-bit mode.*/
+    HI_BOOL             bSupportDeepColor36Bit;   										/**< Whether to support the deep-color 36-bit mode. */
+    HI_BOOL             bSupportDeepColor48Bit;   										/**< Whether to support the deep-color 48-bit mode. */
+    HI_BOOL             bSupportAI;               										/**< Whether to support the Supports_AI mode. */
+    HI_U32              u32MaxTMDSClock;          	 									/**< Maximum TMDS clock. */
+
+	HI_BOOL             bI_Latency_Fields_Present;										/**< Delay flag bit. */
+    HI_BOOL             bLatency_Fields_Present;  										/**< whether Video_Latency and Audio_Latency fields are present */
+    HI_BOOL             bHDMI_Video_Present;      										/**< Special video format */
+    HI_U8               u8Video_Latency;          										/**< Video delay */
+    HI_U8               u8Audio_Latency;          										/**< Audio delay */
+    HI_U8               u8Interlaced_Video_Latency;										/**< Video delay in interlaced video mode */
+    HI_U8               u8Interlaced_Audio_Latency;										/**< Audio delay in interlaced video mode */
+    HI_BOOL             bSupportY420DC30Bit;   											/**< Whether to support the YUV420 deep-color 30-bit mode.*/
+    HI_BOOL             bSupportY420DC36Bit;   											/**< Whether to support the YUV420 deep-color 36-bit mode. */
+    HI_BOOL             bSupportY420DC48Bit;   											/**< Whether to support the YUV420 deep-color 48-bit mode. */
+    HI_BOOL             bSupportHdmi_2_0;      											/**< Whether to support HDMI2.0. */
+	HI_BOOL             bSupportY420Format[HI_HDMI_VIDEO_FMT_BUTT]; 					/**< the format support YUV420 */
+    HI_BOOL             bOnlySupportY420Format[HI_HDMI_VIDEO_FMT_BUTT];					/**< the format only support YUV420 */
+    HI_HDMI_DET_TIMING_S    stDetailedTiming;                                               /**<Detailed timing infomation*/
 } HI_HDMI_SINK_CAPABILITY_S;
 
 
 typedef struct hiHDMI_ATTR_S
 {
-  HI_BOOL                 bEnableHdmi;         /**< Whether to forcibly output the video over the HDMI.  */
+	HI_BOOL                 bEnableHdmi;         /**< Whether to forcibly output the video over the HDMI.  */
 
     HI_BOOL                 bEnableVideo;        /**< Whether to output video.The value must be HI_TRUE.If the value is HI_FALSE, the HDMI is forcibly set to HI_TRUE. */
     HI_HDMI_VIDEO_FMT_E     enVideoFmt;          /**< Video norm. This value of the video norm must be consistent with the norm of the video output. */
@@ -509,7 +540,7 @@ typedef struct hiHDMI_ATTR_S
 
     HI_BOOL                 b3DEnable;           /**< Whether to enable 3D mode. 0: disabled 1: enabled */
     HI_U8                   u83DParam;           /**< 3D Parameter. The default value is 9. */
-  HI_HDMI_FORCE_ACTION_E  enDefaultMode;     /**< When get capability fail,HDMI forcily(priority) judgments output video mode.Default is HI_HDMI_FORCE_HDMI.*/
+	HI_HDMI_FORCE_ACTION_E  enDefaultMode;		 /**< When get capability fail,HDMI forcily(priority) judgments output video mode.Default is HI_HDMI_FORCE_HDMI.*/
     HI_BOOL                 bAuthMode;           /**< Whether to enable auth mode. 0: disabled 1: enabled */
     HI_BOOL                 bEnableVidModeAdapt; /**< Enable flag of vedio mode & DVI adapting case of user setting incorrect,default:HI_TRUE.When user have no any adapting strategy,suggestion HI_TRUE*/
     HI_BOOL                 bEnableDeepClrAdapt; /**< Enable flag of deep color mode adapting case of user setting incorrect,default: HI_FALSE.When user have no any adapting strategy,suggestion HI_TRUE*/
@@ -543,7 +574,7 @@ typedef struct hi_HDMI_AVI_INFOFRAME_VER2_S
     HI_HDMI_SCANINFO_E         enScanInfo;
 
     HI_HDMI_COLORIMETRY_E      enColorimetry;
-  HI_HDMI_EXT_COLORIMETRY_E  enExtColorimetry;
+	HI_HDMI_EXT_COLORIMETRY_E  enExtColorimetry;
     HI_HDMI_PIC_ASPECT_RATIO_E enAspectRatio;
     HI_HDMI_ACT_ASPECT_RATIO_E enActiveAspectRatio;
     HI_HDMI_PICTURE_SCALING_E  enPictureScaling;
@@ -563,66 +594,66 @@ typedef struct hi_HDMI_AVI_INFOFRAME_VER2_S
 /**Audio chanel count enum,see EIA-CEA-861-D/F*/
 typedef enum hiHDMI_AUDIO_CHANEL_CNT_E
 {
-  HI_HDMI_AUDIO_CHANEL_CNT_STREAM,
-  HI_HDMI_AUDIO_CHANEL_CNT_2,
-  HI_HDMI_AUDIO_CHANEL_CNT_3,
-  HI_HDMI_AUDIO_CHANEL_CNT_4,
-  HI_HDMI_AUDIO_CHANEL_CNT_5,
-  HI_HDMI_AUDIO_CHANEL_CNT_6,
-  HI_HDMI_AUDIO_CHANEL_CNT_7,
-  HI_HDMI_AUDIO_CHANEL_CNT_8,
+	HI_HDMI_AUDIO_CHANEL_CNT_STREAM,
+	HI_HDMI_AUDIO_CHANEL_CNT_2,
+	HI_HDMI_AUDIO_CHANEL_CNT_3,
+	HI_HDMI_AUDIO_CHANEL_CNT_4,
+	HI_HDMI_AUDIO_CHANEL_CNT_5,
+	HI_HDMI_AUDIO_CHANEL_CNT_6,
+	HI_HDMI_AUDIO_CHANEL_CNT_7,
+	HI_HDMI_AUDIO_CHANEL_CNT_8,
 }HI_HDMI_AUDIO_CHANEL_CNT_E;
 
 /**Audio Sample Size  enum,see EIA-CEA-861-D/F*/
 typedef enum hiHDMI_AUDIO_SAMPLE_SIZE_E
 {
-  HI_HDMI_AUDIO_SAMPLE_SIZE_STREAM,
-  HI_HDMI_AUDIO_SAMPLE_SIZE_16,
-  HI_HDMI_AUDIO_SAMPLE_SIZE_20,
-  HI_HDMI_AUDIO_SAMPLE_SIZE_24,
+	HI_HDMI_AUDIO_SAMPLE_SIZE_STREAM,
+	HI_HDMI_AUDIO_SAMPLE_SIZE_16,
+	HI_HDMI_AUDIO_SAMPLE_SIZE_20,
+	HI_HDMI_AUDIO_SAMPLE_SIZE_24,
 }HI_HDMI_AUDIO_SAMPLE_SIZE_E;
 
 /**Audio Sampling Frequency enum,see EIA-CEA-861-D/F*/
 typedef enum hiHDMI_AUDIO_SAMPLE_FREQ_E
 {
-  HI_HDMI_AUDIO_SAMPLE_FREQ_STREAM,
-  HI_HDMI_AUDIO_SAMPLE_FREQ_32000,
-  HI_HDMI_AUDIO_SAMPLE_FREQ_44100,
-  HI_HDMI_AUDIO_SAMPLE_FREQ_48000,
-  HI_HDMI_AUDIO_SAMPLE_FREQ_88200,
-  HI_HDMI_AUDIO_SAMPLE_FREQ_96000,
-  HI_HDMI_AUDIO_SAMPLE_FREQ_176400,
-  HI_HDMI_AUDIO_SAMPLE_FREQ_192000,
+	HI_HDMI_AUDIO_SAMPLE_FREQ_STREAM,
+	HI_HDMI_AUDIO_SAMPLE_FREQ_32000,
+	HI_HDMI_AUDIO_SAMPLE_FREQ_44100,
+	HI_HDMI_AUDIO_SAMPLE_FREQ_48000,
+	HI_HDMI_AUDIO_SAMPLE_FREQ_88200,
+	HI_HDMI_AUDIO_SAMPLE_FREQ_96000,
+	HI_HDMI_AUDIO_SAMPLE_FREQ_176400,
+	HI_HDMI_AUDIO_SAMPLE_FREQ_192000,
 }HI_HDMI_AUDIO_SAMPLE_FREQ_E;
 
 /** Level Shift Values (LSV0-LSV3) enum,see EIA-CEA-861-D/F*/
 typedef enum hiHDMI_LEVEL_SHIFT_VALUE_E
 {
-  HI_HDMI_LEVEL_SHIFT_VALUE_0_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_1_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_2_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_3_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_4_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_5_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_6_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_7_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_8_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_9_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_10_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_11_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_12_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_13_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_14_DB,
-  HI_HDMI_LEVEL_SHIFT_VALUE_15_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_0_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_1_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_2_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_3_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_4_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_5_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_6_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_7_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_8_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_9_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_10_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_11_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_12_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_13_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_14_DB,
+	HI_HDMI_LEVEL_SHIFT_VALUE_15_DB,
 }HI_HDMI_LEVEL_SHIFT_VALUE_E;
 
 /**LFE Playback Level enum,see EIA-CEA-861-D/F*/
 typedef enum hiHDMI_LFE_PLAYBACK_LEVEL_E
 {
-  HI_HDMI_LFE_PLAYBACK_NO,
-  HI_HDMI_LFE_PLAYBACK_0_DB,
-  HI_HDMI_LFE_PLAYBACK_10_DB,
-  HI_HDMI_LFE_PLAYBACK_RESEVED,
+	HI_HDMI_LFE_PLAYBACK_NO,
+	HI_HDMI_LFE_PLAYBACK_0_DB,
+	HI_HDMI_LFE_PLAYBACK_10_DB,
+	HI_HDMI_LFE_PLAYBACK_RESEVED,
 }HI_HDMI_LFE_PLAYBACK_LEVEL_E;
 
 
@@ -630,13 +661,13 @@ typedef enum hiHDMI_LFE_PLAYBACK_LEVEL_E
 typedef struct hiHDMI_AUD_INFOFRAME_VER1_S
 {
     HI_HDMI_AUDIO_CHANEL_CNT_E          enChannelCount;
-    HI_HDMI_CODING_TYPE_E              enCodingType;
+    HI_HDMI_CODING_TYPE_E          		enCodingType;
     HI_HDMI_AUDIO_SAMPLE_SIZE_E         enSampleSize;
     HI_HDMI_AUDIO_SAMPLE_FREQ_E         enSamplingFrequency;
-    HI_U8                   u8ChannelAlloc;      /* Channel/Speaker Allocation.Range [0,255] */
+    HI_U8						   		u8ChannelAlloc;			/* Channel/Speaker Allocation.Range [0,255] */
     HI_HDMI_LEVEL_SHIFT_VALUE_E         enLevelShift;
-  HI_HDMI_LFE_PLAYBACK_LEVEL_E         enLfePlaybackLevel;
-    HI_BOOL                            bDownmixInhibit;
+	HI_HDMI_LFE_PLAYBACK_LEVEL_E  	   	enLfePlaybackLevel;
+    HI_BOOL                        		bDownmixInhibit;
 }HI_HDMI_AUD_INFOFRAME_VER1_S;
 
 /** HDMI Source Product Description InfoFrame struct , see EIA-CEA-861-D */
@@ -891,7 +922,7 @@ typedef struct hiUNF_HDMI_CEC_STATUS_S
     HI_BOOL bEnable;
     HI_U8   u8PhysicalAddr[4];                        /**< CEC physic addr */
     HI_U8   u8LogicalAddr;                            /**< CEC logic addr, default:0x03. */
-    HI_U8   u8Network[HI_CEC_LOGICALADD_BUTT];        /**< CEC's net work, 1:this device can answer cec command */
+    HI_U8   u8Network[HI_CEC_LOGICALADD_BUTT];    	  /**< CEC's net work, 1:this device can answer cec command */
 }HI_HDMI_CEC_STATUS_S;
 
 typedef HI_VOID (*HI_HDMI_CECCALLBACK)(HI_HDMI_ID_E enHdmi, HI_HDMI_CEC_CMD_S *pstCECCmd, HI_VOID *pData);
@@ -942,14 +973,14 @@ typedef enum hiERR_HDMI_CODE_E
 #define HI_ERR_HDMI_READ_EVENT_FAILED       HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_READ_EVENT_FAILED)
 #define HI_ERR_HDMI_NOT_START               HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_NOT_START)
 #define HI_ERR_HDMI_READ_EDID_FAILED        HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_READ_EDID_FAILED)
-#define HI_ERR_HDMI_INIT_FAILED          HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_INIT_FAILED)
-#define HI_ERR_HDMI_CREATE_TESK_FAILED      HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_CREATE_TESK_FAILED)
-#define HI_ERR_HDMI_MALLOC_FAILED        HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_MALLOC_FAILED)
-#define HI_ERR_HDMI_FREE_FAILED          HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_FREE_FAILED)
+#define HI_ERR_HDMI_INIT_FAILED    			HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_INIT_FAILED)
+#define HI_ERR_HDMI_CREATE_TESK_FAILED    	HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_CREATE_TESK_FAILED)
+#define HI_ERR_HDMI_MALLOC_FAILED    		HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_MALLOC_FAILED)
+#define HI_ERR_HDMI_FREE_FAILED    			HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_FREE_FAILED)
 #define HI_ERR_HDMI_PTHREAD_CREATE_FAILED   HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_PTHREAD_CREATE_FAILED)
 #define HI_ERR_HDMI_PTHREAD_JOIN_FAILED     HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_PTHREAD_JOIN_FAILED)
-#define HI_ERR_HDMI_STRATEGY_FAILED       HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_STRATEGY_FAILED)
-#define HI_ERR_HDMI_SET_ATTR_FAILED       HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_SET_ATTR_FAILED)
+#define HI_ERR_HDMI_STRATEGY_FAILED     	HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_STRATEGY_FAILED)
+#define HI_ERR_HDMI_SET_ATTR_FAILED     	HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_SET_ATTR_FAILED)
 #define HI_ERR_HDMI_CALLBACK_NOT_REGISTER   HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_CALLBACK_NOT_REGISTER)
 #define HI_ERR_HDMI_CEC_CALLBACK_REREGISTER HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_CEC_CALLBACK_REREGISTER)
 #define HI_ERR_HDMI_UNKNOWN_COMMAND         HI_DEF_ERR(HI_ID_HDMI, EN_ERR_LEVEL_ERROR, ERR_HDMI_UNKNOWN_COMMAND)

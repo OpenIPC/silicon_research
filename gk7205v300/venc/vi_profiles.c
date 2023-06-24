@@ -69,10 +69,10 @@ VI_DEV_ATTR_S DEV_ATTR_IMX307_2M_BASE =
     },
     VI_DATA_TYPE_RGB,
     HI_FALSE,
-    {1920, 1080},
+    {1280, 720},
     {
         {
-            {1920 , 1080},
+            {1280 , 720},
 
         },
         {
@@ -82,7 +82,7 @@ VI_DEV_ATTR_S DEV_ATTR_IMX307_2M_BASE =
     },
     {
         WDR_MODE_NONE,
-        1080
+        1280
     },
     DATA_RATE_X1
 };

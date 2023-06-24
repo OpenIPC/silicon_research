@@ -25,6 +25,7 @@ extern "C"{
 #define HI3536C_V100 0x3536c100
 #define HI3521A_V100 0x3521a100
 #define HI3520D_V300 0x3520d300
+#define HI3520D_V400 0x3520d400
 #define HI3531A_V100 0x3531a100
 #define HI35xx_Vxxx  0x35000000
 #define HI3519_V100  0x35190100
@@ -275,6 +276,7 @@ static inline  void FlushDcache(unsigned long addr, unsigned long len)
 #define COVEREX_MAX_NUM_VO          4
 #define OVERLAYEX_MAX_NUM_VO        1
 #define LINE_MAX_NUM_VO             4
+#define RGN_MAX_NUM_PER_CHN		16
 
 /* for VENC */
 #define OVERLAY_MAX_X_VENC           8190
@@ -415,7 +417,7 @@ static inline  void FlushDcache(unsigned long addr, unsigned long len)
 		size: vb blk size
  */
 #define VB_HEADER_STRIDE    16
-#define VB_ALIGN_LEN        256    
+#define VB_ALIGN_LEN        256
 
 #define VB_PIC_Y_HEADER_SIZE(Width, Height, size)\
 	do{\

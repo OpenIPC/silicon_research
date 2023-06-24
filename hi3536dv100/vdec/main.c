@@ -1,85 +1,5 @@
 #include "main.h"
 
-static HI_VOID SAMPLE_COMM_VO_HdmiConvertSync(VO_INTF_SYNC_E enIntfSync, HI_HDMI_VIDEO_FMT_E *penVideoFmt) {
-    switch (enIntfSync) {
-        case VO_OUTPUT_PAL:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_PAL;
-            break;
-        case VO_OUTPUT_NTSC:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_NTSC;
-            break;
-        case VO_OUTPUT_1080P24:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_1080P_24;
-            break;
-        case VO_OUTPUT_1080P25:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_1080P_25;
-            break;
-        case VO_OUTPUT_1080P30:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_1080P_30;
-            break;
-        case VO_OUTPUT_720P50:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_720P_50;
-            break;
-        case VO_OUTPUT_720P60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_720P_60;
-            break;
-        case VO_OUTPUT_1080I50:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_1080i_50;
-            break;
-        case VO_OUTPUT_1080I60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_1080i_60;
-            break;
-        case VO_OUTPUT_1080P50:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_1080P_50;
-            break;
-        case VO_OUTPUT_1080P60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_1080P_60;
-            break;
-        case VO_OUTPUT_576P50:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_576P_50;
-            break;
-        case VO_OUTPUT_480P60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_480P_60;
-            break;
-        case VO_OUTPUT_800x600_60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_VESA_800X600_60;
-            break;
-        case VO_OUTPUT_1024x768_60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_VESA_1024X768_60;
-            break;
-        case VO_OUTPUT_1280x1024_60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_VESA_1280X1024_60;
-            break;
-        case VO_OUTPUT_1366x768_60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_VESA_1366X768_60;
-            break;
-        case VO_OUTPUT_1440x900_60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_VESA_1440X900_60;
-            break;
-        case VO_OUTPUT_1280x800_60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_VESA_1280X800_60;
-            break;
-        case VO_OUTPUT_1600x1200_60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_VESA_1600X1200_60;
-            break;
-        case VO_OUTPUT_2560x1440_30:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_2560x1440_30;
-            break;
-        case VO_OUTPUT_2560x1600_60:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_2560x1600_60;
-            break;
-        case VO_OUTPUT_3840x2160_30:
-            *penVideoFmt = HI_HDMI_VIDEO_FMT_3840X2160P_30;
-            break;
-        default :
-            //SAMPLE_PRT("Unkonw VO_INTF_SYNC_E value!\n");
-            break;
-    }
-
-    return;
-}
-
-#define HI_HDMI_ID_0 0
 typedef struct hiHDMI_ARGS_S
 {
     HI_HDMI_ID_E  enHdmi;
@@ -165,22 +85,143 @@ static HI_VOID HDMI_EventCallBack(HI_HDMI_EVENT_TYPE_E event, HI_VOID *pPrivateD
     return;
 }
 
+
+void printHelp() {
+  printf(
+    "\n"
+    "\t\tOpenIPC FPV Decoder for HI3536\n"
+    "\n"
+    "  Usage:\n"
+    "    vdec [Arguments]\n"
+    "\n"
+    "  Arguments:\n"
+    "    -p [Port]      - Listen port                       (Default: 5000)\n"
+    "    -m [Mode]      - Screen output mode                (Default: 720p60)\n"
+    "      720p60         - 1280 x 720    @ 60 fps\n"
+    "      1080p60        - 1920 x 1080   @ 60 fps\n"
+    "      1024x768x60    - 1024 x 768    @ 60 fps\n" 
+    "      1366x768x60    - 1366 x 768    @ 60 fps\n"
+    "      1280x1024x60   - 1280 x 1024   @ 60 fps\n" 
+    "\n"
+    "    -w [Path]      - Write stream into file\n"
+    "\n"
+    "    --osd          - Enable OSD\n"
+    "    --bg-r [Value] - Background color red component    (Default: 0)\n"
+    "    --bg-g [Value] - Background color green component  (Default: 96)\n"
+    "    --bg-b [Value] - Background color blue component   (Default: 0)\n"
+    "\n"
+  );
+}
+
+extern uint32_t frames_received;
+
+
+uint32_t stats_rx_bytes = 0;
+struct timespec last_timestamp = {0, 0};
+
+double getTimeInterval(struct timespec* timestamp, struct timespec* last_meansure_timestamp) {
+  return (timestamp->tv_sec - last_meansure_timestamp->tv_sec) + (timestamp->tv_nsec - last_meansure_timestamp->tv_nsec) / 1000000000.;
+}
+
+
 int main(int argc, const char* argv[]) {
+  VO_INTF_SYNC_E  vo_mode           = VO_OUTPUT_720P60;// VO_OUTPUT_1080P60; //VO_OUTPUT_2560x1440_30; //VO_OUTPUT_2560x1440_30;// VO_OUTPUT_1080P60;
+  uint32_t        vo_width          = 1280;
+  uint32_t        vo_height         = 720;
+  uint32_t        vo_framerate      = 60;
   
-  VO_INTF_SYNC_E  vo_mode     = VO_OUTPUT_720P60;
-  uint32_t        vo_width    = 1280;
-  uint32_t        vo_height   = 720;
+  VDEC_CHN        vdec_channel_id   = 0;
+  uint32_t        vdec_max_width    = 1920;
+  uint32_t        vdec_max_height   = 1080;
   
+  VPSS_GRP        vpss_group_id     = 0;
+  VPSS_CHN        vpss_channel_id   = 0;
   
+  VO_DEV          vo_device_id      = 0;
+  VO_LAYER        vo_layer_id       = 0;
+  VO_CHN          vo_channel_id     = 0;
   
+  uint16_t        listen_port       = 5000;
+  uint32_t        background_color  = 0x006000;
   
-  uint32_t  sensor_width      = 2592;
-  uint32_t  sensor_height     = 1520;
-  uint32_t  sensor_framerate  = 30;
+  const char*     write_stream_path = 0;
+  int             write_stream_file = -1;
   
-  uint32_t  image_width       = 2592; // - Encoded image width
-  uint32_t  image_height      = 1520; // - Encoded image height
+  int             enable_osd        = 0;
   
+  // --------------------------------------------------------------
+  // --- Load console arguments
+  // --------------------------------------------------------------
+  __BeginParseConsoleArguments__(printHelp)
+    __OnArgument("-p") {
+      listen_port = atoi(__ArgValue);
+      continue;
+    }
+    __OnArgument("-m") {
+      const char* mode = __ArgValue;
+      if        (!strcmp(mode, "720p60")) {
+        vo_mode       = VO_OUTPUT_720P60;
+        vo_width      = 1280;
+        vo_height     = 720;
+        vo_framerate  = 60;
+      } else if (!strcmp(mode, "1080p60")) {
+        vo_mode       = VO_OUTPUT_1080P60;
+        vo_width      = 1920;
+        vo_height     = 1080;
+        vo_framerate  = 60;
+      } else if (!strcmp(mode, "1024x768x60")) {
+        vo_mode       = VO_OUTPUT_1024x768_60;
+        vo_width      = 1024;
+        vo_height     = 768;
+        vo_framerate  = 60;
+      } else if (!strcmp(mode, "1366x768x60")) {
+        vo_mode       = VO_OUTPUT_1366x768_60;
+        vo_width      = 1024;
+        vo_height     = 768;
+        vo_framerate  = 60;
+      } else if (!strcmp(mode, "1280x1024x60")) {
+        vo_mode       = VO_OUTPUT_1280x1024_60;
+        vo_width      = 1280;
+        vo_height     = 1024;
+        vo_framerate  = 60;
+      }else {
+        printf("> ERROR: Unsupported video mode [%s]\n", mode);
+      }
+      continue;
+    }
+    
+    __OnArgument("--bg-r") {
+      uint8_t v = atoi(__ArgValue);
+      background_color &= ~(0xFF << 16);
+      background_color |= (v << 16);
+      continue;
+    }
+    
+    __OnArgument("--bg-g") {
+      uint8_t v = atoi(__ArgValue);
+      background_color &= ~(0xFF << 8);
+      background_color |= (v << 8);
+      continue;
+    }
+    
+    __OnArgument("--bg-b") {
+      uint8_t v = atoi(__ArgValue);
+      background_color &= ~(0xFF);
+      background_color |= (v);
+      continue;
+    }
+    
+    __OnArgument("-w") {
+      write_stream_path = __ArgValue;
+      continue;
+    }
+    
+    __OnArgument("--osd") {
+      enable_osd = 1;
+      continue;
+    }
+    
+  __EndParseConsoleArguments__
   // --------------------------------------------------------------
   // --- Reset previous configuration
   // --------------------------------------------------------------
@@ -204,15 +245,9 @@ int main(int argc, const char* argv[]) {
   { VB_CONF_S vb_conf;
     memset(&vb_conf, 0x00, sizeof(vb_conf));
     
-    // - Use two memory pools
+    // - Set maximum memory pools count
     vb_conf.u32MaxPoolCnt = 16;
-    
-    // - Memory pool for VI
-    vb_conf.astCommPool[0].u32BlkCnt  = 5; 
-    vb_conf.astCommPool[0].u32BlkSize = ((sensor_width * sensor_height * 4) >> 1); 
-    
-    printf("> Main pool block size = %d\n", vb_conf.astCommPool[0].u32BlkSize);
-      
+ 
     // - Configure video buffer
     { int ret = HI_MPI_VB_SetConf(&vb_conf);
       if (ret) {
@@ -226,7 +261,6 @@ int main(int argc, const char* argv[]) {
         printf("ERROR: Init VB failed : 0x%x\n", ret);
       }
     }
-  
   }
   
   // -- Configure system
@@ -246,8 +280,7 @@ int main(int argc, const char* argv[]) {
     }
   }
   
-    
-  // - Configure video buffer
+  // - Configure video buffer for decoder
   { VB_CONF_S vb_conf;
   
     // - Release previous pool configuration
@@ -257,12 +290,13 @@ int main(int argc, const char* argv[]) {
       return 1;
     }
     
-    vb_conf.u32MaxPoolCnt             = 2;
-    vb_conf.astCommPool[0].u32BlkCnt  = 5;
-    vb_conf.astCommPool[0].u32BlkSize = 1280 * 720 * 3;
+    vb_conf.u32MaxPoolCnt             = 1;
+    vb_conf.astCommPool[0].u32BlkCnt  = 4;
+    vb_conf.astCommPool[0].u32BlkSize = vdec_max_width * vdec_max_height * 3;
     
-    VB_PIC_BLK_SIZE(1280, 720, PT_H264, vb_conf.astCommPool[0].u32BlkSize);
-    
+    // - Calculate required size for video buffer
+    VB_PIC_BLK_SIZE(vdec_max_width, vdec_max_height, PT_H264, vb_conf.astCommPool[0].u32BlkSize);
+  
     printf("> VDEC picture block size = %d\n", vb_conf.astCommPool[0].u32BlkSize);
   
     ret = HI_MPI_VB_SetModPoolConf(VB_UID_VDEC, &vb_conf);
@@ -276,21 +310,11 @@ int main(int argc, const char* argv[]) {
       printf("ERROR: Unable to init ModComPool = 0x%x\n", ret);
       return 1;
     }
-  
   }
   
-  VDEC_CHN        vdec_channel_id   = 0;
-  
-  VPSS_GRP        vpss_group_id     = 0;
-  VPSS_CHN        vpss_channel_id   = 0;
-  
-  
-  VO_DEV          vo_device_id  = 0;
-  VO_LAYER        vo_layer_id   = 0;
-  VO_CHN          vo_channel_id = 0;
-  
+
   {
-    int ret = HI_MPI_VO_SetDispBufLen(vo_layer_id, 3);
+    int ret = HI_MPI_VO_SetDispBufLen(vo_layer_id, 2);
     if (ret != HI_SUCCESS) {
       printf("ERROR: Unable to set display buffer length\n");
       return 1;
@@ -298,14 +322,87 @@ int main(int argc, const char* argv[]) {
   }
   
   // - Initialize VO
-  VO_init(vo_device_id, VO_INTF_HDMI, vo_mode, 0x00FF00);
+  VO_init(vo_device_id, VO_INTF_HDMI, vo_mode, vo_framerate, background_color);
 
   // - Initialize HDMI
-  //VO_HDMI_init(0, vo_mode);
+  VO_HDMI_init(0, vo_mode);
 
+ /*{ VO_PUB_ATTR_S vo_config;
+    memset(&vo_config, 0x00, sizeof(VO_PUB_ATTR_S));
+    
+    int ret = HI_MPI_VO_GetPubAttr(vo_device_id, &vo_config);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to GET video timing = 0x%x\n");
+      return 1;
+    }
+    
+    printf("> Video timing for mode = %d:\n"
+      "bSynm      = %d\n"
+      "\n"
+      "bIop       = %d\n"
+      "u8Intfb    = %d\n"
+      "\n"
+      "u16Vact    = %d\n"
+      "u16Vbb     = %d\n"
+      "u16Vfb     = %d\n"
+      "\n"
+      "u16Hact    = %d\n"
+      "u16Hbb     = %d\n"
+      "u16Hfb     = %d\n"
+      "u16Hmid    = %d\n"
+      "\n"
+      "u16Bvact   = %d\n"
+      "u16Bvbb    = %d\n"
+      "u16Bvfb    = %d\n"
+      "\n"
+      "u16Hpw     = %d\n"
+      "u16Vpw     = %d\n"
+      "\n"
+      "bIdv       = %d\n"
+      "bIhs       = %d\n"
+      "bIvs       = %d\n"
+    
+      ,
+      vo_config.enIntfType,
+      vo_config.stSyncInfo.bSynm,
+      
+      vo_config.stSyncInfo.bIop,
+      vo_config.stSyncInfo.u8Intfb,
+      
+      vo_config.stSyncInfo.u16Vact,
+      vo_config.stSyncInfo.u16Vbb,
+      vo_config.stSyncInfo.u16Vfb,
+      
+      vo_config.stSyncInfo.u16Hact,
+      vo_config.stSyncInfo.u16Hbb,
+      vo_config.stSyncInfo.u16Hfb,
+      vo_config.stSyncInfo.u16Hmid,
+      
+      vo_config.stSyncInfo.u16Bvact,
+      vo_config.stSyncInfo.u16Bvbb,
+      vo_config.stSyncInfo.u16Bvfb,
+
+      vo_config.stSyncInfo.u16Hpw,
+      vo_config.stSyncInfo.u16Vpw,
+
+      vo_config.stSyncInfo.bIdv,
+      vo_config.stSyncInfo.bIhs,
+      vo_config.stSyncInfo.bIvs
+      
+    );
+  }*/
+  
+  { int ret = HI_MPI_VO_GetDevFrameRate(vo_device_id, &vo_framerate);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to set VO framerate = 0x%x\n");
+      return ret;
+    }
+    printf("> VO framerate = %d\n", vo_framerate);
+  }
 
   // - Configure video layer
   { VO_VIDEO_LAYER_ATTR_S layer_config;
+    memset(&layer_config, 0x00, sizeof(layer_config));
     int ret = HI_MPI_VO_GetVideoLayerAttr(vo_layer_id, &layer_config);
     if (ret != HI_SUCCESS) {
       printf("ERROR: Unable to get VO layer information\n");
@@ -314,21 +411,21 @@ int main(int argc, const char* argv[]) {
     
     layer_config.enPixFormat  = PIXEL_FORMAT_YUV_SEMIPLANAR_420;
     layer_config.bDoubleFrame = HI_FALSE;
-    layer_config.bClusterMode = HI_FALSE;
+    layer_config.bClusterMode = HI_TRUE;
     
-    layer_config.u32DispFrmRt = 30;
+    layer_config.u32DispFrmRt = vo_framerate;
     
-    layer_config.stDispRect.u32Width    = 1280;
-    layer_config.stDispRect.u32Height   = 720;
+    layer_config.stDispRect.u32Width    = vo_width;
+    layer_config.stDispRect.u32Height   = vo_height;
     layer_config.stDispRect.s32X        = 0;
     layer_config.stDispRect.s32Y        = 0;
     
-    layer_config.stImageSize.u32Width   = 1280;
-    layer_config.stImageSize.u32Height  = 720;
+    layer_config.stImageSize.u32Width   = vo_width;
+    layer_config.stImageSize.u32Height  = vo_height;
     
     ret = HI_MPI_VO_SetVideoLayerAttr(vo_layer_id, &layer_config);
     if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to configure video layer\n");
+      printf("ERROR: Unable to configure video layer = 0x%x\n", ret);
       return 1;
     }
   }
@@ -336,10 +433,9 @@ int main(int argc, const char* argv[]) {
   // - Enable video layer
   { int ret = HI_MPI_VO_EnableVideoLayer(vo_layer_id);
     if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to enable video layer\n");
+      printf("ERROR: Unable to enable video layer = 0x%x\n", ret);
       return 1;
     }
-    
   }
   
   // - Configure video channel
@@ -355,8 +451,8 @@ int main(int argc, const char* argv[]) {
     
     channel_config.stRect.s32X      = 0;
     channel_config.stRect.s32Y      = 0;
-    channel_config.stRect.u32Width  = 1280;
-    channel_config.stRect.u32Height = 720;
+    channel_config.stRect.u32Width  = vo_width;
+    channel_config.stRect.u32Height = vo_height;
     
     ret = HI_MPI_VO_SetChnAttr(vo_layer_id, vo_channel_id, &channel_config);
     if (ret != HI_SUCCESS) {
@@ -370,73 +466,9 @@ int main(int argc, const char* argv[]) {
       return 1;
     }
     
-    //HI_MPI_VO_GetChnFrameRate(vo_layer_id, vo_channel_id, &rate);
-    //printf("Channel framerate = %d\n", rate);
-  }
-  
-
-  
-  // --------------------------------------------
-  // --- Start VPSS
-  // --------------------------------------------
-  // - Create VPSS group
-  { VPSS_GRP_ATTR_S group_config;
-    int ret = HI_MPI_VPSS_GetGrpAttr(vpss_group_id, &group_config);
-    
-    group_config.u32MaxW    = ALIGN_UP(1280,  16);
-    group_config.u32MaxH    = ALIGN_UP(720,   16);
-    group_config.enPixFmt   = PIXEL_FORMAT_YUV_SEMIPLANAR_420;
-    
-    group_config.bIeEn      = HI_FALSE;
-    group_config.bDciEn     = HI_FALSE;
-    group_config.bEsEn      = HI_FALSE;
-    group_config.bHistEn    = HI_FALSE;
-    group_config.bNrEn      = HI_FALSE;
-    
-    group_config.enDieMode  = VPSS_DIE_MODE_NODIE;
-    
-    ret = HI_MPI_VPSS_CreateGrp(vpss_group_id, &group_config);
-    if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to create VPSS group\n");
-    }
-  }
-
-  // - Activate channel border
-  { VPSS_CHN_ATTR_S channel_config;
-    int ret = HI_MPI_VPSS_GetChnAttr(vpss_group_id, vpss_channel_id, &channel_config);
-    if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to get VPSS channel config\n");
-      return 1;
-    }
-    
-    channel_config.bBorderEn                = HI_TRUE;
-    channel_config.stBorder.u32TopWidth     = 10;
-    channel_config.stBorder.u32BottomWidth  = 10;
-    channel_config.stBorder.u32LeftWidth    = 10;
-    channel_config.stBorder.u32RightWidth   = 10;
-    channel_config.stBorder.u32Color        = 0xFF0000;
-    
-    ret = HI_MPI_VPSS_SetChnAttr(vpss_group_id, vpss_channel_id, &channel_config);
-    if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to configure VPSS channel\n");
-      return 1;
-    }
-  }
-
-  // - Start VPSS group 
-  { int ret = HI_MPI_VPSS_StartGrp(vpss_group_id);
-    if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to start VPSS group\n");
-      return 1;
-    }
-  }
-
-  // - Enable VPSS channel 
-  { int ret = HI_MPI_VPSS_EnableChn(vpss_group_id, vpss_channel_id);
-    if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to enable VPSS channel\n");
-      return 1;
-    }
+    /*uint32_t rate = 0;
+    HI_MPI_VO_GetChnFrameRate(vo_layer_id, vo_channel_id, &rate);
+    printf("Channel framerate = %d\n", rate);*/
   }
   
   // --------------------------------------------
@@ -446,15 +478,15 @@ int main(int argc, const char* argv[]) {
   { VDEC_CHN_ATTR_S config;
     memset(&config, 0x00, sizeof(config));
     config.enType       = PT_H264;
-    config.u32BufSize   = vo_width * vo_height * 2;
-    config.u32Priority  = 5;
-    config.u32PicWidth  = vo_width;
-    config.u32PicHeight = vo_height;    
-  
+    config.u32BufSize   = vdec_max_width * vdec_max_height * 3; // vdec_max_width * vdec_max_height;
+    config.u32Priority  = 128;
+    config.u32PicWidth  = vdec_max_width;
+    config.u32PicHeight = vdec_max_height;  
+
     config.stVdecVideoAttr.bTemporalMvpEnable = HI_FALSE;
-    config.stVdecVideoAttr.enMode             = VIDEO_MODE_FRAME;
-    config.stVdecVideoAttr.u32RefFrameNum     = 2;
-    
+    config.stVdecVideoAttr.enMode             = VIDEO_MODE_STREAM;// VIDEO_MODE_FRAME;
+    config.stVdecVideoAttr.u32RefFrameNum     = 1;
+
     // - Create VDEC channel
     int ret = HI_MPI_VDEC_CreateChn(vdec_channel_id, &config);
     if (ret != HI_SUCCESS) {
@@ -463,7 +495,7 @@ int main(int argc, const char* argv[]) {
     }
     
     //- Set channel extra parameters
-    { VDEC_CHN_PARAM_S channel;
+    /*{ VDEC_CHN_PARAM_S channel;
       ret = HI_MPI_VDEC_GetChnParam(vdec_channel_id, &channel);
       if (ret != HI_SUCCESS) {
         printf("ERROR: Unable to get VDEC channel parameters\n");
@@ -483,7 +515,7 @@ int main(int argc, const char* argv[]) {
         printf("ERROR: Unable to set VDEC channel config\n");
         return 1;
       }
-    }
+    }*/
   
     // - Set display mode
     ret = HI_MPI_VDEC_SetDisplayMode(vdec_channel_id, VIDEO_DISPLAY_MODE_PREVIEW);
@@ -495,62 +527,30 @@ int main(int argc, const char* argv[]) {
     // - Read decoder protocol information
     VDEC_PRTCL_PARAM_S protocol;
     HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
+
+    protocol.stH264PrtclParam.s32MaxPpsNum    = 32;
+    protocol.stH264PrtclParam.s32MaxSpsNum    = 32;
+    protocol.stH264PrtclParam.s32MaxSliceNum  = 32;
+    
+    ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to set VDEC protocol parameters\n");
+      return 1;
+    }
+    
+    HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
     printf("> VDEC Protocol = Type: %s, PPS: %d, SLICE: %d, SPS: %d\n",
       protocol.enType == PT_H264 ? "h264" : "Unknown",
       protocol.stH264PrtclParam.s32MaxPpsNum,
       protocol.stH264PrtclParam.s32MaxSliceNum,
       protocol.stH264PrtclParam.s32MaxSpsNum
     );
-    
-    /*ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
-    if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to set VDEC protocol parameters\n");
-      return 1;
-    }*/
   }
 
   // --------------------------------------------
   // --- Assemble pipeline
   // --------------------------------------------
-  // - Bind VDEC -> VPSS
   { MPP_CHN_S src;
-    MPP_CHN_S dst;
-
-    src.enModId   = HI_ID_VDEC;
-    src.s32DevId  = 0;
-    src.s32ChnId  = vdec_channel_id;
-
-    dst.enModId   = HI_ID_VPSS;
-    dst.s32DevId  = vpss_group_id;
-    dst.s32ChnId  = vpss_channel_id;
-
-    int ret = HI_MPI_SYS_Bind(&src, &dst);
-    if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to bind VDEC -> VPSS\n");
-      return 1;
-    }
-  }
-  
-  // - Bind VPSS -> VO
-  { MPP_CHN_S src;
-    MPP_CHN_S dst;
-
-    src.enModId   = HI_ID_VPSS;
-    src.s32DevId  = vpss_group_id;
-    src.s32ChnId  = vpss_channel_id;
-
-    dst.enModId   = HI_ID_VOU;
-    dst.s32DevId  = vo_layer_id;
-    dst.s32ChnId  = vo_channel_id;
-
-    int ret = HI_MPI_SYS_Bind(&src, &dst);
-    if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to bind VPSS -> VO\n");
-      return 1;
-    }
-  }
-  
-  /*{ MPP_CHN_S src;
     MPP_CHN_S dst;
 
     src.enModId   = HI_ID_VDEC;
@@ -566,7 +566,9 @@ int main(int argc, const char* argv[]) {
       printf("ERROR: Unable to bind VDEC -> VO\n");
       return 1;
     }
-  }*/
+  }
+  
+  
   
   // - Start VDEC
   { int ret = HI_MPI_VDEC_StartRecvStream(vdec_channel_id);
@@ -583,17 +585,38 @@ int main(int argc, const char* argv[]) {
   { struct sockaddr_in address;
     memset(&address, 0x00, sizeof(address));
     address.sin_family  = AF_INET;
-    address.sin_port    = htons(5000);
+    address.sin_port    = htons(listen_port);
     bind(port, (struct sockaddr*)&address, sizeof(struct sockaddr_in));
+  }
+  
+  if (fcntl(port, F_SETFL, O_NONBLOCK) == -1) {
+    printf("ERROR: Unable to set non-blocking mode\n");
+    return 1;
   }
   
   uint8_t*  rx_buffer       = malloc(1024 * 1024);
   uint8_t*  nal_buffer      = malloc(1024 * 1024);
   uint32_t  nal_buffer_used = 0;
+  
+  // - Open write file
+  if (write_stream_path) {
+    write_stream_file = open(write_stream_path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+  }
+    
+  // - Start ISP service thread
+  pthread_t osd_thread;
+  if (enable_osd) {
+    pthread_create(&osd_thread, NULL, __OSD_THREAD__, 0);
+  }
+
+  
+  uint32_t  write_buffer_capacity = 1024 * 1024 * 2;
+  uint8_t*  write_buffer = malloc(write_buffer_capacity);
+  uint32_t  write_buffer_size = 0;
+
   while (1) {
-    int rx = recv(port, rx_buffer + 8, 1500, 0);
+    int rx = recv(port, rx_buffer + 8, 2048, 0);
     if (rx <= 0) {
-      printf("ERROR: UDP RX failed\n");
       usleep(1);
       continue;
     }
@@ -601,27 +624,56 @@ int main(int argc, const char* argv[]) {
     VDEC_STREAM_S stream;
     memset(&stream, 0x00, sizeof(stream));
     stream.bEndOfStream = HI_FALSE;
-    stream.bEndOfFrame  = HI_TRUE;
-    
+    stream.bEndOfFrame  = HI_FALSE;
+
     // - Decode UDP stream
     stream.pu8Addr = decodeUDPFrame(rx_buffer + 8, (uint32_t)rx, 0, nal_buffer, &nal_buffer_used, &stream.u32Len);
     if (!stream.pu8Addr) {
       continue;
     }
     
+    stats_rx_bytes += stream.u32Len;
+    
+    // - Write file
+    if (write_stream_file != -1) {      
+      uint32_t  write_size = stream.u32Len;
+      uint32_t  write_done = 0;
+      
+      #define MIN(a,b) (((a)<(b))?(a):(b))
+      while (write_size) {
+        uint32_t chunk_size = MIN(write_size, write_buffer_capacity - write_buffer_size);
+        
+        memcpy(write_buffer + write_buffer_size, stream.pu8Addr + write_done,  chunk_size);
+        write_buffer_size += chunk_size;
+        
+        // - Flush buffer
+        if (write_buffer_size == write_buffer_capacity) {
+          write(write_stream_file, write_buffer, write_buffer_size);
+          write_buffer_size = 0;
+        }
+          
+        write_size -= chunk_size;
+        write_done += chunk_size;
+      }
+    }
+
+    
     // - Send frame into decoder
     { int ret = HI_MPI_VDEC_SendStream(vdec_channel_id, &stream, 0);
       if (ret != HI_SUCCESS) {
-        printf("WARN: Unable to send data into VDEC\n");
+        printf("WARN: Unable to send data into VDEC = 0x%x\n", ret);
       }
     }
     
+  
+
+    
     // - Query decoder status
-    { VDEC_CHN_STAT_S stats;
+    /*{ VDEC_CHN_STAT_S stats;
       memset(&stats, 0x00, sizeof(stats));
       int ret = HI_MPI_VDEC_Query(vdec_channel_id, &stats);
       if (ret != HI_SUCCESS) {
-        printf("WARN: Unable to query statistics\n");
+        printf("WARN: Unable to query statistics = 0x%x\n", ret);
         
       } else {
         printf("> R: %d, RxFrames: %d, DecFrames: %d | BufSize: %d, BufPic: %d | E_SUP: %d, E_FMT: %d, E_PAK: %d, E_PBUF: %d, E_PSIZE: %d, E_PRTCL: %d, E_REF: %d\n",
@@ -640,7 +692,7 @@ int main(int argc, const char* argv[]) {
           stats.stVdecDecErr.s32RefErrSet
         );
       }
-    }
+    }*/
     
     /*{ VIDEO_FRAME_INFO_S frame;
       int ret = HI_MPI_VDEC_GetImage(vdec_channel_id, &frame, 0);
@@ -648,6 +700,7 @@ int main(int argc, const char* argv[]) {
         
         printf("> FRAME: %d x %d\n", frame.stVFrame.u32Width, frame.stVFrame.u32Height);
         
+        HI_MPI_VO_SendFrame(vo_layer_id, vo_channel_id, &frame, 0);
         
         // - Release frame
         HI_MPI_VDEC_ReleaseImage(vdec_channel_id, &frame);
@@ -658,4 +711,99 @@ int main(int argc, const char* argv[]) {
   }
 
   return 0;
+}
+
+extern const char font_14_23[];
+extern uint32_t frames_lost;
+
+float rx_rate = 0;
+
+// array size is 7602
+extern const char openipc[];
+
+void* __OSD_THREAD__(void* arg) {
+  struct _fbg *fbg = fbg_fbdevInit();
+  
+  
+  //struct _fbg_img *texture = fbg_loadImage(fbg, "texture.png");
+  
+  
+  struct _fbg_img *bb_font_img = fbg_loadPNGFromMemory(fbg, font_14_23, 26197);
+  struct _fbg_font *bbfont = fbg_createFont(fbg, bb_font_img, 14, 23, 33);
+
+
+  struct _fbg_img* openipc_img = fbg_loadPNGFromMemory(fbg, openipc, 11761);
+
+  while (1) {
+    fbg_clear(fbg, 0);
+    fbg_draw(fbg);
+    
+    uint32_t x_center = fbg->width / 2;
+    
+    
+    for (int i = 0; i < 4; i++) {
+      fbg_line(fbg, x_center - 180, fbg->height / 2 + i - 2, x_center - 60, fbg->height / 2 + i - 2, 255,255,255);
+      fbg_line(fbg, x_center + 60, fbg->height / 2 + i - 2, x_center + 180, fbg->height / 2 + i - 2, 255,255,255);
+    }
+    
+    for (int i = 0; i < 25; i++) {
+      
+      uint32_t width = (i == 12) ? 10 : 0;
+      
+      fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120 + i * 10,       x_center - 220, fbg->height / 2 - 120 + i * 10, 255,255,255);
+      fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120  + i * 10 + 1,  x_center - 220, fbg->height / 2 - 120 + i * 10 + 1, 255,255,255);
+
+      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10,       x_center + 240 + width, fbg->height / 2 - 120 + i * 10, 255,255,255);
+      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120  + i * 10 + 1,  x_center + 240 + width, fbg->height / 2 - 120 + i * 10 + 1, 255,255,255);
+    }
+    
+    fbg_write(fbg, "SPD", x_center - (16 * 3 + 20) - 240, fbg->height / 2 - 8);
+    fbg_write(fbg, "ALT", x_center + ( 20) + 240,         fbg->height / 2 - 8);
+    
+    //fbg_imageClip(fbg, openipc, x_center - 80, 700, 0, 0, 160, 46);
+    fbg_image(fbg, openipc_img, 1280 - 160 - 80, 40);
+    //fbg_write(fbg, "OpenIPC FPV", 60, 40);
+   
+    
+    
+
+    // - Print rate stats
+    struct timespec current_timestamp;
+    if (!clock_gettime(CLOCK_MONOTONIC_COARSE, &current_timestamp)) {
+      double interval = getTimeInterval(&current_timestamp, &last_timestamp);
+      if (interval > 1) {
+        last_timestamp = current_timestamp;
+        rx_rate = (float)stats_rx_bytes / 1024.0f * 8; 
+        stats_rx_bytes = 0;
+        
+        
+      }
+    }
+  
+    char hud_frames_rx[32];
+    memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
+    sprintf(hud_frames_rx, "RX Packets %d", frames_received);
+    fbg_write(fbg, hud_frames_rx, 60, 660);
+    
+    
+    
+
+    memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
+    sprintf(hud_frames_rx, "Rate %.02f Kbit/s", rx_rate);
+    
+    
+    
+    fbg_write(fbg, hud_frames_rx, x_center - strlen(hud_frames_rx) / 2 * 16, 40);
+    
+    float percent = rx_rate / (1024 * 10);
+    if (percent > 1) percent = 1;
+    
+    uint32_t width =  (strlen(hud_frames_rx) * 16) * percent;
+    
+    fbg_rect(fbg, x_center - strlen(hud_frames_rx) / 2 * 16, 64, width, 8,  255, 255, 255);
+    
+    
+    fbg_flip(fbg);
+    usleep(1);
+  }
 }

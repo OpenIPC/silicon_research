@@ -1,17 +1,77 @@
 #include "main.h"
 
-int VO_init(VO_DEV device_id, VO_INTF_TYPE_E interface_type, VO_INTF_SYNC_E interface_mode, uint32_t background_color) {
+int VO_init(VO_DEV device_id, VO_INTF_TYPE_E interface_type, VO_INTF_SYNC_E interface_mode, uint32_t framerate, uint32_t background_color) {
   VO_PUB_ATTR_S vo_config;
   memset(&vo_config, 0x00, sizeof(VO_PUB_ATTR_S));
   vo_config.u32BgColor = background_color;
   vo_config.enIntfType = interface_type;  //VO_INTF_VGA | VO_INTF_HDMI;
   vo_config.enIntfSync = interface_mode;  //VO_OUTPUT_1080P60;
 
+  //vo_config.enIntfSync = VO_OUTPUT_USER;
+  /*
+  vo_config.stSyncInfo.bSynm    = 0;        // sync mode(0:timing,as BT.656; 1:signal,as LCD) 
+  vo_config.stSyncInfo.bIop     = 1;        // interlaced or progressive display(0:i; 1:p) 
+  vo_config.stSyncInfo.u8Intfb  = 0;        // interlace bit width while output 
+  
+  vo_config.stSyncInfo.u16Vact  = 2560;     // vertical active area 
+  vo_config.stSyncInfo.u16Vbb   = 4;        // vertical back blank porch 
+  vo_config.stSyncInfo.u16Vfb   = 12;       // vertical front blank porch 
+  
+  vo_config.stSyncInfo.u16Hact  = 1440;     // herizontal active area 
+  vo_config.stSyncInfo.u16Hbb   = 80;       // herizontal back blank porch 
+  vo_config.stSyncInfo.u16Hfb   = 70;       // herizontal front blank porch 
+  vo_config.stSyncInfo.u16Hmid  = 0;        // bottom herizontal active area 
+  
+  vo_config.stSyncInfo.u16Bvact = 0;        // bottom vertical active area 
+  vo_config.stSyncInfo.u16Bvbb  = 0 ;       // bottom vertical back blank porch 
+  vo_config.stSyncInfo.u16Bvfb  = 0;        // bottom vertical front blank porch 
+
+  vo_config.stSyncInfo.u16Hpw   = 35;       // horizontal pulse width 
+  vo_config.stSyncInfo.u16Vpw   = 2;        // vertical pulse width 
+
+  vo_config.stSyncInfo.bIdv     = 0;        // inverse data valid of output 
+  vo_config.stSyncInfo.bIhs     = 0;        // inverse horizontal synch signal 
+  vo_config.stSyncInfo.bIvs     = 0;        // inverse vertical synch signal 
+  */
+
+/*
+  vo_config.stSyncInfo.bSynm    = 0;        // sync mode(0:timing,as BT.656; 1:signal,as LCD) 
+  vo_config.stSyncInfo.bIop     = 1;        // interlaced or progressive display(0:i; 1:p) 
+  vo_config.stSyncInfo.u8Intfb  = 0;        // interlace bit width while output 
+  
+  vo_config.stSyncInfo.u16Vact  = 2560;     // vertical active area 
+  vo_config.stSyncInfo.u16Vbb   = 77;        // vertical back blank porch 
+  vo_config.stSyncInfo.u16Vfb   = 8;       // vertical front blank porch 
+  
+  vo_config.stSyncInfo.u16Hact  = 1440;     // herizontal active area 
+  vo_config.stSyncInfo.u16Hbb   = 80;       // herizontal back blank porch 
+  vo_config.stSyncInfo.u16Hfb   = 80;       // herizontal front blank porch 
+  vo_config.stSyncInfo.u16Hmid  = 0;        // bottom herizontal active area 
+  
+  vo_config.stSyncInfo.u16Bvact = 0;        // bottom vertical active area 
+  vo_config.stSyncInfo.u16Bvbb  = 0 ;       // bottom vertical back blank porch 
+  vo_config.stSyncInfo.u16Bvfb  = 0;        // bottom vertical front blank porch 
+
+  vo_config.stSyncInfo.u16Hpw   = 32;       // horizontal pulse width 
+  vo_config.stSyncInfo.u16Vpw   = 5;        // vertical pulse width 
+
+  vo_config.stSyncInfo.bIdv     = 0;        // inverse data valid of output 
+  vo_config.stSyncInfo.bIhs     = 0;        // inverse horizontal synch signal 
+  vo_config.stSyncInfo.bIvs     = 0;        // inverse vertical synch signal 
+*/
   // - Configure device
   int ret = HI_MPI_VO_SetPubAttr(device_id, &vo_config);
   if (ret != HI_SUCCESS) {
+    printf("ERROR: Unable to set VO timing = 0x%x\n");
     return ret;
   }
+
+  /*{ ret = HI_MPI_VO_SetDevFrameRate(device_id, framerate);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to set VO framerate = 0x%x\n");
+      return ret;
+    }
+  }*/
   
   // - Enable device
   return HI_MPI_VO_Enable(device_id);
@@ -41,7 +101,7 @@ HI_HDMI_VIDEO_FMT_E VO_interfaceModeToHDMIMode(VO_INTF_SYNC_E enIntfSync) {
     case VO_OUTPUT_1600x1200_60:  return HI_HDMI_VIDEO_FMT_VESA_1600X1200_60;
     
     case VO_OUTPUT_2560x1440_30:  return HI_HDMI_VIDEO_FMT_2560x1440_30;
-    //case VO_OUTPUT_2560x1440_60:  return HI_HDMI_VIDEO_FMT_2560x1440_60;
+    case VO_OUTPUT_2560x1440_60:  return HI_HDMI_VIDEO_FMT_2560x1440_60;
     
     case VO_OUTPUT_2560x1600_60:  return HI_HDMI_VIDEO_FMT_2560x1600_60;
     case VO_OUTPUT_3840x2160_30:  return HI_HDMI_VIDEO_FMT_3840X2160P_30;
@@ -102,6 +162,7 @@ int VO_HDMI_init(HI_HDMI_ID_E device_id, VO_INTF_SYNC_E interface_mode) {
   hdmi_config.u83DParam         = 9;
   
   hdmi_config.enDefaultMode     = HI_HDMI_FORCE_HDMI;
+  
   
   ret = HI_MPI_HDMI_SetAttr(device_id, &hdmi_config);
   if (ret != HI_SUCCESS) {

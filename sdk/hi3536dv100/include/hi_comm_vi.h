@@ -1,6 +1,6 @@
 /******************************************************************************
 
-Copyright (C), 2004-2020, Hisilicon Tech. Co., Ltd.
+Copyright (C), 2004-2018, Hisilicon Tech. Co., Ltd.
 
 ******************************************************************************
 File Name     : hi_comm_vi.h
@@ -39,19 +39,6 @@ extern "C"
 
 #define VI_INVALID_FRMRATE  (-1UL)
 #define VIU_MAX_USER_FRAME_DEPTH 8
-
-typedef enum hiEN_VIU_ERR_CODE_E
-{
-    ERR_VI_FAILED_NOTENABLE = 64,   /* device or channel not enable*/
-    ERR_VI_FAILED_NOTDISABLE,       /* device not disable*/
-    ERR_VI_FAILED_CHNOTDISABLE,     /* channel not disable*/
-    ERR_VI_CFG_TIMEOUT,             /* config timeout*/
-    ERR_VI_NORM_UNMATCH,            /* video norm of ADC and VIU is unmatch*/
-    ERR_VI_INVALID_WAYID,           /* invlalid way ID     */
-    ERR_VI_INVALID_PHYCHNID,        /* invalid phychn id*/
-    ERR_VI_FAILED_NOTBIND,          /* device or channel not bind */
-    ERR_VI_FAILED_BINDED,           /* device or channel not unbind */
-} EN_VIU_ERR_CODE_E;
 
 #define HI_ERR_VI_INVALID_PARA          HI_DEF_ERR(HI_ID_VIU, EN_ERR_LEVEL_ERROR, EN_ERR_ILLEGAL_PARAM)
 #define HI_ERR_VI_INVALID_DEVID         HI_DEF_ERR(HI_ID_VIU, EN_ERR_LEVEL_ERROR, EN_ERR_INVALID_DEVID)
@@ -105,7 +92,7 @@ typedef enum hiVI_WORK_MODE_E
     VI_WORK_MODE_1Multiplex = 0,    /* 1 Multiplex mode */
     VI_WORK_MODE_2Multiplex,        /* 2 Multiplex mode */
     VI_WORK_MODE_4Multiplex,        /* 4 Multiplex mode */
-    
+
 
     VI_WORK_MODE_BUTT
 } VI_WORK_MODE_E;
@@ -282,7 +269,7 @@ typedef enum hiVI_VBI_MODE_E
 {
     VI_VBI_MODE_8BIT  = 0,
     VI_VBI_MODE_6BIT ,
-    
+
     VI_VBI_MODE_BUTT
 } VI_VBI_MODE_E;
 
@@ -312,7 +299,7 @@ typedef struct hiVI_DEV_ATTR_EX_S
     VI_CLK_EDGE_E       enClkEdge;          /* Clock edge mode (sampling on the rising or falling edge) */
 
     HI_U32              au32CompMask[2];    /* Component mask */
-    
+
     HI_S32              s32AdChnId[4];      /* AD channel ID. Typically, the default value -1 is recommended */
 
     VI_DATA_YUV_SEQ_E   enDataSeq;          /* Input data sequence (only the YUV format is supported) */
@@ -333,7 +320,7 @@ typedef struct hiVI_DEV_ATTR_S
     VI_WORK_MODE_E      enWorkMode;         /*1-, 2-, or 4-channel multiplexed work mode */
 
     HI_U32              au32CompMask[2];    /* Component mask */
-    
+
 	VI_CLK_EDGE_E       enClkEdge;          /* Clock edge mode (sampling on the rising or falling,double edge) */
     HI_S32              s32AdChnId[4];      /* AD channel ID. Typically, the default value -1 is recommended */
 
@@ -353,12 +340,6 @@ typedef struct hiVI_CHN_BIND_ATTR_S
     VI_DEV ViDev;
     VI_WAY ViWay;
 } VI_CHN_BIND_ATTR_S;
-
-/* the attributes of a VI way */
-typedef struct hiVI_WAY_ATTR_S
-{
-   HI_S32 s32AdChnId;
-} VI_WAY_ATTR_S;
 
 /* captrue selection of video input */
 typedef enum hiVI_CAPSEL_E
@@ -388,7 +369,7 @@ typedef struct hiVI_CHN_ATTR_S
     VI_SCAN_MODE_E  enScanMode;         /* Input scanning mode (progressive or interlaced) */
     PIXEL_FORMAT_E  enPixFormat;        /* Pixel storage format. Only the formats semi-planar420 and semi-planar422 are supported */
     HI_BOOL         bMirror;            /* Whether to mirror */
-    HI_BOOL         bFlip;              /* Whether to flip */      
+    HI_BOOL         bFlip;              /* Whether to flip */
     HI_S32          s32SrcFrameRate;    /* Source frame rate. The value -1 indicates that the frame rate is not controlled */
     HI_S32          s32DstFrameRate;    /* Target frame rate. The value -1 indicates that the frame rate is not controlled */
 } VI_CHN_ATTR_S;
@@ -428,21 +409,6 @@ typedef struct hiVI_USERPIC_ATTR_S
     }unUsrPic;
 } VI_USERPIC_ATTR_S;
 
-typedef struct hiVI_USR_GET_FRM_TIMEOUT_S
-{
-    VIDEO_FRAME_INFO_S  stVFrame;
-    HI_S32              s32MilliSec;
-} VI_USR_GET_FRM_TIMEOUT_S;
-
-typedef struct hiVI_EXT_CHN_ATTR_S
-{
-    VI_CHN    s32BindChn;		        /* The channel num which extend channel will bind to*/
-    SIZE_S    stDestSize;		        /* Target size*/
-
-    HI_S32    s32SrcFrameRate;          /* Source frame rate. The value -1 indicates that the frame rate is not controlled */
-    HI_S32    s32DstFrameRate;             /* Target frame rate. The value -1 indicates that the frame rate is not controlled */
-    PIXEL_FORMAT_E  enPixFormat;        /* Pixel storage format. Only the formats semi-planar420 and semi-planar422 are supported */
-}VI_EXT_CHN_ATTR_S;
 
 typedef struct hiVI_CHN_LUM_S
 {
@@ -450,7 +416,7 @@ typedef struct hiVI_CHN_LUM_S
     HI_U64 u64Pts;                      /* PTS of current frame */
 } VI_CHN_LUM_S;
 
-typedef enum hiVI_SKIP_MODE_E		
+typedef enum hiVI_SKIP_MODE_E
 {
     VI_SKIP_NONE = 0,  /*default mode, no skip*/
 	VI_SKIP_YES,       /*default skip mode,1/2 skip or 3/4 skip*/

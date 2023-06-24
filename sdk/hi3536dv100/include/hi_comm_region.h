@@ -82,7 +82,8 @@ typedef struct hiOVERLAY_ATTR_S
     HI_U32 u32BgColor;
 
     /* region size */
-    SIZE_S stSize;
+    SIZE_S stSize;	
+	HI_U32 u32CanvasNum;
 }OVERLAY_ATTR_S;
 
 typedef struct hiOVERLAY_CHN_ATTR_S
@@ -179,6 +180,7 @@ typedef struct hiOVERLAYEX_ATTR_S
 
     /* region size */
     SIZE_S stSize;
+	HI_U32 u32CanvasNum;
 }OVERLAYEX_ATTR_S;
 
 typedef struct hiOVERLAYEX_CHN_ATTR_S

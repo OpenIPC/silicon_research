@@ -103,7 +103,7 @@ typedef struct hiVDEC_STREAM_S
 typedef struct hiVDEC_STREAM_EX_S
 {
     VDEC_STREAM_S stStream;
-	HI_BOOL bDisplay;           /* whether no display,0:display  1:no display */
+	HI_BOOL bDisplay;           /* whether display,0:no display  1:display */
 }VDEC_STREAM_EX_S;
 
 typedef struct hiVDEC_USERDATA_S{
@@ -137,6 +137,9 @@ typedef struct hiVDEC_CHN_STAT_S
 	HI_U32  u32RecvStreamFrames;         /* how many frames of stream has been received. valid when send by frame. */
 	HI_U32  u32DecodeStreamFrames;       /* how many frames of stream has been decoded. valid when send by frame. */
 	VDEC_DECODE_ERROR_S stVdecDecErr;    /* information about decode error */	
+	HI_U64  u64DecDiff;                  /* Time difference from the time a frame is sent to thestream buffer to the time the frame is decoded by the decoder. The unit is us. */
+	HI_U64  u64MaxDecDiff;               /* Maximun time difference from the time a frame is sent to thestream buffer to the time the frame is decoded by the decoder. The unit is us. */
+	HI_U64  u64CurPicPts;                /*PTS of the latest decoded picture*/
 }VDEC_CHN_STAT_S;
 
 /*

@@ -7,7 +7,7 @@
   Version       : Initial Draft
   Author        : Hisilicon multimedia software group
   Created       : 2013/05/08
-  Description   : 
+  Description   :
   History       :
   1.Date        : 2013/05/08
     Author      : d00224772
@@ -168,7 +168,7 @@ HI_S32 HI_MPI_VO_DisableCascade(HI_VOID);
 /* VGA setting */
 
 HI_S32 HI_MPI_VO_GetVgaParam(VO_DEV VoDev, VO_VGA_PARAM_S *pstVgaParam);
-HI_S32 HI_MPI_VO_SetVgaParam(VO_DEV VoDev, VO_VGA_PARAM_S *pstVgaParam);
+HI_S32 HI_MPI_VO_SetVgaParam(VO_DEV VoDev, const VO_VGA_PARAM_S *pstVgaParam);
 
 HI_S32 HI_MPI_VO_SetDevFrameRate(VO_DEV VoDev, HI_U32 u32FrameRate);
 HI_S32 HI_MPI_VO_GetDevFrameRate(VO_DEV VoDev, HI_U32 *pu32FrameRate);

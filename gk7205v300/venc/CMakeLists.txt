@@ -9,6 +9,12 @@ add_executable(${NAME}
   compat.c
   config.c
   common.c
+  
+  sensor/imx307_2l_cmos.c
+  sensor/imx307_2l_sensor_ctl.c
+  
+  #sensor/imx307_cmos.c
+  #sensor/imx307_sensor_ctl.c
 )
 
 target_include_directories(${NAME}
@@ -29,7 +35,8 @@ target_link_libraries(${NAME}
   gk_ae
   gk_awb
   
-  sns_imx335
+  #sns_imx335
+  #sns_imx307
   
   isp
   ae
@@ -40,8 +47,11 @@ target_link_libraries(${NAME}
   dnvqe
   drc
   ir_auto
-  
   voice_engine
+  
+  pthread
+  dl
+  m
 )
 
 target_link_directories(${NAME}

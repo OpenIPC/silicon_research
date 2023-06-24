@@ -114,6 +114,86 @@ typedef enum hiEN_ERR_CODE_E
                               ** must be greater than it                      */
 }EN_ERR_CODE_E;
 
+typedef enum hiEN_VOU_ERR_CODE_E
+{
+    EN_ERR_VO_DEV_NOT_CONFIG	  = 0x40,
+    EN_ERR_VO_DEV_NOT_ENABLE      = 0x41,
+    EN_ERR_VO_DEV_HAS_ENABLED     = 0x42,
+    EN_ERR_VO_DEV_HAS_BINDED      = 0x43,
+    EN_ERR_VO_DEV_NOT_BINDED      = 0x44,
+
+    ERR_VO_NOT_ENABLE             = 0x45,
+    ERR_VO_NOT_DISABLE            = 0x46,
+    ERR_VO_NOT_CONFIG             = 0x47,
+
+    ERR_VO_CHN_NOT_DISABLE        = 0x48,
+    ERR_VO_CHN_NOT_ENABLE         = 0x49,
+    ERR_VO_CHN_NOT_CONFIG         = 0x4a,
+    ERR_VO_CHN_NOT_ALLOC          = 0x4b,
+
+    ERR_VO_CCD_INVALID_PAT        = 0x4c,
+    ERR_VO_CCD_INVALID_POS        = 0x4d,
+
+    ERR_VO_WAIT_TIMEOUT           = 0x4e,
+    ERR_VO_INVALID_VFRAME         = 0x4f,
+    ERR_VO_INVALID_RECT_PARA      = 0x50,
+    ERR_VO_SETBEGIN_ALREADY       = 0x51,
+    ERR_VO_SETBEGIN_NOTYET        = 0x52,
+    ERR_VO_SETEND_ALREADY         = 0x53,
+    ERR_VO_SETEND_NOTYET          = 0x54,
+
+    ERR_VO_GRP_INVALID_ID         = 0x55,
+    ERR_VO_GRP_NOT_CREATE         = 0x56,
+    ERR_VO_GRP_HAS_CREATED        = 0x57,
+    ERR_VO_GRP_NOT_DESTROY        = 0x58,
+    ERR_VO_GRP_CHN_FULL           = 0x59,
+    ERR_VO_GRP_CHN_EMPTY          = 0x5a,
+    ERR_VO_GRP_CHN_NOT_EMPTY      = 0x5b,
+    ERR_VO_GRP_INVALID_SYN_MODE   = 0x5c,
+    ERR_VO_GRP_INVALID_BASE_PTS   = 0x5d,
+    ERR_VO_GRP_NOT_START          = 0x5e,
+    ERR_VO_GRP_NOT_STOP           = 0x5f,
+    ERR_VO_GRP_INVALID_FRMRATE    = 0x60,
+    ERR_VO_GRP_CHN_HAS_REG        = 0x61,
+    ERR_VO_GRP_CHN_NOT_REG        = 0x62,
+    ERR_VO_GRP_CHN_NOT_UNREG      = 0x63,
+    ERR_VO_GRP_BASE_NOT_CFG       = 0x64,
+
+    ERR_GFX_NOT_DISABLE           = 0x65,
+    ERR_GFX_NOT_BIND              = 0x66,
+    ERR_GFX_NOT_UNBIND            = 0x67,
+    ERR_GFX_INVALID_ID            = 0x68,
+
+    ERR_VO_WBC_NOT_DISABLE        = 0x69,
+    ERR_VO_WBC_NOT_CONFIG         = 0x6a,
+
+    ERR_VO_CHN_AREA_OVERLAP       = 0x6b,
+
+    EN_ERR_INVALID_WBCID          = 0x6c,
+    EN_ERR_INVALID_LAYERID        = 0x6d,
+    EN_ERR_VO_VIDEO_HAS_BINDED    = 0x6e,
+    EN_ERR_VO_VIDEO_NOT_BINDED    = 0x6f,
+    ERR_VO_WBC_HAS_BIND           = 0x70,
+    ERR_VO_WBC_HAS_CONFIG         = 0x71, 
+    ERR_VO_WBC_NOT_BIND           = 0x72,
+
+    /* new added */
+    ERR_VO_BUTT
+
+}EN_VOU_ERR_CODE_E;
+
+typedef enum hiEN_VIU_ERR_CODE_E
+{
+    ERR_VI_FAILED_NOTENABLE = 64,   /* device or channel not enable*/
+    ERR_VI_FAILED_NOTDISABLE,       /* device not disable*/
+    ERR_VI_FAILED_CHNOTDISABLE,     /* channel not disable*/
+    ERR_VI_CFG_TIMEOUT,             /* config timeout*/
+    ERR_VI_NORM_UNMATCH,            /* video norm of ADC and VIU is unmatch*/
+    ERR_VI_INVALID_WAYID,           /* invlalid way ID     */
+    ERR_VI_INVALID_PHYCHNID,        /* invalid phychn id*/
+    ERR_VI_FAILED_NOTBIND,          /* device or channel not bind */
+    ERR_VI_FAILED_BINDED,           /* device or channel not unbind */
+} EN_VIU_ERR_CODE_E;
 
 /* 
 ** following is an example for defining error code of VDA module

@@ -1,4 +1,5 @@
 #include "main.h"
+#include <time.h>
 
 // - Configuration profiles
 extern combo_dev_attr_t MIPI_4lane_CHN0_SENSOR_IMX335_10BIT_4M_WDR2TO1_ATTR;
@@ -6,6 +7,61 @@ extern VI_DEV_ATTR_S    DEV_ATTR_IMX335_4M_BASE;
 extern VI_PIPE_ATTR_S   PIPE_ATTR_RAW10_420_3DNR_RFR;
 extern VI_CHN_ATTR_S    CHN_ATTR_420_SDR8_LINEAR;
 extern ISP_PUB_ATTR_S   ISP_PROFILE_IMX335_MIPI_4M_30FPS;
+
+
+extern combo_dev_attr_t MIPI_4lane_CHN0_SENSOR_IMX307_12BIT_2M_NOWDR_ATTR;
+extern combo_dev_attr_t MIPI_4lane_CHN0_SENSOR_IMX307_12BIT_2M_WDR2to1_ATTR;
+extern VI_DEV_ATTR_S    DEV_ATTR_IMX307_2M_BASE;
+extern VI_PIPE_ATTR_S   PIPE_ATTR_RAW12_420_3DNR_RFR;
+extern ISP_PUB_ATTR_S   ISP_PROFILE_IMX307_MIPI_2M_30FPS;
+extern ISP_PUB_ATTR_S   ISP_PROFILE_IMX307_MIPI_2M_30FPS_WDR2TO1_LINE;
+
+uint8_t*  tx_buffer;
+uint32_t  tx_buffer_used = 0;
+
+
+void printHelp() {
+  printf(
+    "\n"
+    "\t\tOpenIPC FPV Streamer for GK7205 + IMX307\n"
+    "\n"
+    "  Usage:\n"
+    "    venc [Arguments]\n"
+    "\n"
+    "  Arguments:\n"
+    "    -v [GkVer]     - Goke CPU version                (Default: 200)\n"
+    "       200         - v200, 2-lane MIPI\n"
+    "       300         - v300, 4-lane MIPI\n"
+    "\n"
+    "    -h [IP]        - Sink IP address                 (Default: 127.0.0.1)\n"
+    "    -p [Port]      - Sink port                       (Default: 5000)\n"
+    "    -r [Rate]      - Max video rate in Kbit/sec.     (Default: 8192)\n"
+    "    -n [Size]      - Max payload frame size in bytes (Default: 1446)\n"
+    "    -m [Mode]      - Streaming mode                  (Default: compact)\n"
+    "       compact       - Compact UDP stream \n"
+    "       rtp           - RTP stream\n"
+    "\n"
+    "    -f [FPS]       - Encoder FPS (25,30,50,60)       (Default: 60)\n"
+    "    -c [Codec]     - Encoder mode                    (Default: 264avbr)\n"
+    "       264avbr       - h264 AVBR\n"
+    "       264vbr        - h264 VBR\n"
+    "       264cbr        - h264 CBR\n"
+    "\n"
+    "    --no-slices    - Disable slices\n"
+    "    --low-delay    - Enable low delay mode\n"
+    "    --roi          - Enable ROI\n"
+    "    --roi-qp [QP]  - ROI quality points              (Default: 20)\n"
+    "\n"
+    "  Notes:\n"
+    "    1. Dont forget 'ln -s /dev/venc /dev/ven' before start!\n"
+    "\n"
+  );
+}
+
+uint8_t   stream_mode       = 0;
+uint16_t  goke_version      = 200;
+uint64_t  current_pts       = 0;
+uint32_t  sensor_framerate  = 60;
 
 /**
  * @brief Example video capture (h264)
@@ -17,15 +73,26 @@ extern ISP_PUB_ATTR_S   ISP_PROFILE_IMX335_MIPI_4M_30FPS;
  * @param argv
  */
 int main(int argc, const char* argv[]) {
+  if (argc == 2 && !strcmp(argv[1], "help")) {
+    printHelp();
+    return 1;
+  }
+  
   // --------------------------------------------------------------
   // --- Resources
   // --------------------------------------------------------------
   uint32_t  mipi_device_id    = 0;
   uint32_t  mipi_sensor_id    = 0;
   
-  uint32_t  sensor_width      = 2592;
+  /*uint32_t  sensor_width      = 2592;
   uint32_t  sensor_height     = 1520;
-  uint32_t  sensor_framerate  = 30;
+  uint32_t  sensor_framerate  = 30;*/
+  
+  uint32_t  sensor_width      = 1280;
+  uint32_t  sensor_height     = 720;
+  
+  
+  uint32_t  isp_framerate     = 45;
   
   uint32_t  image_width       = 1280; // - Encoded image width
   uint32_t  image_height      = 720;  // - Encoded image height
@@ -34,32 +101,152 @@ int main(int argc, const char* argv[]) {
   VI_PIPE   vi_pipe_id        = 0;
   VI_CHN    vi_channel_id     = 0;
   
-  uint32_t  vi_vpss_mode      = VI_OFFLINE_VPSS_ONLINE;
+  uint32_t  vi_vpss_mode      = VI_ONLINE_VPSS_ONLINE;//  VI_OFFLINE_VPSS_ONLINE;
   
   VPSS_GRP  vpss_group_id     = 0;
   VPSS_CHN  vpss_first_ch_id  = 0;  // - Channel for primary stream
   VPSS_CHN  vpss_second_ch_id = 1;  // - Channel for secondary stream
   
-  uint32_t  venc_gop_size     = 30;
-  uint32_t  venc_max_rate     = 8192;
+  uint32_t  venc_gop_size     = sensor_framerate / 10;
+  uint32_t  venc_max_rate     = 1024 * 8;
 
   VENC_CHN  venc_first_ch_id  = 0;
   VENC_CHN  venc_second_ch_id = 1;
-  HI_BOOL   venc_by_frame     = HI_TRUE;
+  HI_BOOL   venc_by_frame     = HI_FALSE;
   
-  uint32_t  udp_sink_ip       = inet_addr("10.42.0.233");
+  uint32_t  udp_sink_ip       = inet_addr("127.0.0.1");
   uint16_t  udp_sink_port     = 5000;
+  uint16_t  max_frame_size    = 1446;
+  
+  int       enable_slices     = 1;
+  int       enable_lowdelay   = 0;
+  int       enable_roi        = 0;
+  
+  uint16_t  roi_qp            = 20;
+  
+  PAYLOAD_TYPE_E  rc_codec    = PT_H264;
+  int             rc_mode     = VENC_RC_MODE_H264AVBR;
+  
+  // --------------------------------------------------------------
+  // --- Load console arguments
+  // --------------------------------------------------------------
+  __BeginParseConsoleArguments__(printHelp)
+    __OnArgument("-h") {
+      udp_sink_ip = inet_addr(__ArgValue);
+      continue;
+    }
+    __OnArgument("-p") {
+      udp_sink_port = atoi(__ArgValue);
+      continue;
+    }
+    __OnArgument("-r") {
+      venc_max_rate = atoi(__ArgValue);
+      continue;
+    }
+    __OnArgument("-n") {
+      max_frame_size = atoi(__ArgValue);
+      continue;
+    }
+    __OnArgument("-m") {
+      const char* value = __ArgValue;
+      if (!strcmp(value, "compact")) {
+        stream_mode = 0;
+      } else if (!strcmp(value, "rtp")) {
+        stream_mode = 1;
+      } else {
+        printf("> ERROR: Unknows streaming mode\n");
+        exit(1);
+      }
+      continue;
+    }
+    __OnArgument("-v") {
+      goke_version = atoi(__ArgValue);
+      continue;
+    }
+    __OnArgument("--no-slices") {
+      enable_slices = 0;
+      continue;
+    }
+    __OnArgument("--low-delay") {
+      enable_lowdelay = 1;
+      continue;
+    }
+    __OnArgument("-c") {
+      const char* value = __ArgValue;
+      if        (!strcmp(value, "264avbr")) {
+        rc_codec  = PT_H264;
+        rc_mode   = VENC_RC_MODE_H264AVBR;
+      } else if (!strcmp(value, "264vbr")) {
+        rc_codec  = PT_H264;
+        rc_mode   = VENC_RC_MODE_H264VBR;
+      } else if (!strcmp(value, "264cbr")) {
+        rc_codec  = PT_H264;
+        rc_mode   = VENC_RC_MODE_H264CBR;
+      } else {
+        printf("> ERROR: Unsuported codec [%s]\n", value);
+        exit(1);
+      }
+
+      continue;
+    }
+    __OnArgument("-f") {
+      sensor_framerate = atoi(__ArgValue);
+      continue;
+    }
+    __OnArgument("--roi") {
+      enable_roi = 1;
+      continue;
+    }
+    __OnArgument("--roi-qp") {
+      roi_qp = atoi(__ArgValue);
+      continue;
+    }
+  __EndParseConsoleArguments__
+  
+  
+  // - Normalize sensor framerate
+  if (sensor_framerate > 60) {
+    sensor_framerate = 60;
+  }
+  
+  // - Normalize GOP
+  venc_gop_size  = sensor_framerate / 10;
+  
+  
+  
   
   // --------------------------------------------------------------
   // --- Board configuration
   // --------------------------------------------------------------
-  combo_dev_attr_t* mipi_profile        = &MIPI_4lane_CHN0_SENSOR_IMX335_10BIT_4M_WDR2TO1_ATTR;
+  /*combo_dev_attr_t* mipi_profile        = &MIPI_4lane_CHN0_SENSOR_IMX335_10BIT_4M_WDR2TO1_ATTR;
   ISP_PUB_ATTR_S*   isp_profile         = &ISP_PROFILE_IMX335_MIPI_4M_30FPS;
   ISP_SNS_OBJ_S*    sns_object          = &stSnsImx335Obj;
   VI_DEV_ATTR_S*    sns_profile         = &DEV_ATTR_IMX335_4M_BASE;
   
   VI_PIPE_ATTR_S*   vi_pipe_profile     = &PIPE_ATTR_RAW10_420_3DNR_RFR;
+  VI_CHN_ATTR_S*    vi_channel_profile  = &CHN_ATTR_420_SDR8_LINEAR;*/
+  
+  
+  /* --- v300 IMX307 --- */
+  combo_dev_attr_t* mipi_profile        = &MIPI_4lane_CHN0_SENSOR_IMX307_12BIT_2M_NOWDR_ATTR;
+  ISP_PUB_ATTR_S*   isp_profile         = &ISP_PROFILE_IMX307_MIPI_2M_30FPS;
+  ISP_SNS_OBJ_S*    sns_object          = &stSnsImx307_2l_Obj;
+  VI_DEV_ATTR_S*    sns_profile         = &DEV_ATTR_IMX307_2M_BASE;
+  
+  VI_PIPE_ATTR_S*   vi_pipe_profile     = &PIPE_ATTR_RAW10_420_3DNR_RFR;
   VI_CHN_ATTR_S*    vi_channel_profile  = &CHN_ATTR_420_SDR8_LINEAR;
+  
+  // - 4-lane for v300
+  if (goke_version == 300) {
+    printf("> Running V300\n");
+    mipi_profile->mipi_attr.lane_id[0] = 0;
+    mipi_profile->mipi_attr.lane_id[1] = 1;
+    mipi_profile->mipi_attr.lane_id[2] = 2;
+    mipi_profile->mipi_attr.lane_id[3] = 3;
+  }
+  
+  mipi_profile->mipi_attr.input_data_type  = DATA_TYPE_RAW_10BIT;
+  
   
   // - Update VI pipe / channel resolution
   vi_pipe_profile->u32MaxW              = sensor_width;
@@ -67,11 +254,53 @@ int main(int argc, const char* argv[]) {
   vi_channel_profile->stSize.u32Width   = sensor_width;
   vi_channel_profile->stSize.u32Height  = sensor_height;
   
+  
+  
+  /*off_t offset = 0x12010000;
+  size_t len = sysconf(_SC_PAGE_SIZE);
+
+  printf("len = %d\n", len);
+
+  // Truncate offset to a multiple of the page size, or mmap will fail.
+  size_t pagesize = sysconf(_SC_PAGE_SIZE);
+  off_t page_base = (offset / pagesize) * pagesize;
+  off_t page_offset = offset - page_base;
+
+  int fd = open("/dev/mem", O_SYNC);
+  uint8_t *mem = mmap64(NULL, page_offset + len, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, page_base);
+  if (mem == MAP_FAILED) {
+      perror("Can't map memory");
+      return -1;
+  }
+
+  printf("Memory ready!\n");
+
+  PERI_CRG60 =  (uint32_t*)(mem + 0x00F0);
+  //printf("> PERI_CRG60 = 0x%x\n", *PERI_CRG60);
+ // *PERI_CRG60 &= ~0x1C;
+
+
+
+  PERI_CRG61  = (uint32_t*)(mem + 0x00F4);
+  //printf("> PERI_CRG61 = 0x%x\n", *PERI_CRG61);
+  
+  */
+  
   // --------------------------------------------------------------
   // --- Reset previous configuration
   // --------------------------------------------------------------
-  HI_MPI_SYS_Exit();
-  HI_MPI_VB_Exit();
+  { int ret = HI_MPI_SYS_Exit();
+  
+    for (uint32_t i = 0; i < VB_MAX_USER; i++) {
+      ret = HI_MPI_VB_ExitModCommPool(i);
+    }
+    
+    for (uint32_t i = 0; i < VB_MAX_POOLS; i++) {
+      ret = HI_MPI_VB_DestroyPool(i);
+    }
+
+    ret = HI_MPI_VB_Exit();
+  }
   
   // --------------------------------------------------------------
   // --- Setup memory pools and initialize system
@@ -85,7 +314,7 @@ int main(int argc, const char* argv[]) {
   // - Memory pool for VI
   vb_conf.astCommPool[0].u32BlkCnt  = 2; 
   vb_conf.astCommPool[0].u64BlkSize = VI_GetRawBufferSize(sensor_width, sensor_height,
-    PIXEL_FORMAT_RGB_BAYER_12BPP, COMPRESS_MODE_NONE, DEFAULT_ALIGN
+    PIXEL_FORMAT_RGB_BAYER_12BPP , COMPRESS_MODE_NONE, DEFAULT_ALIGN
   );
   
   // - Memory pool for VENC
@@ -122,14 +351,40 @@ int main(int argc, const char* argv[]) {
   // - Set VI-VPSS mode to VI offline and VPSS online because 
   { VI_VPSS_MODE_S vi_vpss_mode_config;
     HI_MPI_SYS_GetVIVPSSMode(&vi_vpss_mode_config);
+    
     vi_vpss_mode_config.aenMode[vi_dev_id] = vi_vpss_mode;
-    HI_MPI_SYS_SetVIVPSSMode(&vi_vpss_mode_config);
+    
+    int ret = HI_MPI_SYS_SetVIVPSSMode(&vi_vpss_mode_config);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to set VI-VPSS mode\n");
+      return ret;
+    }
   }
   
   // - Set ISP statistics interval to 1 sec
   { ISP_CTRL_PARAM_S isp_control_param;
     HI_MPI_ISP_GetCtrlParam(0, &isp_control_param);
+    printf(
+      "> ISP Control:\n"
+      "  - Stat interval    : %d\n"
+      "  - Int timeout      : %d\n"
+      "  - Port int delay   : %d\n"
+      "  - PWM number       : %d\n"
+      "  - Update pos       : %d\n"
+      "  - LDCI TprFlt En   : %d\n"
+      ,
+
+      isp_control_param.u32StatIntvl,
+      isp_control_param.u32IntTimeOut,
+      isp_control_param.u32PortIntDelay,
+      isp_control_param.u32PwmNumber,
+      isp_control_param.u32UpdatePos,
+      isp_control_param.bLdciTprFltEn
+    );
+    
     isp_control_param.u32StatIntvl = 1;
+    isp_control_param.u32IntTimeOut = 1;
+    //isp_control_param.
     HI_MPI_ISP_SetCtrlParam(0, &isp_control_param);
   }
 
@@ -147,11 +402,13 @@ int main(int argc, const char* argv[]) {
   // - Activate sensor
   mipi_enable_sensor_clock(mipi_device, mipi_sensor_id, 1);
   mipi_set_sensor_reset   (mipi_device, mipi_sensor_id, 1);
-
+  
   // - Configure
   { combo_dev_attr_t mipi_config;
     memcpy(&mipi_config, mipi_profile, sizeof(combo_dev_attr_t));
     mipi_config.devno = mipi_device_id;
+    mipi_config.img_rect.width  = sensor_width;
+    mipi_config.img_rect.height = sensor_height;
     mipi_configure(mipi_device, &mipi_config);
   }
   
@@ -166,17 +423,30 @@ int main(int argc, const char* argv[]) {
   // --- Create VI
   // --------------------------------------------------------------
   // - Set VI device configuration
+  sns_profile->stSize.u32Width  = sensor_width;
+  sns_profile->stSize.u32Height = sensor_height;
+  sns_profile->stBasAttr.stSacleAttr.stBasSize.u32Width   = sensor_width;
+  sns_profile->stBasAttr.stSacleAttr.stBasSize.u32Height  = sensor_height;
+  sns_profile->stSynCfg.stTimingBlank.u32HsyncAct         = sensor_width;
+  sns_profile->stSynCfg.stTimingBlank.u32VsyncVact        = sensor_height;
+  sns_profile->stWDRAttr.u32CacheLine                     = sensor_height;
+  
   HI_MPI_VI_SetDevAttr(vi_dev_id, sns_profile);
   
   { VI_DEV_ATTR_S attr;
     HI_MPI_VI_GetDevAttr(vi_dev_id, &attr);
     //attr.stWDRAttr.enWDRMode  = WDR_MODE_2To1_LINE;
-    HI_MPI_VI_SetDevAttr(vi_dev_id, &attr);
+    //attr.stWDRAttr.enWDRMode  = WDR_MODE_NONE;
+    //HI_MPI_VI_SetDevAttr(vi_dev_id, &attr);
   }
   
   // - Enable VI device
-  HI_MPI_VI_EnableDev(vi_dev_id);
-
+  { int ret = HI_MPI_VI_EnableDev(vi_dev_id);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to enable VI device\n");
+      return ret;
+    }
+  }
 
   // --------------------------------------------------------------
   // --- Create VI pipe
@@ -185,30 +455,48 @@ int main(int argc, const char* argv[]) {
   { VI_DEV_BIND_PIPE_S pipe;
     pipe.u32Num     = 1;
     pipe.PipeId[0]  = vi_pipe_id;
-    HI_MPI_VI_SetDevBindPipe(vi_dev_id, &pipe);
+    int ret = HI_MPI_VI_SetDevBindPipe(vi_dev_id, &pipe);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to bind VI pipe\n");
+      return ret;
+    }
   }
   
   // - Configure pipe
   { VI_PIPE_ATTR_S attr;
-    HI_MPI_VI_CreatePipe(vi_pipe_id, vi_pipe_profile);
+    int ret = HI_MPI_VI_CreatePipe(vi_pipe_id, vi_pipe_profile);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to create VI pipe = 0x%x\n", ret);
+      return ret;
+    }
   }
   
   // - Start pipe
-  HI_MPI_VI_StartPipe(vi_pipe_id);
+  { int ret = HI_MPI_VI_StartPipe(vi_pipe_id);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to start VI pipe\n");
+      return ret;
+    }
+  }
 
   // --------------------------------------------------------------
   // --- Create VI channel
   // --------------------------------------------------------------
   // - Configure channel
   HI_MPI_VI_SetChnAttr(vi_pipe_id, vi_channel_id, vi_channel_profile);
-  { VI_CHN_ATTR_S attr;
+  /*{ VI_CHN_ATTR_S attr;
     HI_MPI_VI_GetChnAttr(vi_pipe_id, vi_channel_id, &attr);
     attr.enDynamicRange = DYNAMIC_RANGE_HDR10;
     HI_MPI_VI_SetChnAttr(vi_pipe_id, vi_channel_id, &attr);
-  }
+  }*/
   
   // - Start channel
-  HI_MPI_VI_EnableChn(vi_pipe_id, vi_channel_id);
+  { int ret = HI_MPI_VI_EnableChn(vi_pipe_id, vi_channel_id);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to enable VI channel\n");
+      return ret;
+    }
+  }
 
   // --------------------------------------------------------------
   // --- Initialize ISP for VI pipe
@@ -226,7 +514,7 @@ int main(int argc, const char* argv[]) {
     ALG_LIB_S awb_lib;  // - Auto white balance library
     
     ae_lib.s32Id  = 0;
-    awb_lib.s32Id = 0;
+    awb_lib.s32Id = 1;
     strncpy(ae_lib.acLibName,   HI_AE_LIB_NAME,   sizeof(HI_AE_LIB_NAME));
     strncpy(awb_lib.acLibName,  HI_AWB_LIB_NAME,  sizeof(HI_AWB_LIB_NAME));
     
@@ -235,17 +523,27 @@ int main(int argc, const char* argv[]) {
     
     // - Load (register) ISP libraries in MPI
     HI_MPI_AE_Register(vi_pipe_id,  &ae_lib);
-    HI_MPI_AWB_Register(vi_pipe_id, &awb_lib);  
+    HI_MPI_AWB_Register(vi_pipe_id, &awb_lib);
   }
   
   // - Initialize ISP memory for VI pipe
   HI_MPI_ISP_MemInit(vi_pipe_id);
 
   // - Configure ISP
+  isp_profile->f32FrameRate         = isp_framerate;
+  isp_profile->stSnsSize.u32Width   = sensor_width;
+  isp_profile->stSnsSize.u32Height  = sensor_height;
+  isp_profile->stWndRect.u32Width   = sensor_width;
+  isp_profile->stWndRect.u32Height  = sensor_height;
   HI_MPI_ISP_SetPubAttr(vi_pipe_id, isp_profile);
 
   // - Initialize ISP
-  HI_MPI_ISP_Init(vi_pipe_id);
+  { int ret = HI_MPI_ISP_Init(vi_pipe_id);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to init ISP\n");
+      return ret;
+    }
+  }
 
   // --------------------------------------------------------------
   // --- Initialize VPSS
@@ -266,7 +564,6 @@ int main(int argc, const char* argv[]) {
     HI_MPI_VPSS_CreateGrp(vpss_group_id, &attr);
   }
   
-  
   // - Create first VPSS channel #0 for large stream (primary stream)
   {
     // - Not used in this example
@@ -282,28 +579,63 @@ int main(int argc, const char* argv[]) {
     attr.enCompressMode               = COMPRESS_MODE_NONE;
     attr.enDynamicRange               = DYNAMIC_RANGE_SDR8;
     attr.enPixelFormat                = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
-    if (attr.u32Width * attr.u32Height > 2688 * 1520 ) {
-        attr.stFrameRate.s32SrcFrameRate  = 30;
+    /*if (attr.u32Width * attr.u32Height > 2688 * 1520 ) {
+        attr.stFrameRate.s32SrcFrameRate  = sensor_framerate;
         attr.stFrameRate.s32DstFrameRate  = 20;
-    } else {
+    } else {*/
         attr.stFrameRate.s32SrcFrameRate  = -1;
         attr.stFrameRate.s32DstFrameRate  = -1;
-    }
+    //}
     attr.u32Depth                     = 0;
     attr.bMirror                      = GK_FALSE;
     attr.bFlip                        = GK_FALSE;
     attr.enVideoFormat                = VIDEO_FORMAT_LINEAR;
     attr.stAspectRatio.enMode         = ASPECT_RATIO_NONE;
+
+    int ret = HI_MPI_VPSS_SetChnAttr(vpss_group_id, vpss_second_ch_id, &attr);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to set VPSS channel configuration\n");
+      return ret;
+    }
+  }
+  
+  { VPSS_LOW_DELAY_INFO_S info;
+    int ret = HI_MPI_VPSS_GetLowDelayAttr(vpss_group_id, vpss_second_ch_id, &info);
+
+    if (enable_lowdelay) {
+      info.bEnable    = HI_TRUE;
+      info.u32LineCnt = image_height / 4;
     
-    HI_MPI_VPSS_SetChnAttr(vpss_group_id, vpss_second_ch_id, &attr);
+      ret = HI_MPI_VPSS_SetLowDelayAttr(vpss_group_id, vpss_second_ch_id, &info);
+      if (ret != HI_SUCCESS) {
+        printf("ERROR: Unable to set low delay mode\n");
+        return ret;
+      }
+    }
+    
+    ret = HI_MPI_VPSS_GetLowDelayAttr(vpss_group_id, vpss_second_ch_id, &info);
+    printf("> Low delay is %s, line count = %d\n",
+      info.bEnable ? "[Enabled]" : "[Disabled]",
+      info.u32LineCnt
+    );
+  
   }
   
   // - Enable channels
-  HI_MPI_VPSS_EnableChn(vpss_group_id, vpss_second_ch_id);
+  { int ret = HI_MPI_VPSS_EnableChn(vpss_group_id, vpss_second_ch_id);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to enable VPSS channel\n");
+      return ret;
+    }
+  }
   
   // - Start group
-  HI_MPI_VPSS_StartGrp(vpss_group_id);
-  
+  { int ret = HI_MPI_VPSS_StartGrp(vpss_group_id);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to start VPSS group\n");
+      return ret;
+    }
+  }
   
   // --------------------------------------------------------------
   // - Connect VI to VPSS
@@ -332,37 +664,177 @@ int main(int argc, const char* argv[]) {
   // - Configure h264 encoder
   { VENC_CHN_ATTR_S config;
     memset(&config, 0x00, sizeof(config));
-    config.stVencAttr.enType          = PT_H264;
-    config.stVencAttr.u32MaxPicWidth  = image_width;  // - Max image size for dynamic resolution selection
-    config.stVencAttr.u32MaxPicHeight = image_height;
-    config.stVencAttr.u32PicWidth     = image_width;  // - Normal image size
+    config.stVencAttr.enType          = rc_codec;
+    config.stVencAttr.u32MaxPicWidth  = sensor_width;   // - Max image size for dynamic resolution selection
+    config.stVencAttr.u32MaxPicHeight = sensor_height;
+    config.stVencAttr.u32PicWidth     = image_width;    // - Normal image size
     config.stVencAttr.u32PicHeight    = image_height;
     config.stVencAttr.u32BufSize      = ALIGN_UP(image_width * image_height * 3 / 4, 64);  /*stream buffer size*/
     config.stVencAttr.u32Profile      = 0;              // - Baseline (0), Main(1), High(1)
     config.stVencAttr.bByFrame        = venc_by_frame;  // - TRUE for get per-frame, FALSE for get per-slice
-    
-    // - Set rate control mode
-    config.stRcAttr.enRcMode          = VENC_RC_MODE_H264AVBR;
-    config.stRcAttr.stH264AVbr.u32Gop           = venc_gop_size;
-    config.stRcAttr.stH264AVbr.u32MaxBitRate    = venc_max_rate;
-    config.stRcAttr.stH264AVbr.u32StatTime      = 1;
-    config.stRcAttr.stH264AVbr.u32SrcFrameRate  = sensor_framerate;
-    config.stRcAttr.stH264AVbr.fr32DstFrameRate = sensor_framerate;
-    
-    
-    // - Set GOP
     config.stGopAttr                  = gop_attr;
+    config.stRcAttr.enRcMode          = rc_mode;
     
+    switch (rc_mode) {
+      case VENC_RC_MODE_H264AVBR:
+        printf("> Codec: h264 AVBR\n");
+        config.stRcAttr.stH264AVbr.u32Gop           = venc_gop_size;
+        config.stRcAttr.stH264AVbr.u32MaxBitRate    = venc_max_rate;
+        config.stRcAttr.stH264AVbr.u32StatTime      = 1;
+        config.stRcAttr.stH264AVbr.u32SrcFrameRate  = sensor_framerate;
+        config.stRcAttr.stH264AVbr.fr32DstFrameRate = sensor_framerate;
+        break;
+      
+      case VENC_RC_MODE_H264VBR:
+        printf("> Codec: h264 VBR\n");
+        config.stRcAttr.stH264Vbr.u32SrcFrameRate   = sensor_framerate;
+        config.stRcAttr.stH264Vbr.fr32DstFrameRate  = sensor_framerate;
+        config.stRcAttr.stH264Vbr.u32StatTime       = 1;
+        config.stRcAttr.stH264Vbr.u32Gop            = venc_gop_size;
+        config.stRcAttr.stH264Vbr.u32MaxBitRate     = venc_max_rate;
+        break;
+      
+      case VENC_RC_MODE_H264CBR:
+        printf("> Codec: h264 CBR\n");
+        config.stRcAttr.stH264Cbr.u32SrcFrameRate   = sensor_framerate;
+        config.stRcAttr.stH264Cbr.fr32DstFrameRate  = sensor_framerate;
+        config.stRcAttr.stH264Cbr.u32StatTime       = 1;
+        config.stRcAttr.stH264Cbr.u32Gop            = venc_gop_size;
+        config.stRcAttr.stH264Cbr.u32BitRate        = venc_max_rate;
+        break;
+    }
+
     // - Create channel #1
-    HI_MPI_VENC_CreateChn(venc_second_ch_id, &config);
+    { int ret = HI_MPI_VENC_CreateChn(venc_second_ch_id, &config);
+      if (ret != HI_SUCCESS) {
+        printf("ERROR: Unable to create VENC channel = 0x%x\n", ret);
+        return ret;
+      }
+    }
   }
   
   // - Configure rate control for channel #1
   { VENC_RC_PARAM_S param;
     HI_MPI_VENC_GetRcParam(venc_second_ch_id, &param);
-    param.stParamH264AVbr.s32MaxReEncodeTimes         = 0;
+    printf("> Scene detect = %s, Adaptive IDR = %s\n",
+      param.stSceneChangeDetect.bDetectSceneChange ? "YES" : "NO",
+      param.stSceneChangeDetect.bAdaptiveInsertIDRFrame ? "YES" : "NO"
+    );
+    switch (rc_mode) {
+      case VENC_RC_MODE_H264AVBR:
+        param.stParamH264AVbr.s32MaxReEncodeTimes = 0;
+        break;
+        
+      case VENC_RC_MODE_H264VBR:
+        param.stParamH264Vbr.s32MaxReEncodeTimes = 0;
+        break;
+      
+      case VENC_RC_MODE_H264CBR:
+        param.stParamH264Cbr.s32MaxReEncodeTimes = 0;
+        break;
+    }
+    
+    //param.stParamH264Cbr.s32MaxReEncodeTimes          = 0;
     param.stSceneChangeDetect.bAdaptiveInsertIDRFrame = HI_TRUE;
-    HI_MPI_VENC_SetRcParam(venc_second_ch_id, &param);
+    param.stSceneChangeDetect.bDetectSceneChange      = HI_TRUE;
+  
+    int ret = HI_MPI_VENC_SetRcParam(venc_second_ch_id, &param);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to set VENC RC options = 0x%x\n", ret);
+      return ret;
+    }
+    
+    HI_MPI_VENC_GetRcParam(venc_second_ch_id, &param);
+    printf("> Scene detect = %s, Adaptive IDR = %s\n",
+      param.stSceneChangeDetect.bDetectSceneChange ? "YES" : "NO",
+      param.stSceneChangeDetect.bAdaptiveInsertIDRFrame ? "YES" : "NO"
+    );
+  }
+
+  
+  // - Enable slices
+  { VENC_H264_SLICE_SPLIT_S param;
+    HI_MPI_VENC_GetH264SliceSplit(venc_second_ch_id, &param);
+  
+    //param.u32MbLineNum  = 2;
+    if (enable_slices) {
+      param.bSplitEnable  = 1;
+      param.u32MbLineNum  = 4;
+      int ret = HI_MPI_VENC_SetH264SliceSplit(venc_second_ch_id, &param);
+      if (ret != HI_SUCCESS) {
+        printf("ERROR: Unable to set VENC slice size = 0x%x\n", ret);
+        return ret;
+      }
+    }
+    
+    HI_MPI_VENC_GetH264SliceSplit(venc_second_ch_id, &param);
+    printf("> Slices is [%s] | Slice size = %d lines\n", param.bSplitEnable ? "Enabled" : "Disabled",  param.u32MbLineNum);
+  }
+  
+  // - Enable IDR frames
+  /*{ int ret = HI_MPI_VENC_EnableIDR(venc_second_ch_id, HI_TRUE);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to senable IDR = 0x%x\n", ret);
+      return ret;
+    }
+  }*/
+  
+  // - Enable intra refresh
+  /*{ VENC_INTRA_REFRESH_S intra;
+    HI_MPI_VENC_GetIntraRefresh(venc_second_ch_id, &intra);
+    
+    printf("> Intra refresh EN = %d, Num = %d, Mode = %d, IQp = %d\n",
+      intra.bRefreshEnable, intra.u32RefreshNum, intra.enIntraRefreshMode, intra.u32ReqIQp
+    );
+    
+    intra.bRefreshEnable      = 0;
+    intra.enIntraRefreshMode  = INTRA_REFRESH_ROW;
+    intra.u32RefreshNum       = 16;
+    intra.u32ReqIQp           = 1;
+    
+    int ret = HI_MPI_VENC_SetIntraRefresh(venc_second_ch_id, &intra);
+     if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to set VENC intra refresh = 0x%x\n", ret);
+      return ret;
+    }
+  }*/
+
+  /*{ VENC_REF_PARAM_S param;
+    HI_MPI_VENC_GetRefParam(venc_second_ch_id, &param);
+    printf("> Reference = EN: %d, Base: %d, Enhance: %d\n",
+      param.bEnablePred, param.u32Base, param.u32Enhance
+    );
+    
+    param.bEnablePred = 1;
+    param.u32Enhance  = 1;
+    param.u32Base     = 2;
+    
+
+    int ret = HI_MPI_VENC_SetRefParam(venc_second_ch_id, &param);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to set VENC REF options = 0x%x\n", ret);
+      return ret;
+    }
+  }*/
+  
+  if (enable_roi) {
+    VENC_ROI_ATTR_S roi_config;
+    roi_config.bEnable          = HI_TRUE;
+    roi_config.u32Index         = 0;
+    roi_config.stRect.s32X      = ALIGN_UP(image_width / 4, 16);
+    roi_config.stRect.s32Y      = ALIGN_UP(image_height / 4, 16);
+    roi_config.stRect.u32Width  = ALIGN_UP(image_width / 2, 16);
+    roi_config.stRect.u32Height = ALIGN_UP(image_height / 2, 16);
+    roi_config.bAbsQp           = HI_TRUE;
+    roi_config.s32Qp            = roi_qp;
+    
+    int ret = HI_MPI_VENC_SetRoiAttr(venc_second_ch_id, &roi_config);
+    if (ret != HI_SUCCESS) {
+        printf("ERROR: Unable to setup VENC ROI = 0x%x\n", ret);
+        return ret;
+    }
+    
+    printf("> ROI is [Enabled]\n");
   }
 
   // - Connect VPSS channel #1 to VENC channel #1
@@ -383,13 +855,17 @@ int main(int argc, const char* argv[]) {
   // - Start VENC channel #1 without frames count limit
   { VENC_RECV_PIC_PARAM_S param;
     param.s32RecvPicNum = -1;
-    HI_MPI_VENC_StartRecvFrame(venc_second_ch_id, &param);
+    int ret = HI_MPI_VENC_StartRecvFrame(venc_second_ch_id, &param);
+    if (ret != HI_SUCCESS) {
+      printf("ERROR: Unable to start Rx frames\n");
+      return ret;
+    }
   }
-
+  
   // - Start ISP service thread
   pthread_t isp_thread;
   pthread_create(&isp_thread, NULL, __ISP_THREAD__, (void*)vi_pipe_id);
-  
+
   // - Open socket handle
   int socket_handle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
   struct sockaddr_in dst_addr;
@@ -397,51 +873,82 @@ int main(int argc, const char* argv[]) {
   dst_addr.sin_port         = htons(udp_sink_port);
   dst_addr.sin_addr.s_addr  = udp_sink_ip;
   
-  
   // - Experiment with AE
-  { ISP_EXPOSURE_ATTR_S attr;
-    /*HI_MPI_ISP_GetExposureAttr(vi_pipe_id, &attr);
+  /*{ ISP_EXPOSURE_ATTR_S attr;
+    HI_MPI_ISP_GetExposureAttr(vi_pipe_id, &attr);
     attr.u8AERunInterval = 1;
     attr.stAuto.stAEDelayAttr.u16BlackDelayFrame = 1;
     attr.stAuto.stAEDelayAttr.u16WhiteDelayFrame = 1;
-    attr.stAuto.u8Speed = 255;
+    attr.stAuto.u8Speed = 1;
     attr.stAuto.bWDRQuick = HI_TRUE;
-    HI_MPI_ISP_SetExposureAttr(vi_pipe_id, &attr);*/
-  }
+    HI_MPI_ISP_SetExposureAttr(vi_pipe_id, &attr);
+  }*/
+  
+  //HI_MPI_SYS_InitPTSBase(0xBEEF);
   
   // --------------------------------------------------------------
   // --- Start polling
   // --------------------------------------------------------------
+  // - Prepare Tx buffer
+  tx_buffer = malloc(8192);
   printf("> Ready for streaming\n");
   while (1) {
-    // - Process stream on encoder channel #1
-    processStream(venc_second_ch_id, socket_handle, (struct sockaddr*)&dst_addr);
+    // - Run ISP
+    //HI_MPI_ISP_RunOnce(vi_pipe_id);
     
-    // --- Take a rest.
-    // - Another way: HI_MPI_VENC_GetFd(vecn_channel_id) + epoll
-    usleep(1);
+    // - Process stream on encoder channel #1
+    if (!processStream(venc_second_ch_id, socket_handle, (struct sockaddr*)&dst_addr, max_frame_size)) {
+      // --- Take a rest if no frames received
+      // - Another way: HI_MPI_VENC_GetFd(vecn_channel_id) + epoll
+      usleep(1);
+    }
   }
   
   return 0;
 }
 
-/**
- * @brief Service thread for ISP
- * @param param - VI pipe identifier
- */
 void* __ISP_THREAD__(void *param) {
   HI_MPI_ISP_Run((VI_PIPE)param);
 }
 
-void processStream(VENC_CHN channel_id, int socket_handle, struct sockaddr* dst_address) {
+double getTimeInterval(struct timespec* timestamp, struct timespec* last_meansure_timestamp) {
+  return (timestamp->tv_sec - last_meansure_timestamp->tv_sec) + (timestamp->tv_nsec - last_meansure_timestamp->tv_nsec) / 1000000000.;
+}
+
+struct timespec last_timestamp = {0, 0};
+uint32_t        bytes_sent = 0;
+uint32_t        frames_sent = 0;
+uint64_t        seq_last      = 0;
+
+uint64_t        jitter_sum = 0;
+uint64_t        jitter_cnt = 0;
+
+uint32_t        nal_max_size = 0;
+
+uint32_t        single_packets = 0;
+
+uint32_t        pps_count = 0;
+uint32_t        sps_count = 0;
+uint32_t        idr_count = 0;
+uint32_t        sei_count = 0;
+uint32_t        s_count   = 0;
+
+uint32_t        packets_sent = 0;
+
+int processStream(VENC_CHN channel_id, int socket_handle, struct sockaddr* dst_address, uint16_t max_frame_size) {
   // - Get channel status
   VENC_CHN_STATUS_S channel_status;
-  HI_MPI_VENC_QueryStatus(channel_id, &channel_status);
+  int ret = HI_MPI_VENC_QueryStatus(channel_id, &channel_status);
+  if (ret != HI_SUCCESS) {
+    printf("WARN: Unable to query VENC status = 0x%x\n", ret);
+    usleep(100000);
+    return 0;
+  }
   
   // - Check if has encoded data
   if (!channel_status.u32CurPacks) {
     // - Nothing to get
-    return;
+    return 0;
   }
   
   // --- Stream packets descriptors
@@ -456,31 +963,146 @@ void processStream(VENC_CHN channel_id, int socket_handle, struct sockaddr* dst_
   stream.u32PackCount = 4;
   
   // - Acquire stream
-  HI_MPI_VENC_GetStream(channel_id, &stream, 0);
-
+  ret = HI_MPI_VENC_GetStream(channel_id, &stream, 0);
+  if (ret != HI_SUCCESS) {
+    printf("WARN: Failed to get VENC stream  = 0x%x\n", ret);
+    usleep(100000);
+    return 0;
+  }
+  
   // - Send encoded packets
   for (uint32_t i = 0; i < stream.u32PackCount; i++) {
-    printf("> SEQ: %d : %d, Size = %d, NAL = ", stream.u32Seq,  i, stream.pstPack[i].u32Len  - stream.pstPack[i].u32Offset);
+    //printf("> PTS: %ld\n", current_pts);
+    //printf("> SEQ: %d : %d, Size = %d, NAL = ", stream.u32Seq,  i, stream.pstPack[i].u32Len  - stream.pstPack[i].u32Offset);
+    
+    //printf("> NUM = %d / %d\n", stream.pstPack[0].u32DataNum, stream.u32PackCount);
     sendPacket(
       stream.pstPack[i].pu8Addr + stream.pstPack[i].u32Offset, 
       stream.pstPack[i].u32Len  - stream.pstPack[i].u32Offset,
-      socket_handle, dst_address, 1024
+      socket_handle, dst_address, max_frame_size
     );
   }
   
   // - Release stream
   HI_MPI_VENC_ReleaseStream(channel_id, &stream);
+  
+  // - Print rate stats
+  struct timespec current_timestamp;
+  if (!clock_gettime(CLOCK_MONOTONIC_COARSE, &current_timestamp)) {
+    double interval = getTimeInterval(&current_timestamp, &last_timestamp);
+    if (interval > 1) {
+      printf("> Rate: %.2f Mbit/sec. (%.1f pps) | Frames: %d, NotFrag: %d | AVG Size: %d, MAX Size: %d | S: %d, IDR: %d, SEI: %d, PPS: %d, SPS: %d | Packets: %d\n",
+        ((double)bytes_sent * 8) / interval / 1024 / 1024, (double)frames_sent / interval,/* jitter_sum / jitter_cnt,*/
+        frames_sent, single_packets,
+        bytes_sent / frames_sent, nal_max_size,
+        s_count, idr_count, sei_count, pps_count, sps_count,
+        packets_sent
+      );
+      
+      bytes_sent      = 0;
+      frames_sent     = 0;
+      jitter_sum      = 0;
+      jitter_cnt      = 0;
+      nal_max_size    = 0;
+      s_count         = 0;
+      idr_count       = 0;
+      pps_count       = 0;
+      sps_count       = 0;
+      sei_count       = 0;
+      single_packets  = 0;
+      packets_sent    = 0;
+      last_timestamp  = current_timestamp;
+    }
+  }
+  
+  return 1;
+}
+
+uint32_t  sequence_id = 0;
+uint32_t  frame_id = 0;
+
+#pragma pack(push, 1)
+struct RTPHeader {
+  uint8_t   version;
+  uint8_t   payload_type;
+  uint16_t  sequence;
+  uint32_t  timestamp;
+  uint32_t  ssrc_id;
+};
+#pragma pack(pop)
+
+uint16_t rtp_sequence = 0;
+
+void transmit(int socket_handle, uint8_t* tx_buffer, uint32_t tx_size, struct sockaddr* dst_address) {
+  
+  switch (stream_mode) {
+    // - Compact mode
+    case 0: {
+      sendto(socket_handle, tx_buffer, tx_size, 0, dst_address, sizeof(struct sockaddr_in));
+    }; break;
+    
+    // - RTP mode
+    case 1: {
+      struct RTPHeader header;
+      header.version       = 0x80;
+      header.sequence      = htobe16(rtp_sequence++);
+      header.payload_type  = 0x60;
+      header.timestamp     = 0;//current_pts;
+      header.ssrc_id       = 0xDEADBEEF;
+
+      struct iovec   iov[2];
+      iov[0].iov_base = &header;
+      iov[0].iov_len  = sizeof(struct RTPHeader);
+      iov[1].iov_base = tx_buffer;
+      iov[1].iov_len  = tx_size;
+      
+      struct msghdr msg;
+      msg.msg_iovlen  = 2;
+      msg.msg_iov     = iov;
+      msg.msg_name    = dst_address;
+      msg.msg_namelen = sizeof(struct sockaddr_in);
+      
+      sendmsg(socket_handle, &msg, 0);
+      
+    }; break;
+  }
+
 }
 
 void sendPacket(uint8_t* pack_data, uint32_t pack_size, int socket_handle, struct sockaddr* dst_address, uint32_t max_size) {
   // - Detect h264 NAL prefix
   if (pack_data[0] == 0 && pack_data[1] == 0 && pack_data[2] == 0 && pack_data[3] == 1) {
+    // - Skip NAL prefix
     pack_data += 4;
     pack_size -= 4;
+  
+    // - Update statistics
+    { frame_id    ++;
+      frames_sent ++;
     
+      if (pack_size > nal_max_size) {
+        nal_max_size = pack_size;
+      }
+      
+      if (pack_size <= max_size) {
+        single_packets ++;
+      }
+    }
+
     // - Get NAL type
     uint8_t nal_type  = pack_data[0] & 0x1F;
-    printf("%d\n", nal_type);
+    
+    // - Count NAL by type
+    switch (nal_type) {
+      case 1: s_count++;    break;
+      case 5: idr_count++;  break;
+      case 6: sei_count++;  break;
+      case 7: sps_count++;  break;
+      case 8: pps_count++;  break;
+      default:
+        printf("NAL = %d\n", nal_type);
+        break;
+    }
   
     // - Check if fragmentation needed
     if (pack_size > max_size) {
@@ -490,7 +1112,6 @@ void sendPacket(uint8_t* pack_data, uint32_t pack_size, int socket_handle, struc
       int is_first  = 1;
       int is_last   = 0;
       
-      uint32_t bytes_sent = 0;
       while (pack_size) {
         uint32_t chunk_size = pack_size > max_size ? max_size : pack_size;
         is_last = (chunk_size == pack_size) ? 1 : 0;
@@ -508,22 +1129,48 @@ void sendPacket(uint8_t* pack_data, uint32_t pack_size, int socket_handle, struc
           
           if (is_last == 1) pack_data[-1] |= 0x40;
         }
-
-        sendto(socket_handle, pack_data - (is_first ? 1 : 2), chunk_size + (is_first ? 1 : 2), 0, dst_address, sizeof(struct sockaddr_in));
         
-        pack_data   += chunk_size;
-        bytes_sent  += chunk_size;
-        pack_size   -= chunk_size;
+
+        // - Calculate Tx size
+        uint32_t tx_size = chunk_size + (is_first ? 1 : 2);
+        
+        // - Flush Tx buffer
+        if (tx_buffer_used) {
+          transmit(socket_handle, tx_buffer, tx_buffer_used, dst_address);
+          packets_sent      ++;
+          bytes_sent        += tx_buffer_used;
+          tx_buffer_used    = 0;
+        }
+        
+        // - Insert frame header
+        memcpy(tx_buffer, pack_data - (is_first ? 1 : 2), chunk_size + (is_first ? 1 : 2));
+
+        // - Send chunk
+        transmit(socket_handle, tx_buffer, tx_size, dst_address);
+        
+        packets_sent  ++;
+        bytes_sent    += tx_size;
+        
+        pack_data     += chunk_size;
+        pack_size     -= chunk_size;
         
         // - Reset first marker
         is_first = 0;
+        
       }
-      
+
+    // - Send non-fragment
     } else {
-      sendto(socket_handle, pack_data, pack_size, 0, dst_address, sizeof(struct sockaddr_in));
+      transmit(socket_handle, pack_data, pack_size, dst_address);
+      packets_sent++;
     }
   
   } else {
+    // - Get NAL type
     printf("*** Unknown NAL prefix\n");
+    for (int i = 0; i < 100; i++) {
+      printf("0x%x ", pack_data[i]);
+    }
+    printf("\n");
   }
 }

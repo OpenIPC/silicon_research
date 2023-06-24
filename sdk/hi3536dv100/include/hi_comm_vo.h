@@ -19,6 +19,7 @@
 #define __HI_COMM_VO_H__
 
 #include "hi_type.h"
+#include "hi_errno.h"
 #include "hi_common.h"
 #include "hi_comm_video.h"
 
@@ -32,74 +33,6 @@
 extern "C"{
 #endif
 #endif /* End of #ifdef __cplusplus */
-
-typedef enum hiEN_VOU_ERR_CODE_E
-{
-    EN_ERR_VO_DEV_NOT_CONFIG	  = 0x40,
-    EN_ERR_VO_DEV_NOT_ENABLE      = 0x41,
-    EN_ERR_VO_DEV_HAS_ENABLED     = 0x42,
-    EN_ERR_VO_DEV_HAS_BINDED      = 0x43,
-    EN_ERR_VO_DEV_NOT_BINDED      = 0x44,
-
-    ERR_VO_NOT_ENABLE             = 0x45,
-    ERR_VO_NOT_DISABLE            = 0x46,
-    ERR_VO_NOT_CONFIG             = 0x47,
-
-    ERR_VO_CHN_NOT_DISABLE        = 0x48,
-    ERR_VO_CHN_NOT_ENABLE         = 0x49,
-    ERR_VO_CHN_NOT_CONFIG         = 0x4a,
-    ERR_VO_CHN_NOT_ALLOC          = 0x4b,
-
-    ERR_VO_CCD_INVALID_PAT        = 0x4c,
-    ERR_VO_CCD_INVALID_POS        = 0x4d,
-
-    ERR_VO_WAIT_TIMEOUT           = 0x4e,
-    ERR_VO_INVALID_VFRAME         = 0x4f,
-    ERR_VO_INVALID_RECT_PARA      = 0x50,
-    ERR_VO_SETBEGIN_ALREADY       = 0x51,
-    ERR_VO_SETBEGIN_NOTYET        = 0x52,
-    ERR_VO_SETEND_ALREADY         = 0x53,
-    ERR_VO_SETEND_NOTYET          = 0x54,
-
-    ERR_VO_GRP_INVALID_ID         = 0x55,
-    ERR_VO_GRP_NOT_CREATE         = 0x56,
-    ERR_VO_GRP_HAS_CREATED        = 0x57,
-    ERR_VO_GRP_NOT_DESTROY        = 0x58,
-    ERR_VO_GRP_CHN_FULL           = 0x59,
-    ERR_VO_GRP_CHN_EMPTY          = 0x5a,
-    ERR_VO_GRP_CHN_NOT_EMPTY      = 0x5b,
-    ERR_VO_GRP_INVALID_SYN_MODE   = 0x5c,
-    ERR_VO_GRP_INVALID_BASE_PTS   = 0x5d,
-    ERR_VO_GRP_NOT_START          = 0x5e,
-    ERR_VO_GRP_NOT_STOP           = 0x5f,
-    ERR_VO_GRP_INVALID_FRMRATE    = 0x60,
-    ERR_VO_GRP_CHN_HAS_REG        = 0x61,
-    ERR_VO_GRP_CHN_NOT_REG        = 0x62,
-    ERR_VO_GRP_CHN_NOT_UNREG      = 0x63,
-    ERR_VO_GRP_BASE_NOT_CFG       = 0x64,
-
-    ERR_GFX_NOT_DISABLE           = 0x65,
-    ERR_GFX_NOT_BIND              = 0x66,
-    ERR_GFX_NOT_UNBIND            = 0x67,
-    ERR_GFX_INVALID_ID            = 0x68,
-
-    ERR_VO_WBC_NOT_DISABLE        = 0x69,
-    ERR_VO_WBC_NOT_CONFIG         = 0x6a,
-
-    ERR_VO_CHN_AREA_OVERLAP       = 0x6b,
-
-    EN_ERR_INVALID_WBCID          = 0x6c,
-    EN_ERR_INVALID_LAYERID        = 0x6d,
-    EN_ERR_VO_VIDEO_HAS_BINDED    = 0x6e,
-    EN_ERR_VO_VIDEO_NOT_BINDED    = 0x6f,
-    ERR_VO_WBC_HAS_BIND           = 0x70,
-    ERR_VO_WBC_HAS_CONFIG         = 0x71, 
-    ERR_VO_WBC_NOT_BIND           = 0x72,
-
-    /* new added */
-    ERR_VO_BUTT
-
-}EN_VOU_ERR_CODE_E;
 
 /* System define error code */
 #define HI_ERR_VO_BUSY                  HI_DEF_ERR(HI_ID_VOU, EN_ERR_LEVEL_ERROR, EN_ERR_BUSY)
@@ -302,7 +235,7 @@ typedef struct hiVO_QUERY_STATUS_S
     HI_U32 u32ChnBufUsed;       /* channel buffer that been occupied */
 } VO_QUERY_STATUS_S;
 
-typedef struct tagVO_SYNC_INFO_S
+typedef struct hiVO_SYNC_INFO_S
 {
     HI_BOOL  bSynm;     /* sync mode(0:timing,as BT.656; 1:signal,as LCD) */
     HI_BOOL  bIop;      /* interlaced or progressive display(0:i; 1:p) */
@@ -453,17 +386,17 @@ typedef struct hiVO_ZOOM_ATTR_S
 typedef struct hiVO_CSC_S
 {
     VO_CSC_MATRIX_E enCscMatrix;
-    HI_U32 u32Luma;                     /* luminance:   0 ~ 100 default: 50 */
-    HI_U32 u32Contrast;                 /* contrast :   0 ~ 100 default: 50 */
-    HI_U32 u32Hue;                      /* hue      :   0 ~ 100 default: 50 */
-    HI_U32 u32Saturation;               /* saturation:  0 ~ 100 default: 50 */
+    HI_U32 u32Luma;                     /* luminance:   0 ~ 100  */
+    HI_U32 u32Contrast;                 /* contrast :   0 ~ 100  */
+    HI_U32 u32Hue;                      /* hue      :   0 ~ 100  */
+    HI_U32 u32Saturation;               /* saturation:  0 ~ 100  */
 } VO_CSC_S;
 
 typedef struct hiVO_VGA_PARAM_S
 {
     VO_CSC_S stCSC;                     /* color space */
-    HI_U32 u32Gain;                     /* current gain of VGA signals. [0, 64). default:0x30 */
-    HI_S32 s32SharpenStrength;          /* current sharpen strength of VGA signals. [0, 255]. default:0x80 */
+    HI_U32 u32Gain;                     /* current gain of VGA signals. [0, 64).*/
+    HI_S32 s32SharpenStrength;          /* current sharpen strength of VGA signals. [0, 255]. */
 } VO_VGA_PARAM_S;
 
 typedef struct hiVO_HDMI_PARAM_S

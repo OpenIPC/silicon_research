@@ -1,6 +1,6 @@
 /******************************************************************************
 
-  Copyright (C), 2013-2033, Hisilicon Tech. Co., Ltd.
+  Copyright (C), 2013-2018, Hisilicon Tech. Co., Ltd.
 
  ******************************************************************************
   File Name     : hi_comm_vgs.h
@@ -118,20 +118,19 @@ typedef struct hiVGS_ASPECTRATIO_S
 	HI_U32 	u32CoverData;
  }VGS_ASPECTRATIO_S;
 
-
 typedef struct hiVGS_ONLINE_S
 {
     HI_BOOL                 bCrop;              /* if enable crop */
     RECT_S          		stCropRect;
     HI_BOOL                 bHSharpen;          /* if enable sharpen */
-    HI_U32                  u32LumaGain; 
+    HI_U32                  u32LumaGain;
     HI_BOOL                 bBorder;            /* if enable Border */
-    VGS_BORDER_S        	stBorderOpt; 
+    VGS_BORDER_S        	stBorderOpt;
 	HI_BOOL    				bAspectRatio;		/* if enable aspect ratio */
 	VGS_ASPECTRATIO_S 		stAspectRatioOpt;
 	
     HI_BOOL                 bForceHFilt;        /* if enable horizontal filter */
-    HI_BOOL                 bForceVFilt;        /* if enable vertical filter */	
+    HI_BOOL                 bForceVFilt;        /* if enable vertical filter */
     HI_BOOL                 bDeflicker;        	/* if enable deflicker */
 }VGS_ONLINE_S;
 

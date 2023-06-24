@@ -117,6 +117,8 @@ HI_S32 HI_MPI_VPSS_GetModParam(VPSS_MOD_PARAM_S *pstModParam);
 HI_S32 HI_MPI_VPSS_SetRotate(VPSS_GRP VpssGrp, VPSS_CHN VpssChn, ROTATE_E enRotate);
 HI_S32 HI_MPI_VPSS_GetRotate(VPSS_GRP VpssGrp, VPSS_CHN VpssChn, ROTATE_E *penRotate);
 
+HI_S32 HI_MPI_VPSS_GrpAttachVbPool(VPSS_GRP VpssGrp, VB_POOL hVbPool);
+HI_S32 HI_MPI_VPSS_GrpDetachVbPool(VPSS_GRP VpssGrp);
 
 #ifdef __cplusplus
 #if __cplusplus

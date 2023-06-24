@@ -111,7 +111,7 @@ typedef union hiVENC_DATA_TYPE_U
 {
     H264E_NALU_TYPE_E    enH264EType;               /*H264E NALU types*/
     JPEGE_PACK_TYPE_E    enJPEGEType;               /*JPEGE pack types*/
-    H265E_NALU_TYPE_E    enH265EType;               /*H264E NALU types*/
+    H265E_NALU_TYPE_E    enH265EType;               /*H265E NALU types*/
 }VENC_DATA_TYPE_U;
 
 typedef struct hiVENC_PACK_INFO_S
@@ -124,14 +124,14 @@ typedef struct hiVENC_PACK_INFO_S
 
 typedef struct hiVENC_PACK_S
 {
-    HI_U32   			u32PhyAddr;                         /*the physics address of stream*/
-    HI_U8   			*pu8Addr;                            /*the virtual address of stream*/
-    HI_U32   			u32Len;                             /*the length of stream*/
+    HI_U32   			u32PhyAddr;                 /*the physics address of stream*/
+    HI_U8   			*pu8Addr;                   /*the virtual address of stream*/
+    HI_U32   			u32Len;                     /*the length of stream*/
 
-    HI_U64   			u64PTS;                                /*PTS*/
-    HI_BOOL  			bFrameEnd;                             /*frame end*/
+    HI_U64   			u64PTS;                     /*PTS*/
+    HI_BOOL  			bFrameEnd;                  /*frame end*/
 
-    VENC_DATA_TYPE_U  	DataType;                     /*the type of stream*/
+    VENC_DATA_TYPE_U  	DataType;                   /*the type of stream*/
     HI_U32   			u32Offset;
 
 	HI_U32 				u32DataNum;
@@ -193,7 +193,6 @@ typedef struct hiVENC_SSE_INFO_S
     HI_U32  u32SSEVal;  //SSE
 } VENC_SSE_INFO_S;
 
-
 typedef struct hiVENC_STREAM_ADVANCE_INFO_H264_S
 {
     HI_U32 			u32ResidualBitNum;    //residual
@@ -206,7 +205,6 @@ typedef struct hiVENC_STREAM_ADVANCE_INFO_H264_S
     VENC_SSE_INFO_S stSSEInfo[8];
     HI_U32 			u32QpHstgrm[52];      //Qp histogram
 } VENC_STREAM_ADVANCE_INFO_H264_S;
-
 
 typedef struct hiVENC_STREAM_ADVANCE_INFO_JPEG_S
 {
@@ -229,25 +227,24 @@ typedef struct hiVENC_STREAM_ADVANCE_INFO_H265_S
 } VENC_STREAM_ADVANCE_INFO_H265_S;
 
 
-
 typedef struct hiVENC_STREAM_INFO_JPEG_S
 {
-    HI_U32 u32PicBytesNum;                          			/* the coded picture stream byte number */
-    HI_U32 u32UpdateAttrCnt;                        			/*Number of times that channel attributes or parameters (including RC parameters) are set*/
-    HI_U32 u32Qfactor;                              			/* image quality */
+    HI_U32 u32PicBytesNum;                          				/* the coded picture stream byte number */
+    HI_U32 u32UpdateAttrCnt;                        				/*Number of times that channel attributes or parameters (including RC parameters) are set*/
+    HI_U32 u32Qfactor;                              				/* image quality */
 }VENC_STREAM_INFO_JPEG_S;
 
 typedef struct hiVENC_STREAM_S
 {
-    VENC_PACK_S *pstPack;                           /*stream pack attribute*/
-    HI_U32      u32PackCount;                       /*the pack number of one frame stream*/
-    HI_U32      u32Seq;                             /*the list number of stream*/
+    VENC_PACK_S *pstPack;                           				/*stream pack attribute*/
+    HI_U32      u32PackCount;                       				/*the pack number of one frame stream*/
+    HI_U32      u32Seq;                             				/*the list number of stream*/
 
     union
     {
-        VENC_STREAM_INFO_H264_S  stH264Info;         /*the stream info of h264*/
-        VENC_STREAM_INFO_JPEG_S  stJpegInfo;         /*the stream info of jpeg*/
-        VENC_STREAM_INFO_H265_S  stH265Info;        /*the stream info of h265*/
+        VENC_STREAM_INFO_H264_S  stH264Info;        	 			/*the stream info of h264*/
+        VENC_STREAM_INFO_JPEG_S  stJpegInfo;         				/*the stream info of jpeg*/
+        VENC_STREAM_INFO_H265_S  stH265Info;        				/*the stream info of h265*/
     };
 
     union
@@ -357,14 +354,14 @@ typedef struct  hiVENC_GOP_SMARTP_S
 {
 	HI_U32  u32BgInterval;
     HI_S32  s32BgQpDelta;
-	HI_S32  s32ViQpDelta;									/**/
+	HI_S32  s32ViQpDelta;
 }VENC_GOP_SMARTP_S;
 
 
 typedef struct  hiVENC_GOP_BIPREDB_S
 {
-    HI_U32 u32BFrmNum;										/*<=MAX_B_FRAME_NUM=3*/
-    HI_S32 s32BQpDelta;										/**/
+    HI_U32 u32BFrmNum;
+    HI_S32 s32BQpDelta;
 	HI_S32 s32IPQpDelta;
 }VENC_GOP_BIPREDB_S;
 
@@ -464,8 +461,8 @@ typedef struct hiVENC_PARAM_H264_POC_S
 typedef struct hiVENC_PARAM_H264_DBLK_S
 {
     HI_U32 disable_deblocking_filter_idc;          /* default value: 0. {0,1,2} */
-    HI_S32 slice_alpha_c0_offset_div2;             /* default value: 5. [-6,+6] */
-    HI_S32 slice_beta_offset_div2;                 /* default value: 5. [-6,+6] */
+    HI_S32 slice_alpha_c0_offset_div2;             /* default value: 0. [-6,+6] */
+    HI_S32 slice_beta_offset_div2;                 /* default value: 0. [-6,+6] */
 }VENC_PARAM_H264_DBLK_S;
 
 
@@ -473,32 +470,32 @@ typedef struct hiVENC_PARAM_H264_DBLK_S
 typedef struct hiVENC_PARAM_H264_VUI_TIME_INFO_S
 {
     HI_U8  timing_info_present_flag;               /* default value: 0. If 1, timing info belows will be encoded into vui. {0,1} */
-    HI_U8  fixed_frame_rate_flag;                  /* default value: n/a. {0,1} */
-    HI_U32 num_units_in_tick;                      /* default value: n/a. > 0. */
-    HI_U32 time_scale;                             /* default value: n/a. > 0. */
+    HI_U8  fixed_frame_rate_flag;                  /* default value: 1. {0,1} */
+    HI_U32 num_units_in_tick;                      /* default value: 1. > 0. */
+    HI_U32 time_scale;                             /* default value: 60. > 0. */
 
 }VENC_PARAM_VUI_H264_TIME_INFO_S;
 
 typedef struct hiVENC_PARAM_VUI_ASPECT_RATIO_S
 {
     HI_U8  aspect_ratio_info_present_flag;        /* default value: 0. If 1, aspectratio info belows will be encoded into vui. {0,1} */
-    HI_U8  aspect_ratio_idc;                      /* default value: n/a. [0,255],17~254 is reserved. */
+    HI_U8  aspect_ratio_idc;                      /* default value: 1. [0,255] */
 	HI_U8  overscan_info_present_flag;			  /* default value: 0,just be 0.If 1, oversacan info belows will be encoded into vui. {0,1} */
-	HI_U8  overscan_appropriate_flag;			  /* default value: n/a. */
-	HI_U16 sar_width;                             /* default value: n/a. sar_width  and  sar_height  shall  be  relatively  prime. */
-    HI_U16 sar_height ;                  		  /* default value: n/a.  */
+	HI_U8  overscan_appropriate_flag;			  /* default value: 0. */
+	HI_U16 sar_width;                             /* default value: 1. sar_width  and  sar_height  shall  be  relatively  prime. */
+    HI_U16 sar_height ;                  		  /* default value: 1.  */
 }VENC_PARAM_VUI_ASPECT_RATIO_S;
 
 
 typedef struct hiVENC_PARAM_VUI_VIDEO_SIGNAL_S
 {
-    HI_U8  video_signal_type_present_flag ;        /* default value: 0. If 1, video singnal info will be encoded into vui. {0,1} */
+    HI_U8  video_signal_type_present_flag ;        /* default value: 1. If 1, video singnal info will be encoded into vui. {0,1} */
     HI_U8  video_format ;                          /* default value: 5. h.264:{0,7},h.265:{0,5}. */
-    HI_U8  video_full_range_flag;                  /* default value: n/a. {0,1}. */
-    HI_U8  colour_description_present_flag ;       /* default value: n/a. {0,1} */
-	HI_U8  colour_primaries ;					   /* default value: n/a. [0,255],0/9~255 is reserved */
-	HI_U8  transfer_characteristics;			   /* default value: n/a. [0,255],0/13~255 is reserved */
-	HI_U8  matrix_coefficients; 				   /* default value: n/a. [0,255],9~255 is reserved */
+    HI_U8  video_full_range_flag;                  /* default value: 1. {0,1}. */
+    HI_U8  colour_description_present_flag ;       /* default value: 1. {0,1} */
+	HI_U8  colour_primaries ;					   /* default value: 1. [0,255]*/
+	HI_U8  transfer_characteristics;			   /* default value: 1. [0,255]*/
+	HI_U8  matrix_coefficients; 				   /* default value: 1. [0,255]*/
 }VENC_PARAM_VUI_VIDEO_SIGNAL_S;
 
 typedef struct hiVENC_PARAM_VUI_BITSTREAM_RESTRIC_S
@@ -508,19 +505,18 @@ typedef struct hiVENC_PARAM_VUI_BITSTREAM_RESTRIC_S
 
 typedef struct hiVENC_PARAM_H264_VUI_S
 {
-	VENC_PARAM_VUI_ASPECT_RATIO_S 		    stVuiAspectRatio;
-	VENC_PARAM_VUI_H264_TIME_INFO_S    	    stVuiTimeInfo;
-	VENC_PARAM_VUI_VIDEO_SIGNAL_S 		    stVuiVideoSignal;
-	VENC_PARAM_VUI_BITSTREAM_RESTRIC_S      stVuiBitstreamRestric;
+	VENC_PARAM_VUI_ASPECT_RATIO_S 		stVuiAspectRatio;
+  	VENC_PARAM_VUI_H264_TIME_INFO_S    	stVuiTimeInfo;
+	VENC_PARAM_VUI_VIDEO_SIGNAL_S 		stVuiVideoSignal;
+	VENC_PARAM_VUI_BITSTREAM_RESTRIC_S  stVuiBitstreamRestric;
 }VENC_PARAM_H264_VUI_S;
-
 
 typedef struct hiVENC_PARAM_H265_TIME_INFO_S
 {
     HI_U32 timing_info_present_flag;               /* default value: 0. If 1, timing info belows will be encoded into vui. {0,1} */
-    HI_U32 num_units_in_tick;                      /* default value: n/a. > 0. */
-    HI_U32 time_scale;                             /* default value: n/a. > 0. */
-    HI_U32 num_ticks_poc_diff_one_minus1;
+    HI_U32 num_units_in_tick;                      /* default value: 1. > 0. */
+    HI_U32 time_scale;                             /* default value: 60. > 0. */
+    HI_U32 num_ticks_poc_diff_one_minus1;          /* default value: 1. */
 }VENC_PARAM_VUI_H265_TIME_INFO_S;
 
 typedef struct hiVENC_PARAM_H265_VUI_S
@@ -530,7 +526,6 @@ typedef struct hiVENC_PARAM_H265_VUI_S
 	VENC_PARAM_VUI_H265_TIME_INFO_S     stVuiTimeInfo;
   	VENC_PARAM_VUI_BITSTREAM_RESTRIC_S  stVuiBitstreamRestric;
 }VENC_PARAM_H265_VUI_S;
-
 
 typedef struct hiVENC_PARAM_JPEG_S
 {
@@ -695,7 +690,7 @@ typedef struct hiVENC_PARAM_H265_TRANS_S
 
 typedef struct hiVENC_PARAM_H265_ENTROPY_S
 {
-    HI_U32 cabac_init_flag;                         /* default: 0*/
+    HI_U32 cabac_init_flag;                         /* default: 1*/
 }VENC_PARAM_H265_ENTROPY_S;
 
 typedef struct hiVENC_PARAM_H265_DBLK_S
@@ -715,9 +710,9 @@ typedef struct hiVENC_PARAM_H265_SAO_S
 typedef struct hiVENC_PARAM_H265_TIMING_S
 {
     HI_S32 timing_info_present_flag;               /* default value: 0. If 1, timing info belows will be encoded into vui. {0,1} */
-    HI_S32 num_units_in_tick;                      /* default value: n/a. > 0. */
-    HI_S32 time_scale;                             /* default value: n/a. > 0. */
-    HI_U32 num_ticks_poc_diff_one;
+    HI_S32 num_units_in_tick;                      /* default value: 1. > 0. */
+    HI_S32 time_scale;                             /* default value: 60. > 0. */
+    HI_U32 num_ticks_poc_diff_one;                 /* default value: 1.  */
 }VENC_PARAM_H265_TIMING_S;
 
 typedef struct hiVENC_PARAM_INTRA_REFRESH_S
@@ -752,24 +747,23 @@ typedef struct hiVENC_PARAM_MOD_H264E_S
 typedef struct hiVENC_PARAM_MOD_H265E_S
 {
     HI_U32  u32OneStreamBuffer;
+    HI_U32  u32H265eVBSource;
     HI_U32  u32H265eMiniBufMode;
 	HI_U32  u32H265ePowerSaveEn;
     HI_BOOL bQpHstgrmEn;
 } VENC_PARAM_MOD_H265E_S;
+
+typedef struct hiVENC_PARAM_MOD_JPEGE_S
+{
+    HI_U32  u32OneStreamBuffer;
+    HI_U32  u32JpegeMiniBufMode;
+} VENC_PARAM_MOD_JPEGE_S;
 
 typedef struct hiVENC_PARAM_MOD_RC_S
 {
     HI_U32  u32ClrStatAfterSetBr;
 
 } VENC_PARAM_MOD_RC_S;
-
-
-typedef struct hiVENC_PARAM_MOD_JPEGE_S
-{
-    HI_U32  u32OneStreamBuffer;
-    HI_U32  u32JpegeMiniBufMode;
-
-} VENC_PARAM_MOD_JPEGE_S;
 
 typedef struct hiVENC_PARAM_MOD_VENC_S
 {
@@ -778,6 +772,7 @@ typedef struct hiVENC_PARAM_MOD_VENC_S
     HI_U32 u32QuickSchedule;
     HI_U32 u32JpegClearStreamBuf;
     HI_U32 u32OneBufferForJpegOSD;
+	HI_U32 u32VencMaxChnNum;
 } VENC_PARAM_MOD_VENC_S;
 
 
@@ -794,10 +789,18 @@ typedef struct hiVENC_MODPARAM_S
   };
 } VENC_PARAM_MOD_S;
 
+typedef enum hiVENC_FRAME_TYPE_E
+{
+    VENC_FRAME_TYPE_NONE = 1,
+    VENC_FRAME_TYPE_IDR,
+    VENC_FRAME_TYPE_BUTT
+} VENC_FRAME_TYPE_E;
+
 typedef struct hiUSER_RC_INFO_S
 {
     HI_U32 u32BlkStartQp;
     HI_U32 u32QpMapPhyAddr;
+    VENC_FRAME_TYPE_E enFrameType;
 } USER_RC_INFO_S;
 
 typedef struct hiUSER_FRAME_INFO_S
