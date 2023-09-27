@@ -104,19 +104,20 @@ void printHelp() {
     "      stream         - Incoming data is stream\n"
     "      frame          - Incoming data is frame\n"
     "\n"
-    "    -m [Mode]      - Screen output mode                (Default: 720p60)\n"
+    "    -m [Mode]        - Screen output mode                (Default: 720p60)\n"
     "      720p60         - 1280 x 720    @ 60 fps\n"
     "      1080p60        - 1920 x 1080   @ 60 fps\n"
     "      1024x768x60    - 1024 x 768    @ 60 fps\n" 
     "      1366x768x60    - 1366 x 768    @ 60 fps\n"
     "      1280x1024x60   - 1280 x 1024   @ 60 fps\n" 
     "\n"
-    "    -w [Path]      - Write stream into file\n"
+    "    -w [Path]              - Write stream into file\n"
     "\n"
-    "    --osd          - Enable OSD\n"
-    "    --bg-r [Value] - Background color red component    (Default: 0)\n"
-    "    --bg-g [Value] - Background color green component  (Default: 96)\n"
-    "    --bg-b [Value] - Background color blue component   (Default: 0)\n"
+    "    --osd                  - Enable OSD\n"
+    "    --mavlink-port [port]  - MavLink Rx port                   (Default: 14550)\n"
+    "    --bg-r [Value]         - Background color red component    (Default: 0)\n"
+    "    --bg-g [Value]         - Background color green component  (Default: 96)\n"
+    "    --bg-b [Value]         - Background color blue component   (Default: 0)\n"
     "\n"
   );
 }
@@ -129,8 +130,11 @@ struct timespec last_timestamp = {0, 0};
 
 double getTimeInterval(struct timespec* timestamp, struct timespec* last_meansure_timestamp) {
   return (timestamp->tv_sec - last_meansure_timestamp->tv_sec) + (timestamp->tv_nsec - last_meansure_timestamp->tv_nsec) / 1000000000.;
+
 }
 
+
+uint16_t mavlink_port = 14550;
 
 int main(int argc, const char* argv[]) {
   VO_INTF_SYNC_E  vo_mode           = VO_OUTPUT_720P60;// VO_OUTPUT_1080P60; //VO_OUTPUT_2560x1440_30; //VO_OUTPUT_2560x1440_30;// VO_OUTPUT_1080P60;
@@ -252,6 +256,10 @@ int main(int argc, const char* argv[]) {
     
     __OnArgument("--osd") {
       enable_osd = 1;
+      continue;
+    }
+    __OnArgument("--mavlink-port") {
+      mavlink_port = atoi(__ArgValue);
       continue;
     }
     
@@ -675,6 +683,7 @@ int main(int argc, const char* argv[]) {
   pthread_t osd_thread;
   if (enable_osd) {
     pthread_create(&osd_thread, NULL, __OSD_THREAD__, 0);
+    pthread_create(&osd_thread, NULL, __MAVLINK_THREAD__, 0);
   }
 
   
@@ -785,6 +794,95 @@ int main(int argc, const char* argv[]) {
   return 0;
 }
 
+float telemetry_altitude  = 0;
+float telemetry_pitch     = 0;
+float telemetry_roll      = 0;
+float telemetry_yaw       = 0;
+
+void* __MAVLINK_THREAD__(void* arg) {
+
+  // - Create socket
+  int fd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (fd < 0) {
+    printf("ERROR: Unable to create MavLink socket: %s\n", strerror(errno));
+    return 0;
+  }
+
+  // - Bind port
+  { struct sockaddr_in addr = {};
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    inet_pton(AF_INET, "0.0.0.0", &(addr.sin_addr));    // listen on all network interfaces
+    addr.sin_port = htons(mavlink_port);                // default port on the ground
+    if (bind(fd, (struct sockaddr*)(&addr), sizeof(addr)) != 0) {
+        printf("ERROR: Unable to bind MavLink port: %s\n", strerror(errno));
+        return 0;
+    }
+  }
+
+  // - Set Rx timeout
+  { struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 100000;
+    if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+        printf("ERROR: Unable to bind MavLink rx timeout: %s\n", strerror(errno));
+        return 0;
+    }
+  }
+
+  char buffer[2048];
+
+  while (1) {
+    memset(buffer, 0x00, sizeof(buffer));
+
+    int ret = recv(fd, buffer, sizeof(buffer), 0);
+    if (ret < 0) {
+        printf("WARN: MavLink rx error: %s\n", strerror(errno));
+    } else if (ret == 0) {
+      // peer has done an orderly shutdown
+      return;
+    }
+    
+    // - Parse
+    mavlink_message_t message;
+    mavlink_status_t  status;
+    for (int i = 0; i < ret; ++i) {
+      if (mavlink_parse_char(MAVLINK_COMM_0, buffer[i], &message, &status) == 1) {
+        switch (message.msgid) {
+          case MAVLINK_MSG_ID_HEARTBEAT:
+            //handle_heartbeat(&message);
+            break;
+
+          case MAVLINK_MSG_ID_ALTITUDE: {
+            mavlink_altitude_t alt;
+            mavlink_msg_altitude_decode(&message, &alt);
+            telemetry_altitude = alt.altitude_relative;
+
+          }; break;
+
+          case MAVLINK_MSG_ID_ATTITUDE: {
+            mavlink_attitude_t att;
+            mavlink_msg_attitude_decode(&message, &att);
+            telemetry_pitch = att.pitch * (180.0/3.141592653589793238463);
+            telemetry_roll  = att.roll  * (180.0/3.141592653589793238463);
+            telemetry_yaw   = att.yaw   * (180.0/3.141592653589793238463);
+          }; break;
+          
+          default:
+            printf("> MavLink message %d from %d/%d\n", message.msgid, message.sysid, message.compid);
+            break;
+        }
+      }
+    }
+
+    usleep(1);
+  }
+
+  return 0;
+}
+
+
+
 extern const char font_14_23[];
 extern uint32_t frames_lost;
 
@@ -793,33 +891,34 @@ float rx_rate = 0;
 // array size is 7602
 extern const char openipc[];
 
+
+int32_t map_range(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+      
 void* __OSD_THREAD__(void* arg) {
   struct _fbg *fbg = fbg_fbdevInit();
   
-  
-  //struct _fbg_img *texture = fbg_loadImage(fbg, "texture.png");
-  
-  
-  struct _fbg_img *bb_font_img = fbg_loadPNGFromMemory(fbg, font_14_23, 26197);
-  struct _fbg_font *bbfont = fbg_createFont(fbg, bb_font_img, 14, 23, 33);
-
-
-  struct _fbg_img* openipc_img = fbg_loadPNGFromMemory(fbg, openipc, 11761);
+  struct _fbg_img*  bb_font_img = fbg_loadPNGFromMemory(fbg, font_14_23, 26197);
+  struct _fbg_font* bbfont      = fbg_createFont(fbg, bb_font_img, 14, 23, 33);
+  struct _fbg_img*  openipc_img = fbg_loadPNGFromMemory(fbg, openipc, 11761);
 
   while (1) {
     fbg_clear(fbg, 0);
     fbg_draw(fbg);
-    
+
     uint32_t x_center = fbg->width / 2;
-    
-    
-    for (int i = 0; i < 4; i++) {
-      fbg_line(fbg, x_center - 180, fbg->height / 2 + i - 2, x_center - 60, fbg->height / 2 + i - 2, 255,255,255);
-      fbg_line(fbg, x_center + 60, fbg->height / 2 + i - 2, x_center + 180, fbg->height / 2 + i - 2, 255,255,255);
+
+    // - Pitch
+    { uint32_t offset =  -telemetry_pitch * 2; //map_range(telemetry_pitch, -90, 90, -120, 120);
+      uint32_t y_pos = ((int32_t)fbg->height / 2 - 2 + offset);
+      for (int i = 0; i < 4; i++) {
+        fbg_line(fbg, x_center - 180, y_pos + i, x_center - 60,   y_pos + i, 255,255,255);
+        fbg_line(fbg, x_center + 60,  y_pos + i, x_center + 180,  y_pos + i, 255,255,255);
+      }
     }
-    
     for (int i = 0; i < 25; i++) {
-      
+
       uint32_t width = (i == 12) ? 10 : 0;
       
       fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120 + i * 10,       x_center - 220, fbg->height / 2 - 120 + i * 10, 255,255,255);
@@ -830,15 +929,17 @@ void* __OSD_THREAD__(void* arg) {
     }
     
     fbg_write(fbg, "SPD", x_center - (16 * 3 + 20) - 240, fbg->height / 2 - 8);
-    fbg_write(fbg, "ALT", x_center + ( 20) + 240,         fbg->height / 2 - 8);
-    
-    //fbg_imageClip(fbg, openipc, x_center - 80, 700, 0, 0, 160, 46);
-    fbg_image(fbg, openipc_img, 1280 - 160 - 80, 40);
-    //fbg_write(fbg, "OpenIPC FPV", 60, 40);
-   
-    
+
+    // - Altitude
+    { char msg[16];
+      memset(msg, 0x00, sizeof(msg));
+      sprintf(msg, "%.01f", telemetry_altitude);
+      fbg_write(fbg, msg, x_center + ( 20) + 240,         fbg->height / 2 - 8);
+    }
     
 
+    fbg_image(fbg, openipc_img, 1280 - 160 - 80, 40);
+   
     // - Print rate stats
     struct timespec current_timestamp;
     if (!clock_gettime(CLOCK_MONOTONIC_COARSE, &current_timestamp)) {

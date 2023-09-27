@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -53,6 +54,7 @@
 
 #include "fbgraphics.h"
 #include "fbg_fbdev.h"
+#include "mavlink/common/mavlink.h"
 
 /**
  * @brief Initialize VO device
@@ -91,3 +93,4 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
 
 
 void* __OSD_THREAD__(void*);
+void* __MAVLINK_THREAD__(void*);

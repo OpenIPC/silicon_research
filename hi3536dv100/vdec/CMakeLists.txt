@@ -23,6 +23,7 @@ target_include_directories(${NAME}
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/sdk/hi3536dv100/include
+    ${CMAKE_SOURCE_DIR}
 )
 
 target_link_libraries(${NAME}
@@ -46,7 +47,6 @@ set_target_properties (${NAME} PROPERTIES
   LINK_FLAGS
     -Wl,-rpath,$ORIGIN
 )
-
 
 add_executable(telemetry
   telemetry.c
