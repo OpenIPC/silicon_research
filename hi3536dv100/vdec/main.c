@@ -98,7 +98,7 @@ void printHelp() {
     "    -p [Port]      - Listen port                       (Default: 5000)\n"
     "    -c [Codec]     - Video codec                       (Default: h264)\n"
     "      h264           - H264\n"
-    "      h265           - H264\n"
+    "      h265           - H265\n"
     "\n"
     "    -d [Format]    - Data format                       (Default: stream)\n"
     "      stream         - Incoming data is stream\n"
