@@ -89,7 +89,7 @@ static HI_VOID HDMI_EventCallBack(HI_HDMI_EVENT_TYPE_E event, HI_VOID *pPrivateD
 void printHelp() {
   printf(
     "\n"
-    "\t\tOpenIPC FPV Decoder for HI3536\n"
+    "\t\tOpenIPC FPV Decoder for HI3536 v23.09-27\n"
     "\n"
     "  Usage:\n"
     "    vdec [Arguments]\n"

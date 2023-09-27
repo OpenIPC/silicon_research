@@ -17,6 +17,10 @@ include("${CMAKE_SOURCE_DIR}/cmake/framework.cmake")
 
 # - Detect platform
 if (${TARGET_CPU_MODEL} STREQUAL "GK7205v300") 
+  if (NOT TARGET_PLATFORM_EABI)
+    message (FATAL_ERROR "TARGET_PLATFORM_EABI not set (musl/glibc)")
+  endif ()
+
   add_subdirectory(gk7205v300)
   
 elseif(${TARGET_CPU_MODEL} STREQUAL "HI3536Dv100")

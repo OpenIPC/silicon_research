@@ -1,9 +1,9 @@
 include(ProcessorCount)
 #
 # Options:
-#   TARGET_PLATFORM   = native, intel, amd
-#   TARGET_BUILD      = Debug, Release, RelWithDebInfo
-#   TOOLCHAIN         = gcc
+#   TARGET_PLATFORM   = native, intel, amd, ...
+#   TARGET_BUILD      = Debug, Release
+#   TARGET_DEBUG_INFO = (NO) / YES
 #
 # Defined:
 #   TARGET_CPU_VENDOR = intel / amd
@@ -12,6 +12,7 @@ include(ProcessorCount)
 
 include_guard(GLOBAL)
 include ("${CMAKE_CURRENT_LIST_DIR}/external_project.cmake")
+include ("${CMAKE_CURRENT_LIST_DIR}/set_option.cmake")
 
 # - Set framework root paths
 get_filename_component(DATAFLOW_FRAMEWORK_DIR "${CMAKE_CURRENT_LIST_DIR}/../" ABSOLUTE)
@@ -81,11 +82,13 @@ else ()
 endif ()
 
 # - Store toolchain information
-set (TOOLCHAIN_CPU_OPTIONS        "${TOOLCHAIN_CPU_OPTIONS}"    CACHE STRING "Extra options for toolchain compiler" FORCE)
-set (TOOLCHAIN_LINKER_OPTIONS     "${TOOLCHAIN_LINKER_OPTIONS}" CACHE STRING "Extra options for toolchain linker"   FORCE)
+set (TOOLCHAIN_CPU_OPTIONS        "${TOOLCHAIN_CPU_OPTIONS}"      CACHE STRING "Extra options for toolchain compiler"     FORCE)
+set (TOOLCHAIN_LINKER_OPTIONS     "${TOOLCHAIN_LINKER_OPTIONS}"   CACHE STRING "Extra options for toolchain linker"       FORCE)
+set (TOOLCHAIN_CPU_C_OPTIONS      "${TOOLCHAIN_CPU_C_OPTIONS}"    CACHE STRING "Extra options for toolchain C compiler"   FORCE)
+set (TOOLCHAIN_CPU_CXX_OPTIONS    "${TOOLCHAIN_CPU_CXX_OPTIONS}"  CACHE STRING "Extra options for toolchain C++ compiler" FORCE)
 
-set (TOOLCHAIN_COMPILER_OPTIONS_DEBUG   "${TOOLCHAIN_COMPILER_OPTIONS_DEBUG}"   CACHE STRING "Extra options for Debug build")
-set (TOOLCHAIN_COMPILER_OPTIONS_RELEASE "${TOOLCHAIN_COMPILER_OPTIONS_RELEASE}" CACHE STRING "Extra options for Release build")
+set (TOOLCHAIN_COMPILER_OPTIONS_DEBUG   ${TOOLCHAIN_COMPILER_OPTIONS_DEBUG}   CACHE STRING "Extra options for Debug build")
+set (TOOLCHAIN_COMPILER_OPTIONS_RELEASE ${TOOLCHAIN_COMPILER_OPTIONS_RELEASE} CACHE STRING "Extra options for Release build")
 
 # - Setup toolchain build threads count
 if (NOT TOOLCHAIN_BUILD_THREAD_COUNT)
@@ -103,34 +106,42 @@ set(TOOLCHAIN_BUILD_THREAD_COUNT ${TOOLCHAIN_BUILD_THREAD_COUNT} CACHE STRING "B
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin"          CACHE STRING "Binaries"         FORCE)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin/modules"  CACHE STRING "Modules"          FORCE)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib"          CACHE STRING "Static libraries" FORCE)
+#set(CMAKE_HOST_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/host"  CACHE STRING "Host output" FORCE)
 
 # --- Generic compile configuration
-set (CMAKE_C_FLAGS    "${TOOLCHAIN_CPU_OPTIONS}" CACHE STRING "" FORCE)
-set (CMAKE_CXX_FLAGS  "${TOOLCHAIN_CPU_OPTIONS}" CACHE STRING "" FORCE)
+set (CMAKE_C_FLAGS    "${TOOLCHAIN_CPU_OPTIONS} ${TOOLCHAIN_CPU_C_OPTIONS}"   CACHE STRING "" FORCE)
+set (CMAKE_CXX_FLAGS  "${TOOLCHAIN_CPU_OPTIONS} ${TOOLCHAIN_CPU_CXX_OPTIONS}" CACHE STRING "" FORCE)
 
 # - Force reporting of unresolved symbols in shared libraries
-#set (CMAKE_SHARED_LINKER_FLAGS "-Wl,--unresolved-symbols=report-all -Wl,-fuse-ld=gold"  CACHE STRING "" FORCE)
-set (CMAKE_SHARED_LINKER_FLAGS "-Wl,--unresolved-symbols=report-all ${TOOLCHAIN_LINKER_OPTIONS}"  CACHE STRING "" FORCE)
-set (CMAKE_STATIC_LINKER_FLAGS ""                                                                 CACHE STRING "" FORCE)
+set (CMAKE_SHARED_LINKER_FLAGS "${TOOLCHAIN_LINKER_OPTIONS_SHARED_BASE} ${TOOLCHAIN_LINKER_OPTIONS}"  CACHE STRING "" FORCE)
+set (CMAKE_STATIC_LINKER_FLAGS "${TOOLCHAIN_LINKER_OPTIONS_STATIC_BASE}"                              CACHE STRING "" FORCE)
+
+# - Force debug information in debug mode
+if (TARGET_BUILD STREQUAL "Debug")
+  set (TARGET_DEBUG_INFO  YES)
+endif ()
+
+# - Add debug information
+if (TARGET_DEBUG_INFO)
+  set (CMAKE_C_FLAGS    "${CMAKE_C_FLAGS} ${TOOLCHAIN_COMPILER_OPTIONS_DEBUG_BASE}"   CACHE STRING "" FORCE)
+  set (CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${TOOLCHAIN_COMPILER_OPTIONS_DEBUG_BASE}" CACHE STRING "" FORCE)
+endif ()
 
 # - Disable automatic RPATH generation
 set (CMAKE_SKIP_RPATH TRUE)
 
-# - Define RPATH for modules
-set (DF_MODULE_RPATH_LINKER_OPTION "-Wl,-rpath,$ORIGIN:$ORIGIN/.." CACHE STRING "" FORCE)
-
 # ---------------------------------------
 # --- Debug configuration
 # ---------------------------------------
-set (CMAKE_C_FLAGS_DEBUG    "-O0 -g ${TOOLCHAIN_COMPILER_OPTIONS_DEBUG}"  CACHE STRING "" FORCE)
-set (CMAKE_CXX_FLAGS_DEBUG  "-O0 -g ${TOOLCHAIN_COMPILER_OPTIONS_DEBUG}"  CACHE STRING "" FORCE)
+set (CMAKE_C_FLAGS_DEBUG    "${TOOLCHAIN_COMPILER_OPTIONS_DEBUG_BASE} ${TOOLCHAIN_COMPILER_OPTIONS_DEBUG}"  CACHE STRING "" FORCE)
+set (CMAKE_CXX_FLAGS_DEBUG  "${TOOLCHAIN_COMPILER_OPTIONS_DEBUG_BASE} ${TOOLCHAIN_COMPILER_OPTIONS_DEBUG}"  CACHE STRING "" FORCE)
 
 # ---------------------------------------
 # --- Release configuration
 # ---------------------------------------
-set (CMAKE_C_FLAGS_RELEASE        "-DNDEBUG ${TOOLCHAIN_COMPILER_OPTIONS_RELEASE}"  CACHE STRING "" FORCE)
-set (CMAKE_CXX_FLAGS_RELEASE      "-DNDEBUG ${TOOLCHAIN_COMPILER_OPTIONS_RELEASE}"  CACHE STRING "" FORCE)
-set (COMPILE_DEFINITIONS_RELEASE  "NDEBUG;${COMPILE_DEFINITIONS_RELEASE}"           CACHE STRING "" FORCE)
+set (CMAKE_C_FLAGS_RELEASE        "${TOOLCHAIN_COMPILER_OPTIONS_RELEASE_BASE} ${TOOLCHAIN_COMPILER_OPTIONS_RELEASE}"  CACHE STRING "" FORCE)
+set (CMAKE_CXX_FLAGS_RELEASE      "${TOOLCHAIN_COMPILER_OPTIONS_RELEASE_BASE} ${TOOLCHAIN_COMPILER_OPTIONS_RELEASE}"  CACHE STRING "" FORCE)
+set (COMPILE_DEFINITIONS_RELEASE  "${TOOLCHAIN_COMPILER_DEFINITIONS_RELEASE_BASE};${COMPILE_DEFINITIONS_RELEASE}"     CACHE STRING "" FORCE)
 
 # Make possible to pass paths to program code.
 #add_definitions(-DFRAMEWORK_OUTPUT_BINARTY_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
@@ -166,8 +177,6 @@ message ("  Static Linker flags  : ${CMAKE_STATIC_LINKER_FLAGS}"    )
 message ("  CMAKE_BINARY_DIR     : ${CMAKE_BINARY_DIR}"             )
 message ("  Build thread count   : ${TOOLCHAIN_BUILD_THREAD_COUNT}" )
 message ("----------------------------------------"                 )
-
-
 
 function (DF_AddTargetSources target_name )
   file(GLOB _sources

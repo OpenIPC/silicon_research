@@ -38,8 +38,11 @@ Compile the code into a binary.
 
 ```bash
 #### on desktop
-cmake -Bbuild-gk7205v300-release -DTARGET_PLATFORM=gk7205v300 -DTARGET_BUILD=Release \
+cmake -Bbuild-gk7205v300-release -DTARGET_BUILD=Release \
+  -DTARGET_PLATFORM=gk7205v300 \
+  -DTARGET_PLATFORM_EABI=musl  \
   -DTARGET_PLATFORM_TOOLCHAIN_GCC_PATH=/path/to/toolchain/bin
+  
 cmake --build build-gk7205v300-release
 ```
 Upload the compiled binary onto your camera.
@@ -86,8 +89,11 @@ ln -s /dev/venc /dev/ven
 Также вам потребуется соответствующая камера с установленной прошивкой OpenIPC.
 
 ``` bash
-cmake -Bbuild-gk7205v300-release -DTARGET_PLATFORM=gk7205v300 -DTARGET_BUILD=Release \
-  -DTARGET_PLATFORM_TOOLCHAIN_GCC_PATH={PATH_TO}/openipc/output/host/bin
+cmake -Bbuild-gk7205v300-release -DTARGET_BUILD=Release \
+  -DTARGET_PLATFORM=gk7205v300 \
+  -DTARGET_PLATFORM_EABI=musl  \
+  -DTARGET_PLATFORM_TOOLCHAIN_GCC_PATH=/path/to/toolchain/bin
+
 cmake --build build-gk7205v300-release
 ```
 

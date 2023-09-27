@@ -23,7 +23,7 @@ uint32_t  tx_buffer_used = 0;
 void printHelp() {
   printf(
     "\n"
-    "\t\tOpenIPC FPV Streamer for GK7205 + IMX307\n"
+    "\t\tOpenIPC FPV Streamer for GK7205 + IMX307 v23.09-27\n"
     "\n"
     "  Usage:\n"
     "    venc [Arguments]\n"
@@ -64,6 +64,7 @@ void printHelp() {
     "        WxH          - Custom resolution W x H pixels\n"
     "\n"
     "    -f [FPS]       - Encoder FPS (25,30,50,60)       (Default: 60)\n"
+    "    -g [Value]     - GOP denominator                 (Default: 10)\n"
     "    -c [Codec]     - Encoder mode                    (Default: 264avbr)\n"
     "\n"
     "           --- H264 ---\n"
@@ -79,8 +80,8 @@ void printHelp() {
     "       265cbr        - h265 CBR\n"
     "\n"
     "    -d [Format]    - Data format                       (Default: stream)\n"
-    "      stream         - Incoming data is stream\n"
-    "      frame          - Incoming data is frame\n"
+    "      stream         - Produce NALUs in stream mode\n"
+    "      frame          - Produce NALUs in packet mode\n"
     "\n"
     "    --no-slices          - Disable slices\n"
     "    --slice-size [size]  - Slices size in lines      (Default: 4)\n"
@@ -142,7 +143,8 @@ int main(int argc, const char* argv[]) {
   VPSS_CHN  vpss_first_ch_id  = 0;  // - Channel for primary stream
   VPSS_CHN  vpss_second_ch_id = 1;  // - Channel for secondary stream
   
-  uint32_t  venc_gop_size     = sensor_framerate / 10;
+  uint32_t  venc_gop_denom    = 10;
+  uint32_t  venc_gop_size     = sensor_framerate / venc_gop_denom;
   uint32_t  venc_max_rate     = 1024 * 8;
 
   VENC_CHN  venc_first_ch_id  = 0;
@@ -323,6 +325,10 @@ int main(int argc, const char* argv[]) {
       }
       continue;
     }
+    __OnArgument("-g") {
+      venc_gop_denom = atoi(__ArgValue);
+      continue;
+    }
     __OnArgument("--roi") {
       enable_roi = 1;
       continue;
@@ -377,8 +383,7 @@ int main(int argc, const char* argv[]) {
   }
   
   // - Normalize GOP
-  venc_gop_size  = sensor_framerate / 10;
-  
+  venc_gop_size  = sensor_framerate / venc_gop_denom;
   
   // --------------------------------------------------------------
   // --- Board configuration
