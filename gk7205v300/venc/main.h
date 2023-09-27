@@ -1,4 +1,7 @@
 #pragma once
+#define _POSIX_TIMERS
+#define _REENTRANT
+#include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
@@ -7,6 +10,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -14,17 +18,19 @@
 #include <netinet/in.h>
 #include <pthread.h>
 
-#define PROT_READ  0x1
-#define PROT_WRITE 0x2
-#define PROT_EXEC  0x4
+#ifdef TARGET_PLATFORM_EABI_MUSL
+  #define PROT_READ  0x1
+  #define PROT_WRITE 0x2
+  #define PROT_EXEC  0x4
 
-#define MAP_SHARED  0x01
-#define MAP_PRIVATE 0x02
+  #define MAP_SHARED  0x01
+  #define MAP_PRIVATE 0x02
 
-#define MAP_FAILED ((void *)-1)
+  #define MAP_FAILED ((void *)-1)
 
-void *mmap64(void *start, size_t len, int prot, int flags, int fd, off_t off);
-int munmap(void *__addr, size_t __len);
+  void *mmap64(void *start, size_t len, int prot, int flags, int fd, off_t off);
+  int munmap(void *__addr, size_t __len);
+#endif
 
 #include "hi_common.h"
 #include "hi_buffer.h"
@@ -60,6 +66,21 @@ int munmap(void *__addr, size_t __len);
 #include "hi_sns_ctrl.h"
 #include "mpi_vgs.h"
 
+
+typedef enum SensorType {
+  IMX307  = 0,
+  IMX335  = 1
+} SensorType;
+
+#pragma pack(push, 1)
+struct RTPHeader {
+  uint8_t   version;
+  uint8_t   payload_type;
+  uint16_t  sequence;
+  uint32_t  timestamp;
+  uint32_t  ssrc_id;
+};
+#pragma pack(pop)
 
 void* __ISP_THREAD__(void *param);
 int processStream(VENC_CHN channel_id, int socket_handle, struct sockaddr* dst_address, uint16_t max_frame_size);

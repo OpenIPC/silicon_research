@@ -13,8 +13,8 @@ add_executable(${NAME}
   sensor/imx307_2l_cmos.c
   sensor/imx307_2l_sensor_ctl.c
   
-  #sensor/imx307_cmos.c
-  #sensor/imx307_sensor_ctl.c
+  sensor/imx335_cmos.c
+  sensor/imx335_sensor_ctl.c
 )
 
 target_include_directories(${NAME}
@@ -34,10 +34,7 @@ target_link_libraries(${NAME}
   gk_api
   gk_ae
   gk_awb
-  
-  #sns_imx335
-  #sns_imx307
-  
+
   isp
   ae
   awb
@@ -65,3 +62,10 @@ set_target_properties (${NAME} PROPERTIES
   LINK_FLAGS
     -Wl,-rpath,$ORIGIN
 )
+
+if (TARGET_PLATFORM_EABI STREQUAL "musl")
+  target_compile_definitions(${NAME}
+    PUBLIC
+      TARGET_PLATFORM_EABI_MUSL
+  )
+endif()

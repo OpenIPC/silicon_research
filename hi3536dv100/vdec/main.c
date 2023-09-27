@@ -96,6 +96,14 @@ void printHelp() {
     "\n"
     "  Arguments:\n"
     "    -p [Port]      - Listen port                       (Default: 5000)\n"
+    "    -c [Codec]     - Video codec                       (Default: h264)\n"
+    "      h264           - H264\n"
+    "      h265           - H264\n"
+    "\n"
+    "    -d [Format]    - Data format                       (Default: stream)\n"
+    "      stream         - Incoming data is stream\n"
+    "      frame          - Incoming data is frame\n"
+    "\n"
     "    -m [Mode]      - Screen output mode                (Default: 720p60)\n"
     "      720p60         - 1280 x 720    @ 60 fps\n"
     "      1080p60        - 1920 x 1080   @ 60 fps\n"
@@ -148,6 +156,10 @@ int main(int argc, const char* argv[]) {
   int             write_stream_file = -1;
   
   int             enable_osd        = 0;
+
+  PAYLOAD_TYPE_E  codec_id          = PT_H264;
+  
+  int             codec_mode_stream = 1;
   
   // --------------------------------------------------------------
   // --- Load console arguments
@@ -155,6 +167,28 @@ int main(int argc, const char* argv[]) {
   __BeginParseConsoleArguments__(printHelp)
     __OnArgument("-p") {
       listen_port = atoi(__ArgValue);
+      continue;
+    }
+    __OnArgument("-c") {
+      const char* codec = __ArgValue;
+      if        (!strcmp(codec, "h264")) {
+        codec_id = PT_H264;
+      } else if (!strcmp(codec, "h265")) {
+        codec_id = PT_H265;
+      } else {
+        printf("> ERROR: Unsupported video codec [%s]\n", codec);
+      }
+      continue;
+    }
+    __OnArgument("-d") {
+      const char* format = __ArgValue;
+      if        (!strcmp(format, "stream")) {
+        codec_mode_stream = 1;
+      } else if (!strcmp(format, "frame")) {
+        codec_mode_stream = 0;
+      } else {
+        printf("> ERROR: Unsupported data format [%s]\n", format);
+      }
       continue;
     }
     __OnArgument("-m") {
@@ -295,7 +329,7 @@ int main(int argc, const char* argv[]) {
     vb_conf.astCommPool[0].u32BlkSize = vdec_max_width * vdec_max_height * 3;
     
     // - Calculate required size for video buffer
-    VB_PIC_BLK_SIZE(vdec_max_width, vdec_max_height, PT_H264, vb_conf.astCommPool[0].u32BlkSize);
+    VB_PIC_BLK_SIZE(vdec_max_width, vdec_max_height, codec_id, vb_conf.astCommPool[0].u32BlkSize);
   
     printf("> VDEC picture block size = %d\n", vb_conf.astCommPool[0].u32BlkSize);
   
@@ -477,14 +511,14 @@ int main(int argc, const char* argv[]) {
   // - Start decode at 1920x1080 maximum resolution
   { VDEC_CHN_ATTR_S config;
     memset(&config, 0x00, sizeof(config));
-    config.enType       = PT_H264;
+    config.enType       = codec_id;
     config.u32BufSize   = vdec_max_width * vdec_max_height * 3; // vdec_max_width * vdec_max_height;
     config.u32Priority  = 128;
     config.u32PicWidth  = vdec_max_width;
     config.u32PicHeight = vdec_max_height;  
 
     config.stVdecVideoAttr.bTemporalMvpEnable = HI_FALSE;
-    config.stVdecVideoAttr.enMode             = VIDEO_MODE_STREAM;// VIDEO_MODE_FRAME;
+    config.stVdecVideoAttr.enMode             = codec_mode_stream ? VIDEO_MODE_STREAM : VIDEO_MODE_FRAME;
     config.stVdecVideoAttr.u32RefFrameNum     = 1;
 
     // - Create VDEC channel
@@ -525,26 +559,62 @@ int main(int argc, const char* argv[]) {
     }
     
     // - Read decoder protocol information
-    VDEC_PRTCL_PARAM_S protocol;
-    HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
+    { VDEC_PRTCL_PARAM_S protocol;
+      HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
 
-    protocol.stH264PrtclParam.s32MaxPpsNum    = 32;
-    protocol.stH264PrtclParam.s32MaxSpsNum    = 32;
-    protocol.stH264PrtclParam.s32MaxSliceNum  = 32;
-    
-    ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
-    if (ret != HI_SUCCESS) {
-      printf("ERROR: Unable to set VDEC protocol parameters\n");
-      return 1;
+      switch (protocol.enType) {
+        case PT_H264: {
+          // - Configure video stream
+          protocol.stH264PrtclParam.s32MaxPpsNum    = 32;
+          protocol.stH264PrtclParam.s32MaxSpsNum    = 32;
+          protocol.stH264PrtclParam.s32MaxSliceNum  = 32;
+
+          ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
+          if (ret != HI_SUCCESS) {
+            printf("ERROR: Unable to set VDEC protocol parameters\n");
+            return 1;
+          }
+
+          HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
+          printf("> VDEC Protocol = Type: %s, PPS: %d, SLICE: %d, SPS: %d\n",
+            (codec_id == PT_H264 ? "H264" : (codec_id == PT_H265 ? "H265" : "Unknown")),
+            protocol.stH264PrtclParam.s32MaxPpsNum,
+            protocol.stH264PrtclParam.s32MaxSliceNum,
+            protocol.stH264PrtclParam.s32MaxSpsNum
+          );
+
+
+        }; break;
+
+        case PT_H265: {
+          // - Configure video stream
+          protocol.stH265PrtclParam.s32MaxPpsNum          = 16;
+          protocol.stH265PrtclParam.s32MaxSpsNum          = 16;
+          protocol.stH265PrtclParam.s32MaxSliceSegmentNum = 16;
+
+          ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
+          if (ret != HI_SUCCESS) {
+            printf("ERROR: Unable to set VDEC protocol parameters\n");
+            return 1;
+          }
+
+          HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
+          printf("> VDEC Protocol = Type: %s, PPS: %d, SLICE: %d, SPS: %d\n",
+            (codec_id == PT_H264 ? "H264" : (codec_id == PT_H265 ? "H265" : "Unknown")),
+            protocol.stH265PrtclParam.s32MaxPpsNum,
+            protocol.stH265PrtclParam.s32MaxSliceSegmentNum,
+            protocol.stH265PrtclParam.s32MaxSpsNum
+          );
+          
+        }; break;
+
+        default:
+          break;
+      }
+
+
+          
     }
-    
-    HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
-    printf("> VDEC Protocol = Type: %s, PPS: %d, SLICE: %d, SPS: %d\n",
-      protocol.enType == PT_H264 ? "h264" : "Unknown",
-      protocol.stH264PrtclParam.s32MaxPpsNum,
-      protocol.stH264PrtclParam.s32MaxSliceNum,
-      protocol.stH264PrtclParam.s32MaxSpsNum
-    );
   }
 
   // --------------------------------------------
@@ -567,8 +637,6 @@ int main(int argc, const char* argv[]) {
       return 1;
     }
   }
-  
-  
   
   // - Start VDEC
   { int ret = HI_MPI_VDEC_StartRecvStream(vdec_channel_id);
@@ -624,18 +692,24 @@ int main(int argc, const char* argv[]) {
     VDEC_STREAM_S stream;
     memset(&stream, 0x00, sizeof(stream));
     stream.bEndOfStream = HI_FALSE;
-    stream.bEndOfFrame  = HI_FALSE;
+    stream.bEndOfFrame  = codec_mode_stream ? HI_FALSE : HI_TRUE;
 
     // - Decode UDP stream
     stream.pu8Addr = decodeUDPFrame(rx_buffer + 8, (uint32_t)rx, 0, nal_buffer, &nal_buffer_used, &stream.u32Len);
     if (!stream.pu8Addr) {
       continue;
     }
+    if (stream.u32Len < 5) {
+      printf("> Broken frame\n");
+    }
+
+    uint8_t nal_type = stream.pu8Addr[4]  & 0x1F;
+    //printf("NAL Type = %d, Size = %d\n", nal_type, stream.u32Len - 4);
     
     stats_rx_bytes += stream.u32Len;
     
     // - Write file
-    if (write_stream_file != -1) {      
+    if (write_stream_file != -1) {
       uint32_t  write_size = stream.u32Len;
       uint32_t  write_done = 0;
       
@@ -664,10 +738,8 @@ int main(int argc, const char* argv[]) {
         printf("WARN: Unable to send data into VDEC = 0x%x\n", ret);
       }
     }
-    
   
 
-    
     // - Query decoder status
     /*{ VDEC_CHN_STAT_S stats;
       memset(&stats, 0x00, sizeof(stats));
@@ -775,8 +847,6 @@ void* __OSD_THREAD__(void* arg) {
         last_timestamp = current_timestamp;
         rx_rate = (float)stats_rx_bytes / 1024.0f * 8; 
         stats_rx_bytes = 0;
-        
-        
       }
     }
   

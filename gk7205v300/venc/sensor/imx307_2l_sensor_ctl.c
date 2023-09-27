@@ -17,7 +17,8 @@
 #include "i2c.h"
 #endif
 
-extern uint16_t   goke_version;
+extern uint16_t goke_version;
+extern uint32_t sensor_framerate;
 
 const unsigned char imx307_2l_i2c_addr = 0x34; /* I2C Address of IMX307 */
 const unsigned int imx307_2l_addr_byte = 2;
@@ -226,7 +227,7 @@ enum MIPI_LANES {
 	MIPI_LANES_2 = 2,
 	MIPI_LANES_4 = 4,
 };
- extern uint32_t  sensor_framerate;
+
  
 static void imx307_write_adjacent(VI_PIPE ViPipe, GK_U32 addr, GK_U32 data)
 {
@@ -238,9 +239,6 @@ void imx307_2l_init_universal(VI_PIPE ViPipe, enum WINMODE winmode,
 			      unsigned fps, enum MIPI_LANES mipi_lanes,
 			      int bitness)
 {
-  
-  fps =  sensor_framerate;
-  
 	if (fps <= 25)
 		fps = 25;
 	else if (fps <= 30)
@@ -250,7 +248,7 @@ void imx307_2l_init_universal(VI_PIPE ViPipe, enum WINMODE winmode,
 	else if (fps <= 60)
 		fps = 60;
     
-  printf("MIPI LANES: %d, FPS: %d\n", mipi_lanes, fps);
+  //printf("MIPI LANES: %d, FPS: %d\n", mipi_lanes, fps);
 
 	// Enter Standby
 	imx307_2l_write_register(ViPipe, 0x3000, 0x01); // Standby mode
@@ -511,7 +509,7 @@ void imx307_2l_init_universal(VI_PIPE ViPipe, enum WINMODE winmode,
 void imx307_2l_linear_720p30_init(VI_PIPE ViPipe)
 {
   printf("> Starting 720p\n");
-	imx307_2l_init_universal(ViPipe, WINMODE_720P, 60, goke_version == 300 ? MIPI_LANES_4 : MIPI_LANES_2, 10);
+	imx307_2l_init_universal(ViPipe, WINMODE_720P, sensor_framerate, goke_version == 300 ? MIPI_LANES_4 : MIPI_LANES_2, 10);
   /*
   imx307_write_adjacent(ViPipe, 0x301C, 0x0CE4);
 	imx307_2l_write_register(ViPipe, 0x305C, 0x10); // INCKSEL1 37.125MHz
@@ -534,7 +532,7 @@ void imx307_2l_linear_720p30_init(VI_PIPE ViPipe)
 /* 1080P30 and 1080P25 */
 void imx307_2l_linear_1080p30_init(VI_PIPE ViPipe)
 {
-	imx307_2l_init_universal(ViPipe, WINMODE_1080P, 30, MIPI_LANES_4, 10);
+	imx307_2l_init_universal(ViPipe, WINMODE_1080P, sensor_framerate, goke_version == 300 ? MIPI_LANES_4 : MIPI_LANES_2, 10);
 }
 
 void imx307_2l_wdr_1080p30_2to1_init(VI_PIPE ViPipe)

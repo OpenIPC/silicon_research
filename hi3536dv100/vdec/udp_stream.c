@@ -63,7 +63,8 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
   uint32_t  in_size     = 0;
 
   if (fragment_type == 28) {
-    uint8_t new_nal = (rx_buffer[0] & 0xE0) | (rx_buffer[1] & 0x1F);
+    // - Calculate original NAL type
+    uint8_t original_nal = (rx_buffer[0] & 0xE0) | nal_type;
     
     rx_buffer ++;
     rx_size   --;
@@ -79,7 +80,7 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
       memcpy(nal_buffer + 4, rx_buffer, rx_size);
       
       // - Patch NAL 
-      nal_buffer[4]       = new_nal;
+      nal_buffer[4]       = original_nal;
       (*nal_buffer_used)  = rx_size + 4;
       
     } else if (!start_bit && !end_bit && (*nal_buffer_used) != 0) {
@@ -95,7 +96,7 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
       memcpy(nal_buffer + (*nal_buffer_used), rx_buffer, rx_size);
       *nal_buffer_used += rx_size;
      
-     
+
       // - Store NAL size
       *out_nal_size = *nal_buffer_used;
       
@@ -115,11 +116,11 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
     
   } else {
     // - Create frame prefix
-    rx_buffer[-1] = 1;
-    rx_buffer[-2] = 0;
-    rx_buffer[-3] = 0;
     rx_buffer[-4] = 0;
-
+    rx_buffer[-3] = 0;
+    rx_buffer[-2] = 0;
+    rx_buffer[-1] = 1;
+  
     *out_nal_size     = rx_size + 4;
     *nal_buffer_used  = 0;
     

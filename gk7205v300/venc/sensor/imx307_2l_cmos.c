@@ -1035,7 +1035,6 @@ static GK_S32 cmos_set_wdr_mode(VI_PIPE ViPipe, GK_U8 u8Mode)
 	switch (u8Mode & 0x3F) {
 	case WDR_MODE_NONE:
 		pstSnsState->enWDRMode = WDR_MODE_NONE;
-		printf("linear mode\n");
 		break;
 
 	case WDR_MODE_2To1_LINE:
