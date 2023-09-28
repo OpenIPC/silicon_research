@@ -798,6 +798,12 @@ float telemetry_altitude  = 0;
 float telemetry_pitch     = 0;
 float telemetry_roll      = 0;
 float telemetry_yaw       = 0;
+float telemetry_battery   = 0;
+float telemetry_current   = 0;
+float telemetry_lat       = 0;
+float telemetry_lon       = 0;
+float telemetry_sats      = 0;
+float telemetry_gspeed    = 0;
 
 void* __MAVLINK_THREAD__(void* arg) {
 
@@ -860,6 +866,30 @@ void* __MAVLINK_THREAD__(void* arg) {
 
           }; break;
 
+          case MAVLINK_MSG_ID_SYS_STATUS: {
+            mavlink_sys_status_t bat;
+            mavlink_msg_sys_status_decode(&message, &bat);
+            telemetry_battery = bat.voltage_battery;
+            telemetry_current = bat.current_battery;
+
+          }; break;
+
+          case MAVLINK_MSG_ID_GPS_RAW_INT: {
+            mavlink_gps_raw_int_t gps;
+            mavlink_msg_gps_raw_int_decode(&message, &gps);
+            telemetry_sats = gps.satellites_visible;
+            telemetry_lat = gps.lat;
+            telemetry_lon = gps.lon;
+
+          }; break;
+            
+          case MAVLINK_MSG_ID_VFR_HUD: {
+            mavlink_vfr_hud_t vfr;
+            mavlink_msg_vfr_hud_decode(&message, &vfr);
+            telemetry_gspeed = vfr.groundspeed*3.6;
+
+          }; break;
+
           case MAVLINK_MSG_ID_ATTITUDE: {
             mavlink_attitude_t att;
             mavlink_msg_attitude_decode(&message, &att);
@@ -910,7 +940,7 @@ void* __OSD_THREAD__(void* arg) {
     uint32_t x_center = fbg->width / 2;
 
     // - Pitch
-    { uint32_t offset =  -telemetry_pitch * 2; //map_range(telemetry_pitch, -90, 90, -120, 120);
+    { uint32_t offset =  telemetry_pitch * 2; //map_range(telemetry_pitch, -90, 90, -120, 120);
       uint32_t y_pos = ((int32_t)fbg->height / 2 - 2 + offset);
       for (int i = 0; i < 4; i++) {
         fbg_line(fbg, x_center - 180, y_pos + i, x_center - 60,   y_pos + i, 255,255,255);
@@ -927,16 +957,25 @@ void* __OSD_THREAD__(void* arg) {
       fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10,       x_center + 240 + width, fbg->height / 2 - 120 + i * 10, 255,255,255);
       fbg_line(fbg, x_center + 220, fbg->height / 2 - 120  + i * 10 + 1,  x_center + 240 + width, fbg->height / 2 - 120 + i * 10 + 1, 255,255,255);
     }
-    
-    fbg_write(fbg, "SPD", x_center - (16 * 3 + 20) - 240, fbg->height / 2 - 8);
 
     // - Altitude
     { char msg[16];
       memset(msg, 0x00, sizeof(msg));
       sprintf(msg, "%.01f", telemetry_altitude);
       fbg_write(fbg, msg, x_center + ( 20) + 240,         fbg->height / 2 - 8);
+      sprintf(msg, "%.00f", telemetry_gspeed);
+      fbg_write(fbg, msg, x_center - (16 * 3 + 20) - 240, fbg->height / 2 - 8);
+      sprintf(msg, "%.02f", telemetry_battery/1000);
+      fbg_write(fbg, msg, x_center - 520,         fbg->height - 90);
+      sprintf(msg, "%.02f", telemetry_current/100);
+      fbg_write(fbg, msg, x_center - 520,         fbg->height - 120);
+      sprintf(msg, "%.00f", telemetry_sats);
+      fbg_write(fbg, msg, x_center + 550,         fbg->height - 30);
+      sprintf(msg, "%.00f", telemetry_lat);
+      fbg_write(fbg, msg, x_center + 480,         fbg->height - 90);
+      sprintf(msg, "%.00f", telemetry_lon);
+      fbg_write(fbg, msg, x_center + 480,         fbg->height - 60);
     }
-    
 
     fbg_image(fbg, openipc_img, 1280 - 160 - 80, 40);
    
