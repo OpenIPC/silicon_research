@@ -940,41 +940,46 @@ void* __OSD_THREAD__(void* arg) {
     uint32_t x_center = fbg->width / 2;
 
     // - Pitch
-    { uint32_t offset =  telemetry_pitch * 2; //map_range(telemetry_pitch, -90, 90, -120, 120);
-      uint32_t y_pos = ((int32_t)fbg->height / 2 - 2 + offset);
+    { int32_t offset_pitch =  telemetry_pitch * 4;
+      int32_t offset_roll  =  telemetry_roll  * 4;
+      uint32_t y_pos_left = ((int32_t)fbg->height / 2 - 2 + offset_pitch + offset_roll);
+      uint32_t y_pos_right  = ((int32_t)fbg->height / 2 - 2 + offset_pitch - offset_roll);
       for (int i = 0; i < 4; i++) {
-        fbg_line(fbg, x_center - 180, y_pos + i, x_center - 60,   y_pos + i, 255,255,255);
-        fbg_line(fbg, x_center + 60,  y_pos + i, x_center + 180,  y_pos + i, 255,255,255);
+        fbg_line(fbg, x_center - 180, y_pos_left + i, x_center +180,   y_pos_right + i, 255,255,255);
       }
-    }
+    }  
     for (int i = 0; i < 25; i++) {
 
       uint32_t width = (i == 12) ? 10 : 0;
-      
-      fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120 + i * 10,       x_center - 220, fbg->height / 2 - 120 + i * 10, 255,255,255);
-      fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120  + i * 10 + 1,  x_center - 220, fbg->height / 2 - 120 + i * 10 + 1, 255,255,255);
 
-      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10,       x_center + 240 + width, fbg->height / 2 - 120 + i * 10, 255,255,255);
-      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120  + i * 10 + 1,  x_center + 240 + width, fbg->height / 2 - 120 + i * 10 + 1, 255,255,255);
+      fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120 + i * 10,       x_center - 220, fbg->height / 2 - 120 + i * 1>
+      fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120  + i * 10 + 1,  x_center - 220, fbg->height / 2 - 120 + i * 1>
+
+      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10,       x_center + 240 + width, fbg->height / 2 - 120 + i * 1>
+      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120  + i * 10 + 1,  x_center + 240 + width, fbg->height / 2 - 120 + i * 1>
     }
 
-    // - Altitude
+    // - OSD telemetry
     { char msg[16];
       memset(msg, 0x00, sizeof(msg));
-      sprintf(msg, "%.01f", telemetry_altitude);
-      fbg_write(fbg, msg, x_center + ( 20) + 240,         fbg->height / 2 - 8);
-      sprintf(msg, "%.00f", telemetry_gspeed);
-      fbg_write(fbg, msg, x_center - (16 * 3 + 20) - 240, fbg->height / 2 - 8);
-      sprintf(msg, "%.02f", telemetry_battery/1000);
-      fbg_write(fbg, msg, x_center - 520,         fbg->height - 90);
-      sprintf(msg, "%.02f", telemetry_current/100);
-      fbg_write(fbg, msg, x_center - 520,         fbg->height - 120);
-      sprintf(msg, "%.00f", telemetry_sats);
-      fbg_write(fbg, msg, x_center + 550,         fbg->height - 30);
-      sprintf(msg, "%.00f", telemetry_lat);
-      fbg_write(fbg, msg, x_center + 480,         fbg->height - 90);
-      sprintf(msg, "%.00f", telemetry_lon);
-      fbg_write(fbg, msg, x_center + 480,         fbg->height - 60);
+      sprintf(msg, "ALT:%.00fM", telemetry_altitude);
+      fbg_write(fbg, msg, x_center + ( 20) + 260,         fbg->height / 2 - 8);
+      sprintf(msg, "SPD:%.00fKM/H", telemetry_gspeed);
+      fbg_write(fbg, msg, x_center - (16 * 3) - 360, fbg->height / 2 - 8);
+      sprintf(msg, "BAT:%.02fV", telemetry_battery/1000);
+      fbg_write(fbg, msg, 40,         fbg->height - 60);
+      sprintf(msg, "CUR:%.02fA", telemetry_current/100);
+      fbg_write(fbg, msg, 40,         fbg->height - 90);
+      sprintf(msg, "SATS:%.00f", telemetry_sats);
+      fbg_write(fbg, msg, x_center + 520,         fbg->height - 30);
+      sprintf(msg, "LAT:%.00f", telemetry_lat);
+      fbg_write(fbg, msg, x_center + 440,         fbg->height - 90);
+      sprintf(msg, "LON:%.00f", telemetry_lon);
+      fbg_write(fbg, msg, x_center + 440,         fbg->height - 60);
+      sprintf(msg, "PITCH:%.00f", telemetry_pitch);
+      fbg_write(fbg, msg, x_center + 440,         fbg->height - 140);
+      sprintf(msg, "ROLL:%.00f", telemetry_roll);
+      fbg_write(fbg, msg, x_center + 440,         fbg->height - 170);
     }
 
     fbg_image(fbg, openipc_img, 1280 - 160 - 80, 40);
@@ -993,7 +998,7 @@ void* __OSD_THREAD__(void* arg) {
     char hud_frames_rx[32];
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
     sprintf(hud_frames_rx, "RX Packets %d", frames_received);
-    fbg_write(fbg, hud_frames_rx, 60, 660);
+    fbg_write(fbg, hud_frames_rx, 40, 690);
     
     
     
