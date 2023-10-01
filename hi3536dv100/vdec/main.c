@@ -846,7 +846,7 @@ void* __MAVLINK_THREAD__(void* arg) {
         printf("WARN: MavLink rx error: %s\n", strerror(errno));
     } else if (ret == 0) {
       // peer has done an orderly shutdown
-      return;
+      return 0;
     }
     
     // - Parse
@@ -947,17 +947,18 @@ void* __OSD_THREAD__(void* arg) {
       for (int i = 0; i < 4; i++) {
         fbg_line(fbg, x_center - 180, y_pos_left + i, x_center +180,   y_pos_right + i, 255,255,255);
       }
-    }  
-    for (int i = 0; i < 25; i++) {
+    }
+    
+    /*for (int i = 0; i < 25; i++) {
 
       uint32_t width = (i == 12) ? 10 : 0;
 
-      fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120 + i * 10,       x_center - 220, fbg->height / 2 - 120 + i * 1>
-      fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120  + i * 10 + 1,  x_center - 220, fbg->height / 2 - 120 + i * 1>
+      fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120 + i * 10,       x_center - 220, fbg->height / 2 - 120 + i * 1, 255, 255, 255);
+      fbg_line(fbg, x_center - 240 - width, fbg->height / 2 - 120  + i * 10 + 1,  x_center - 220, fbg->height / 2 - 120 + i * 1, 255, 255, 255);
 
-      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10,       x_center + 240 + width, fbg->height / 2 - 120 + i * 1>
-      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120  + i * 10 + 1,  x_center + 240 + width, fbg->height / 2 - 120 + i * 1>
-    }
+      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10,       x_center + 240 + width, fbg->height / 2 - 120 + i * 1, 255, 255, 255);
+      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120  + i * 10 + 1,  x_center + 240 + width, fbg->height / 2 - 120 + i * 1, 255, 255, 255);
+    }*/
 
     // - OSD telemetry
     { char msg[16];

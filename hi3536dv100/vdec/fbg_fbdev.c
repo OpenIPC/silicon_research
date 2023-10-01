@@ -8,6 +8,7 @@
 #include <linux/kd.h>
 
 #include "fbg_fbdev.h"
+#include "hifb.h"
 
 void fbg_fbdevDraw(struct _fbg *fbg);
 void fbg_fbdevFlip(struct _fbg *fbg);
@@ -39,42 +40,75 @@ struct _fbg *fbg_fbdevSetup(char *fb_device, int page_flipping) {
         return NULL;
     }
     
-    static struct fb_bitfield g_r16 = {10, 5, 0};
+    // - 16bpp mode
+    /*static struct fb_bitfield g_r16 = {10, 5, 0};
     static struct fb_bitfield g_g16 = {5, 5, 0};
     static struct fb_bitfield g_b16 = {0, 5, 0};
     static struct fb_bitfield g_a16 = {15, 1, 0};
-
     fbdev_context->vinfo.red    = g_r16;
     fbdev_context->vinfo.green  = g_g16;
     fbdev_context->vinfo.blue   = g_b16;
     fbdev_context->vinfo.transp = g_a16;
+    fbdev_context->vinfo.bits_per_pixel = 16;*/
     
+    // - 32bpp mode
+    static struct fb_bitfield s_a32 = {24,8,0};
+    static struct fb_bitfield s_r32 = {16,8,0};
+    static struct fb_bitfield s_g32 = {8,8,0};
+    static struct fb_bitfield s_b32 = {0,8,0};
+    fbdev_context->vinfo.red            = s_r32;
+    fbdev_context->vinfo.green          = s_g32;
+    fbdev_context->vinfo.blue           = s_b32;
+    fbdev_context->vinfo.transp         = s_a32;
+    fbdev_context->vinfo.bits_per_pixel = 32;
     
     if (ioctl(fbdev_context->fd, FBIOPUT_VSCREENINFO, &fbdev_context->vinfo) == -1) {
-        fprintf(stderr, "Unable to set VSCREENINFO informations!\n", fb_device);
-
-        close(fbdev_context->fd);
-
-        return NULL;
+      fprintf(stderr, "Unable to set VSCREENINFO informations!\n", fb_device);
+      close(fbdev_context->fd);
+      return NULL;
     }
     
     if (ioctl(fbdev_context->fd, FBIOGET_VSCREENINFO, &fbdev_context->vinfo) == -1) {
-        fprintf(stderr, "fbg_fbdevSetup: '%s' Cannot obtain framebuffer FBIOGET_VSCREENINFO informations!\n", fb_device);
+      fprintf(stderr, "fbg_fbdevSetup: '%s' Cannot obtain framebuffer FBIOGET_VSCREENINFO informations!\n", fb_device);
+      close(fbdev_context->fd);
+      return NULL;
+    }
+  
+    if (ioctl(fbdev_context->fd, FBIOGET_FSCREENINFO, &fbdev_context->finfo) == -1) {
+      fprintf(stderr, "fbg_fbdevSetup: '%s' Cannot obtain framebuffer FBIOGET_FSCREENINFO informations!\n", fb_device);
+      close(fbdev_context->fd);
+      return NULL;
+    }
 
-        close(fbdev_context->fd);
-
-        return NULL;
+    // --- FBG has no support for transparency
+    // - Disable alpa channel
+    HIFB_ALPHA_S alpha;
+    { int ret = ioctl(fbdev_context->fd, FBIOGET_ALPHA_HIFB, &alpha);
+    }
+    alpha.bAlphaEnable  = 0;
+    alpha.u8Alpha0      = 0;
+    alpha.u8Alpha1      = 0;
+    alpha.u8GlobalAlpha = 180;
+    alpha.bAlphaChannel = 0;    
+    { int ret = ioctl(fbdev_context->fd, FBIOPUT_ALPHA_HIFB, &alpha);
     }
     
-
-    if (ioctl(fbdev_context->fd, FBIOGET_FSCREENINFO, &fbdev_context->finfo) == -1) {
-        fprintf(stderr, "fbg_fbdevSetup: '%s' Cannot obtain framebuffer FBIOGET_FSCREENINFO informations!\n", fb_device);
-
-        close(fbdev_context->fd);
-
-        return NULL;
+    // - Disable cursor alpha
+    alpha.bAlphaEnable = 0;
+    { int ret = ioctl(fbdev_context->fd, FBIOPUT_CURSOR_ALPHA, &alpha);
     }
-
+    
+    // --- FBG use color key for transparency (black)
+    // - Setup color key as black
+    HIFB_COLORKEY_S colorkey;
+    { int ret = ioctl(fbdev_context->fd, FBIOGET_COLORKEY_HIFB, &colorkey);
+    }
+    colorkey.bKeyEnable = 1;
+    colorkey.u32Key     = 0x000000;
+    { int ret = ioctl(fbdev_context->fd, FBIOPUT_COLORKEY_HIFB, &colorkey);
+    }
+    
+    // --- OK
     fprintf(stdout, "fbg_fbdevSetup: '%s' (%dx%d (%dx%d virtual) %d bpp (%d/%d, %d/%d, %d/%d) (%d smen_len) %d line_length)\n",
         fb_device,
         fbdev_context->vinfo.xres, fbdev_context->vinfo.yres,
@@ -105,6 +139,7 @@ struct _fbg *fbg_fbdevSetup(char *fb_device, int page_flipping) {
         page_flipping = 0;
     } else {
         components = fbdev_context->vinfo.bits_per_pixel / 8;
+        printf("Components: %d\n", components);
     }
 
     struct _fbg *fbg = fbg_customSetup(fbdev_context->vinfo.xres, fbdev_context->vinfo.yres, components, 0, 0, (void *)fbdev_context, fbg_fbdevDraw, fbg_fbdevFlip, NULL, fbg_fbdevFree);
@@ -161,10 +196,9 @@ struct _fbg *fbg_fbdevSetup(char *fb_device, int page_flipping) {
     }
 
     // initialize framebuffer
-    fbdev_context->buffer = (unsigned char *)mmap(0, fbdev_context->finfo.smem_len,
-        PROT_WRITE,
-        MAP_SHARED,
-        fbdev_context->fd, 0);
+    fbdev_context->buffer = (unsigned char *)mmap(
+      0, fbdev_context->finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbdev_context->fd, 0
+    );
 
     memset(fbdev_context->buffer, 0, fbdev_context->finfo.smem_len);
 
@@ -221,7 +255,7 @@ void fbg_fbdevDraw(struct _fbg *fbg) {
                 *pix_pointer_dst++ = v >> 8;;
             }
         } else {
-            memcpy(fbdev_context->buffer, fbg->disp_buffer, fbg->size);
+          memcpy(fbdev_context->buffer, fbg->disp_buffer, fbg->size);
         }
     }
 }
