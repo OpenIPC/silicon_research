@@ -1,4 +1,5 @@
 #include "main.h"
+#define earthRadiusKm 6371.0
 
 typedef struct hiHDMI_ARGS_S
 {
@@ -50,6 +51,41 @@ static HI_VOID HDMI_HotPlug_Proc(HI_VOID *pPrivateData) {
     HI_MPI_HDMI_Start(stArgs.enHdmi);
 
     return;
+}
+
+double deg2rad(double deg) {
+  return (deg * M_PI / 180);
+}
+
+double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d) {
+  double lat1r, lon1r, lat2r, lon2r, u, v;
+  lat1r = deg2rad(lat1d);
+  lon1r = deg2rad(lon1d);
+  lat2r = deg2rad(lat2d);
+  lon2r = deg2rad(lon2d);
+  u = sin((lat2r - lat1r)/2);
+  v = sin((lon2r - lon1r)/2);
+  return 2.0 * earthRadiusKm * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+}
+ 
+size_t numOfChars( const char s[] ) {
+    size_t n = 0;
+    while ( s[n] != '\0' ) ++n;
+    return n;
+}
+ 
+char * insertString(char s1[], const char s2[], size_t pos) {
+    size_t n1 = numOfChars(s1);
+    size_t n2 = numOfChars(s2);
+    if (n1 < pos) pos = n1;
+    for (size_t i = 0; i < n1 - pos; i++) {
+        s1[n1 + n2 - i - 1] = s1[n1 - i - 1];
+    }
+    for (size_t i = 0; i < n2; i++) {
+        s1[pos+i] = s2[i];
+    }
+    s1[n1 + n2] = '\0';
+    return s1;
 }
 
 static HI_VOID HDMI_UnPlug_Proc(HI_VOID *pPrivateData)
@@ -800,10 +836,29 @@ float telemetry_roll      = 0;
 float telemetry_yaw       = 0;
 float telemetry_battery   = 0;
 float telemetry_current   = 0;
-float telemetry_lat       = 0;
-float telemetry_lon       = 0;
+double telemetry_lat      = 0;
+double telemetry_lon      = 0;
+double telemetry_lat_base = 0;
+double telemetry_lon_base = 0;
+double telemetry_distance = 0;
+double s1_double          = 0;
+double s2_double          = 0;
+double s3_double          = 0;
+double s4_double          = 0;
 float telemetry_sats      = 0;
 float telemetry_gspeed    = 0;
+float telemetry_vspeed    = 0;
+float telemetry_rssi      = 0;
+float telemetry_throttle  = 0;
+float telemetry_arm       = 0;
+float armed               = 0;
+char c1[30] = "0";
+char c2[30] = "0";
+char s1[30] = "0";
+char s2[30] = "0";
+char s3[30] = "0";
+char s4[30] = "0";
+char *ptr[30];
 
 void* __MAVLINK_THREAD__(void* arg) {
 
@@ -874,19 +929,92 @@ void* __MAVLINK_THREAD__(void* arg) {
 
           }; break;
 
+          case MAVLINK_MSG_ID_RC_CHANNELS_RAW: {
+            mavlink_rc_channels_raw_t rc_channels_raw;
+            mavlink_msg_rc_channels_raw_decode(&message, &rc_channels_raw);
+            telemetry_rssi = rc_channels_raw.rssi;
+            telemetry_throttle =  (rc_channels_raw.chan4_raw - 1000) / 10;
+            if (telemetry_throttle < 0){
+                 telemetry_throttle = 0;
+            };
+            telemetry_arm = rc_channels_raw.chan5_raw;
+
+          }; break;
+
           case MAVLINK_MSG_ID_GPS_RAW_INT: {
             mavlink_gps_raw_int_t gps;
             mavlink_msg_gps_raw_int_decode(&message, &gps);
             telemetry_sats = gps.satellites_visible;
             telemetry_lat = gps.lat;
             telemetry_lon = gps.lon;
+            if (telemetry_arm > 1700) {
+                if (armed < 1) {
+                    armed = 1;
+                    telemetry_lat_base = telemetry_lat;
+                    telemetry_lon_base = telemetry_lon;
+                };
+                sprintf(s1, "%.00f", telemetry_lat);
+                if (telemetry_lat < 10000000) {
+                    puts(insertString(s1, "0.", 0));
+                };
+                if (telemetry_lat > 9999999) {
+                    if (numOfChars(s1) == 8) {
+                        puts(insertString(s1, ".", 1));
+                    }
+                    else {
+                        puts(insertString(s1, ".", 2));
+                    };
+                };
+                sprintf(s2, "%.00f", telemetry_lon);
+                if (telemetry_lon < 10000000) {
+                    puts(insertString(s2, "0.", 0));
+                };
+                if (telemetry_lon > 9999999) {
+                    if (numOfChars(s2) == 8) {
+                        puts(insertString(s2, ".", 1));
+                    }
+                    else {
+                        puts(insertString(s2, ".", 2));
+                    };
+                };
+                sprintf(s3, "%.00f", telemetry_lat_base);
+                if (telemetry_lat_base < 10000000) {
+                    puts(insertString(s3, "0.", 0));
+                };
+                if (telemetry_lat_base > 9999999) {
+                    if (numOfChars(s3) == 8) {
+                        puts(insertString(s3, ".", 1));
+                    }
+                    else {
+                        puts(insertString(s3, ".", 2));
+                    };
+                };
+                sprintf(s4, "%.00f", telemetry_lon_base);
+                if (telemetry_lon_base < 10000000) {
+                    puts(insertString(s4, "0.", 0));
+                };
+                if (telemetry_lon_base > 9999999) {
+                    if (numOfChars(s4) == 8) {
+                        puts(insertString(s4, ".", 1));
+                    }
+                    else {
+                        puts(insertString(s4, ".", 2));
+                    };
+                };
+                s1_double = strtod(s1, *ptr);
+                s2_double = strtod(s2, *ptr);
+                s3_double = strtod(s3, *ptr);
+                s4_double = strtod(s4, *ptr);
+            };
+            telemetry_distance = distanceEarth(s1_double, s2_double, s3_double, s4_double);
 
           }; break;
-            
+
           case MAVLINK_MSG_ID_VFR_HUD: {
             mavlink_vfr_hud_t vfr;
             mavlink_msg_vfr_hud_decode(&message, &vfr);
             telemetry_gspeed = vfr.groundspeed*3.6;
+            telemetry_vspeed = vfr.climb;
 
           }; break;
 
@@ -939,16 +1067,28 @@ void* __OSD_THREAD__(void* arg) {
 
     uint32_t x_center = fbg->width / 2;
 
-    // - Pitch
+    // - Artificial Horizon
     { int32_t offset_pitch =  telemetry_pitch * 4;
       int32_t offset_roll  =  telemetry_roll  * 4;
-      uint32_t y_pos_left = ((int32_t)fbg->height / 2 - 2 + offset_pitch + offset_roll);
-      uint32_t y_pos_right  = ((int32_t)fbg->height / 2 - 2 + offset_pitch - offset_roll);
+      int32_t y_pos_left = ((int32_t)fbg->height / 2 - 2 + offset_pitch + offset_roll);
+      int32_t y_pos_right  = ((int32_t)fbg->height / 2 - 2 + offset_pitch - offset_roll);
       for (int i = 0; i < 4; i++) {
-        fbg_line(fbg, x_center - 180, y_pos_left + i, x_center +180,   y_pos_right + i, 255,255,255);
+        if (y_pos_left > 0 && y_pos_left < fbg->height && y_pos_right > 0 && y_pos_right < fbg->height) {
+          fbg_line(fbg, x_center - 180, y_pos_left + i, x_center + 180,   y_pos_right + i, 255,255,255);
+        }
       }
     }
-    
+
+    // - Vertical Speedometer
+    { int32_t offset_vspeed =  telemetry_vspeed * 5;
+      int32_t y_pos_vspeed = ((int32_t)fbg->height / 2 - 2 - offset_vspeed);
+      for (int i = 0; i < 8; i++) {
+        if (y_pos_vspeed > 0 && y_pos_vspeed < fbg->height) {
+          fbg_line(fbg, x_center + 242 + i, fbg->height / 2, x_center + 242 + i, y_pos_vspeed, 255,255,255);
+        }
+      }
+    }
+
     for (int i = 0; i < 25; i++) {
       uint32_t width = (i == 12) ? 10 : 0;
       
@@ -966,20 +1106,52 @@ void* __OSD_THREAD__(void* arg) {
       fbg_write(fbg, msg, x_center + ( 20) + 260,         fbg->height / 2 - 8);
       sprintf(msg, "SPD:%.00fKM/H", telemetry_gspeed);
       fbg_write(fbg, msg, x_center - (16 * 3) - 360, fbg->height / 2 - 8);
+      sprintf(msg, "VSPD:%.00fM/S", telemetry_vspeed);
+      fbg_write(fbg, msg, x_center + ( 20) + 260,         fbg->height / 2 + 22);
       sprintf(msg, "BAT:%.02fV", telemetry_battery/1000);
-      fbg_write(fbg, msg, 40,         fbg->height - 60);
+      fbg_write(fbg, msg, 40,         fbg->height - 30);
       sprintf(msg, "CUR:%.02fA", telemetry_current/100);
+      fbg_write(fbg, msg, 40,         fbg->height - 60);
+      sprintf(msg, "THR:%.00f%%", telemetry_throttle);
       fbg_write(fbg, msg, 40,         fbg->height - 90);
       sprintf(msg, "SATS:%.00f", telemetry_sats);
       fbg_write(fbg, msg, x_center + 520,         fbg->height - 30);
-      sprintf(msg, "LAT:%.00f", telemetry_lat);
-      fbg_write(fbg, msg, x_center + 440,         fbg->height - 90);
-      sprintf(msg, "LON:%.00f", telemetry_lon);
-      fbg_write(fbg, msg, x_center + 440,         fbg->height - 60);
-      sprintf(msg, "PITCH:%.00f", telemetry_pitch);
-      fbg_write(fbg, msg, x_center + 440,         fbg->height - 140);
-      sprintf(msg, "ROLL:%.00f", telemetry_roll);
-      fbg_write(fbg, msg, x_center + 440,         fbg->height - 170);
+      sprintf(c1, "%.00f", telemetry_lat);
+      if (telemetry_lat < 10000000) {
+          puts(insertString(c1, "LON:0.", 0));
+      };
+      if (telemetry_lat > 9999999) {
+          if (numOfChars(c1) == 8) {
+              puts(insertString(c1, ".", 1));
+          }
+          else {
+              puts(insertString(c1, ".", 2));
+          };
+          puts(insertString(c1, "LAT:", 0));
+      };
+      fbg_write(fbg, c1, x_center + 440,         fbg->height - 90);
+      sprintf(c2, "%.00f", telemetry_lon);
+      if (telemetry_lon < 10000000) {
+          puts(insertString(c2, "LON:0.", 0));
+      };
+      if (telemetry_lon > 9999999) {
+          if (numOfChars(c2) == 8) {
+              puts(insertString(c2, ".", 1));
+          }
+          else {
+              puts(insertString(c2, ".", 2));
+          };
+          puts(insertString(c2, "LON:", 0));
+      };
+      fbg_write(fbg, c2, x_center + 440,         fbg->height - 60);
+      //sprintf(msg, "PITCH:%.00f", telemetry_pitch);
+      //fbg_write(fbg, msg, x_center + 440,         fbg->height - 140);
+      //sprintf(msg, "ROLL:%.00f", telemetry_roll);
+      //fbg_write(fbg, msg, x_center + 440,         fbg->height - 170);
+      sprintf(msg, "RSSI:%.00f", telemetry_rssi);
+      fbg_write(fbg, msg, x_center -50,         fbg->height - 30);
+      sprintf(msg, "DIST:%.03fM", telemetry_distance);
+      fbg_write(fbg, msg, x_center -350,         fbg->height - 30);
     }
 
     fbg_image(fbg, openipc_img, 1280 - 160 - 80, 40);
@@ -998,26 +1170,15 @@ void* __OSD_THREAD__(void* arg) {
     char hud_frames_rx[32];
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
     sprintf(hud_frames_rx, "RX Packets %d", frames_received);
-    fbg_write(fbg, hud_frames_rx, 40, 690);
-    
-    
-    
+    fbg_write(fbg, hud_frames_rx, x_center - 450, 40);
 
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
     sprintf(hud_frames_rx, "Rate %.02f Kbit/s", rx_rate);
-    
-    
-    
     fbg_write(fbg, hud_frames_rx, x_center - strlen(hud_frames_rx) / 2 * 16, 40);
-    
     float percent = rx_rate / (1024 * 10);
     if (percent > 1) percent = 1;
-    
     uint32_t width =  (strlen(hud_frames_rx) * 16) * percent;
-    
     fbg_rect(fbg, x_center - strlen(hud_frames_rx) / 2 * 16, 64, width, 8,  255, 255, 255);
-    
-    
     fbg_flip(fbg);
     usleep(1);
   }
