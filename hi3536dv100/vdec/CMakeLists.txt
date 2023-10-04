@@ -47,7 +47,3 @@ set_target_properties (${NAME} PROPERTIES
   LINK_FLAGS
     -Wl,-rpath,$ORIGIN
 )
-
-add_executable(telemetry
-  telemetry.c
-)

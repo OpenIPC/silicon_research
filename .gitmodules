@@ -1,0 +1,3 @@
+[submodule "hi3536dv100/osd/lvgl"]
+	path = hi3536dv100/osd/lvgl
+	url = https://github.com/lvgl/lvgl
