@@ -524,13 +524,13 @@ int main(int argc, const char* argv[]) {
   vb_conf.u32MaxPoolCnt = 2;
   
   // - Memory pool for VI
-  vb_conf.astCommPool[0].u32BlkCnt  = 0; //enable_lowdelay ? 2 :  3; 
+  vb_conf.astCommPool[0].u32BlkCnt  = 0;
   vb_conf.astCommPool[0].u64BlkSize = VI_GetRawBufferSize(sensor_width, sensor_height,
     PIXEL_FORMAT_RGB_BAYER_12BPP , COMPRESS_MODE_NONE, DEFAULT_ALIGN
   );
   
   // - Memory pool for VENC
-  vb_conf.astCommPool[1].u32BlkCnt  = 2; //enable_lowdelay ? 2 :  3; 
+  vb_conf.astCommPool[1].u32BlkCnt  = 2;
   vb_conf.astCommPool[1].u64BlkSize = COMMON_GetPicBufferSize(image_width, image_height, 
     PIXEL_FORMAT_YVU_SEMIPLANAR_420,
     DATA_BITWIDTH_8,
@@ -727,7 +727,7 @@ int main(int argc, const char* argv[]) {
     ALG_LIB_S awb_lib;  // - Auto white balance library
     
     ae_lib.s32Id  = 0;
-    awb_lib.s32Id = 1;
+    awb_lib.s32Id = 0;
     strncpy(ae_lib.acLibName,   HI_AE_LIB_NAME,   sizeof(HI_AE_LIB_NAME));
     strncpy(awb_lib.acLibName,  HI_AWB_LIB_NAME,  sizeof(HI_AWB_LIB_NAME));
     
@@ -811,7 +811,7 @@ int main(int argc, const char* argv[]) {
     int ret = HI_MPI_VPSS_GetLowDelayAttr(vpss_group_id, vpss_second_ch_id, &info);
     if (enable_lowdelay) {
       info.bEnable    = HI_TRUE;
-      info.u32LineCnt = image_height / 2;
+      info.u32LineCnt = image_height / 4;
       ret = HI_MPI_VPSS_SetLowDelayAttr(vpss_group_id, vpss_second_ch_id, &info);
       if (ret != HI_SUCCESS) {
         printf("ERROR: Unable to set low delay mode\n");
@@ -1006,7 +1006,7 @@ int main(int argc, const char* argv[]) {
         param.stParamH265Cbr.s32MaxReEncodeTimes = 1;
         break;
     }
-    //param.s32FirstFrameStartQp                          = -1;
+    param.s32FirstFrameStartQp                          = -1;
     //param.u32RowQpDelta                                 = 8;
     param.stSceneChangeDetect.bAdaptiveInsertIDRFrame   = HI_TRUE;
     param.stSceneChangeDetect.bDetectSceneChange        = HI_TRUE;
