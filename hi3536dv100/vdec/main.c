@@ -898,7 +898,7 @@ void* __MAVLINK_THREAD__(void* arg) {
 
     int ret = recv(fd, buffer, sizeof(buffer), 0);
     if (ret < 0) {
-        printf("WARN: MavLink rx error: %s\n", strerror(errno));
+      continue;
     } else if (ret == 0) {
       // peer has done an orderly shutdown
       return 0;
@@ -955,50 +955,50 @@ void* __MAVLINK_THREAD__(void* arg) {
                 };
                 sprintf(s1, "%.00f", telemetry_lat);
                 if (telemetry_lat < 10000000) {
-                    puts(insertString(s1, "0.", 0));
+                    insertString(s1, "0.", 0);
                 };
                 if (telemetry_lat > 9999999) {
                     if (numOfChars(s1) == 8) {
-                        puts(insertString(s1, ".", 1));
+                        insertString(s1, ".", 1);
                     }
                     else {
-                        puts(insertString(s1, ".", 2));
+                        insertString(s1, ".", 2);
                     };
                 };
                 sprintf(s2, "%.00f", telemetry_lon);
                 if (telemetry_lon < 10000000) {
-                    puts(insertString(s2, "0.", 0));
+                    insertString(s2, "0.", 0);
                 };
                 if (telemetry_lon > 9999999) {
                     if (numOfChars(s2) == 8) {
-                        puts(insertString(s2, ".", 1));
+                        insertString(s2, ".", 1);
                     }
                     else {
-                        puts(insertString(s2, ".", 2));
+                        insertString(s2, ".", 2);
                     };
                 };
                 sprintf(s3, "%.00f", telemetry_lat_base);
                 if (telemetry_lat_base < 10000000) {
-                    puts(insertString(s3, "0.", 0));
+                    insertString(s3, "0.", 0);
                 };
                 if (telemetry_lat_base > 9999999) {
                     if (numOfChars(s3) == 8) {
-                        puts(insertString(s3, ".", 1));
+                        insertString(s3, ".", 1);
                     }
                     else {
-                        puts(insertString(s3, ".", 2));
+                        insertString(s3, ".", 2);
                     };
                 };
                 sprintf(s4, "%.00f", telemetry_lon_base);
                 if (telemetry_lon_base < 10000000) {
-                    puts(insertString(s4, "0.", 0));
+                    insertString(s4, "0.", 0);
                 };
                 if (telemetry_lon_base > 9999999) {
                     if (numOfChars(s4) == 8) {
-                        puts(insertString(s4, ".", 1));
+                        insertString(s4, ".", 1);
                     }
                     else {
-                        puts(insertString(s4, ".", 2));
+                        insertString(s4, ".", 2);
                     };
                 };
                 s1_double = strtod(s1, *ptr);
@@ -1118,30 +1118,30 @@ void* __OSD_THREAD__(void* arg) {
       fbg_write(fbg, msg, x_center + 520,         fbg->height - 30);
       sprintf(c1, "%.00f", telemetry_lat);
       if (telemetry_lat < 10000000) {
-          puts(insertString(c1, "LON:0.", 0));
+          insertString(c1, "LON:0.", 0);
       };
       if (telemetry_lat > 9999999) {
           if (numOfChars(c1) == 8) {
-              puts(insertString(c1, ".", 1));
+              insertString(c1, ".", 1);
           }
           else {
-              puts(insertString(c1, ".", 2));
+              insertString(c1, ".", 2);
           };
-          puts(insertString(c1, "LAT:", 0));
+          insertString(c1, "LAT:", 0);
       };
       fbg_write(fbg, c1, x_center + 440,         fbg->height - 90);
       sprintf(c2, "%.00f", telemetry_lon);
       if (telemetry_lon < 10000000) {
-          puts(insertString(c2, "LON:0.", 0));
+          insertString(c2, "LON:0.", 0);
       };
       if (telemetry_lon > 9999999) {
           if (numOfChars(c2) == 8) {
-              puts(insertString(c2, ".", 1));
+              insertString(c2, ".", 1);
           }
           else {
-              puts(insertString(c2, ".", 2));
+              insertString(c2, ".", 2);
           };
-          puts(insertString(c2, "LON:", 0));
+          insertString(c2, "LON:", 0);
       };
       fbg_write(fbg, c2, x_center + 440,         fbg->height - 60);
       //sprintf(msg, "PITCH:%.00f", telemetry_pitch);
