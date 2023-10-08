@@ -524,13 +524,13 @@ int main(int argc, const char* argv[]) {
   vb_conf.u32MaxPoolCnt = 2;
   
   // - Memory pool for VI
-  vb_conf.astCommPool[0].u32BlkCnt  = 1; //enable_lowdelay ? 2 :  3; 
+  vb_conf.astCommPool[0].u32BlkCnt  = 0; //enable_lowdelay ? 2 :  3; 
   vb_conf.astCommPool[0].u64BlkSize = VI_GetRawBufferSize(sensor_width, sensor_height,
     PIXEL_FORMAT_RGB_BAYER_12BPP , COMPRESS_MODE_NONE, DEFAULT_ALIGN
   );
   
   // - Memory pool for VENC
-  vb_conf.astCommPool[1].u32BlkCnt  = 1; //enable_lowdelay ? 2 :  3; 
+  vb_conf.astCommPool[1].u32BlkCnt  = 2; //enable_lowdelay ? 2 :  3; 
   vb_conf.astCommPool[1].u64BlkSize = COMMON_GetPicBufferSize(image_width, image_height, 
     PIXEL_FORMAT_YVU_SEMIPLANAR_420,
     DATA_BITWIDTH_8,
@@ -1006,7 +1006,8 @@ int main(int argc, const char* argv[]) {
         param.stParamH265Cbr.s32MaxReEncodeTimes = 1;
         break;
     }
-    param.s32FirstFrameStartQp                          = -1;
+    //param.s32FirstFrameStartQp                          = -1;
+    //param.u32RowQpDelta                                 = 8;
     param.stSceneChangeDetect.bAdaptiveInsertIDRFrame   = HI_TRUE;
     param.stSceneChangeDetect.bDetectSceneChange        = HI_TRUE;
   
@@ -1017,9 +1018,10 @@ int main(int argc, const char* argv[]) {
     }
     
     HI_MPI_VENC_GetRcParam(venc_second_ch_id, &param);
-    printf("> Scene detect = %s, Adaptive IDR = %s\n",
+    printf("> Scene detect = %s, Adaptive IDR = %s, Start Qp = %d, Row dQp = %d\n",
       param.stSceneChangeDetect.bDetectSceneChange      ? "YES" : "NO",
-      param.stSceneChangeDetect.bAdaptiveInsertIDRFrame ? "YES" : "NO"
+      param.stSceneChangeDetect.bAdaptiveInsertIDRFrame ? "YES" : "NO",
+      param.s32FirstFrameStartQp, param.u32RowQpDelta
     );
   }
 
