@@ -521,10 +521,10 @@ int main(int argc, const char* argv[]) {
   memset(&vb_conf, 0x00, sizeof(vb_conf));
   
   // - Use two memory pools
-  vb_conf.u32MaxPoolCnt = 1;
+  vb_conf.u32MaxPoolCnt = 2;
   
   // - Memory pool for VI
-  vb_conf.astCommPool[0].u32BlkCnt  = 2; //enable_lowdelay ? 2 :  3; 
+  vb_conf.astCommPool[0].u32BlkCnt  = 1; //enable_lowdelay ? 2 :  3; 
   vb_conf.astCommPool[0].u64BlkSize = VI_GetRawBufferSize(sensor_width, sensor_height,
     PIXEL_FORMAT_RGB_BAYER_12BPP , COMPRESS_MODE_NONE, DEFAULT_ALIGN
   );
@@ -637,8 +637,8 @@ int main(int argc, const char* argv[]) {
   // --- Create VI
   // --------------------------------------------------------------
   // - Set VI device configuration
-  sns_profile->stSize.u32Width  = sensor_width;
-  sns_profile->stSize.u32Height = sensor_height;
+  sns_profile->stSize.u32Width                            = sensor_width;
+  sns_profile->stSize.u32Height                           = sensor_height;
   sns_profile->stBasAttr.stSacleAttr.stBasSize.u32Width   = sensor_width;
   sns_profile->stBasAttr.stSacleAttr.stBasSize.u32Height  = sensor_height;
   sns_profile->stSynCfg.stTimingBlank.u32HsyncAct         = sensor_width;
@@ -717,7 +717,7 @@ int main(int argc, const char* argv[]) {
   // --- Set sensor control bus
   // - NOT FOR: BT1120_2M_30FPS_8BIT / BT656_2M_30FPS_8BIT / BT601_2M_30FPS_8BIT
   { ISP_SNS_COMMBUS_U bus;
-    bus.s8I2cDev  = 0; // - I2C device #0
+    bus.s8I2cDev = 0; // - I2C device #0
     sns_object->pfnSetBusInfo(vi_pipe_id, bus);
   }
   
@@ -867,11 +867,11 @@ int main(int argc, const char* argv[]) {
   { VENC_CHN_ATTR_S config;
     memset(&config, 0x00, sizeof(config));
     config.stVencAttr.enType                = rc_codec;
-    config.stVencAttr.u32MaxPicWidth        = image_width;   // - Max image size for dynamic resolution selection
+    config.stVencAttr.u32MaxPicWidth        = image_width;    // - Max image size for dynamic resolution selection
     config.stVencAttr.u32MaxPicHeight       = image_height;
     config.stVencAttr.u32PicWidth           = image_width;    // - Normal image size
     config.stVencAttr.u32PicHeight          = image_height;
-    config.stVencAttr.u32BufSize            = ALIGN_UP(image_width  * image_height * 2, 64);  /*stream buffer size*/
+    config.stVencAttr.u32BufSize            = ALIGN_UP(image_width  * image_height * 3 / 4, 64);  /*stream buffer size*/
     config.stVencAttr.u32Profile            = 0;              // - Baseline (0), Main(1), High(1)
     config.stVencAttr.bByFrame              = venc_by_frame;  // - TRUE for get per-frame, FALSE for get per-slice
     

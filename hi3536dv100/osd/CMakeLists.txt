@@ -5,7 +5,6 @@ include_directories(
 add_executable(osd
   osd.c
   display_fbdev.c
-  fonts/aero_14.c
 )
 
 target_include_directories(osd
