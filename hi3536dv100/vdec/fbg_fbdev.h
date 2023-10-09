@@ -54,8 +54,5 @@
       \param page_flipping wether to use page flipping mechanism for double buffering (slow on some devices)
       \return _fbg structure pointer to pass to any FBG library functions
     */
-    extern struct _fbg *fbg_fbdevSetup(char *fb_device, int page_flipping);
-
-    //! initialize a FB Graphics context with '/dev/fb0' as framebuffer device and no page flipping
-    #define fbg_fbdevInit() fbg_fbdevSetup(NULL, 0)
+    extern struct _fbg *fbg_fbdevSetup(char *fb_device, int page_flipping, uint16_t screen_width, uint16_t screen_height);
 #endif

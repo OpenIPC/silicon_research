@@ -171,11 +171,12 @@ double getTimeInterval(struct timespec* timestamp, struct timespec* last_meansur
 
 
 uint16_t mavlink_port = 14550;
-
-int main(int argc, const char* argv[]) {
-  VO_INTF_SYNC_E  vo_mode           = VO_OUTPUT_720P60;// VO_OUTPUT_1080P60; //VO_OUTPUT_2560x1440_30; //VO_OUTPUT_2560x1440_30;// VO_OUTPUT_1080P60;
   uint32_t        vo_width          = 1280;
   uint32_t        vo_height         = 720;
+  
+int main(int argc, const char* argv[]) {
+  VO_INTF_SYNC_E  vo_mode           = VO_OUTPUT_720P60;// VO_OUTPUT_1080P60; //VO_OUTPUT_2560x1440_30; //VO_OUTPUT_2560x1440_30;// VO_OUTPUT_1080P60;
+
   uint32_t        vo_framerate      = 60;
   
   VDEC_CHN        vdec_channel_id   = 0;
@@ -1055,7 +1056,7 @@ int32_t map_range(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, in
 }
       
 void* __OSD_THREAD__(void* arg) {
-  struct _fbg *fbg = fbg_fbdevInit();
+  struct _fbg *fbg = fbg_fbdevSetup(NULL, HI_FALSE, vo_width, vo_height);
   
   struct _fbg_img*  bb_font_img = fbg_loadPNGFromMemory(fbg, font_14_23, 26197);
   struct _fbg_font* bbfont      = fbg_createFont(fbg, bb_font_img, 14, 23, 33);

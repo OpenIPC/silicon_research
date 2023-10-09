@@ -14,7 +14,7 @@ void fbg_fbdevDraw(struct _fbg *fbg);
 void fbg_fbdevFlip(struct _fbg *fbg);
 void fbg_fbdevFree(struct _fbg *fbg);
 
-struct _fbg *fbg_fbdevSetup(char *fb_device, int page_flipping) {
+struct _fbg *fbg_fbdevSetup(char *fb_device, int page_flipping, uint16_t screen_width, uint16_t screen_height) {
     struct _fbg_fbdev_context *fbdev_context = (struct _fbg_fbdev_context *)calloc(1, sizeof(struct _fbg_fbdev_context));
     if (!fbdev_context) {
         fprintf(stderr, "fbg_fbdevSetup: fbdev context calloc failed!\n");
@@ -61,6 +61,14 @@ struct _fbg *fbg_fbdevSetup(char *fb_device, int page_flipping) {
     fbdev_context->vinfo.blue           = s_b32;
     fbdev_context->vinfo.transp         = s_a32;
     fbdev_context->vinfo.bits_per_pixel = 32;
+    
+    
+    fbdev_context->vinfo.width        = screen_width;
+    fbdev_context->vinfo.height       = screen_height;
+    fbdev_context->vinfo.xres_virtual = screen_width;
+    fbdev_context->vinfo.yres_virtual = screen_height;
+    fbdev_context->vinfo.xres         = screen_width;
+    fbdev_context->vinfo.yres         = screen_height;
     
     if (ioctl(fbdev_context->fd, FBIOPUT_VSCREENINFO, &fbdev_context->vinfo) == -1) {
       fprintf(stderr, "Unable to set VSCREENINFO informations!\n", fb_device);
