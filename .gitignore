@@ -2,4 +2,5 @@
 /compile_commands.json
 /.ctagsd
 /.cache
-
+build
+toolchain
