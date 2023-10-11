@@ -841,6 +841,7 @@ double telemetry_lat      = 0;
 double telemetry_lon      = 0;
 double telemetry_lat_base = 0;
 double telemetry_lon_base = 0;
+double telemetry_hdg      = 0;
 double telemetry_distance = 0;
 double s1_double          = 0;
 double s2_double          = 0;
@@ -1019,6 +1020,13 @@ void* __MAVLINK_THREAD__(void* arg) {
 
           }; break;
 
+          case MAVLINK_MSG_ID_GLOBAL_POSITION_INT: {
+            mavlink_global_position_int_t global_position_int;
+            mavlink_msg_global_position_int_decode(&message, &global_position_int);
+            telemetry_hdg = global_position_int.hdg/100;
+
+          }; break;
+
           case MAVLINK_MSG_ID_ATTITUDE: {
             mavlink_attitude_t att;
             mavlink_msg_attitude_decode(&message, &att);
@@ -1117,6 +1125,8 @@ void* __OSD_THREAD__(void* arg) {
       fbg_write(fbg, msg, 40,         fbg->height - 90);
       sprintf(msg, "SATS:%.00f", telemetry_sats);
       fbg_write(fbg, msg, x_center + 520,         fbg->height - 30);
+      sprintf(msg, "HDG:%.00f", telemetry_hdg);
+      fbg_write(fbg, msg, x_center + 520,         fbg->height - 120);
       sprintf(c1, "%.00f", telemetry_lat);
       if (telemetry_lat < 10000000) {
           insertString(c1, "LON:0.", 0);
