@@ -727,7 +727,6 @@ int main(int argc, const char* argv[]) {
   uint32_t  write_buffer_capacity = 1024 * 1024 * 2;
   uint8_t*  write_buffer = malloc(write_buffer_capacity);
   uint32_t  write_buffer_size = 0;
-  uint32_t  rtp_header = 0;
 
   while (1) {
     int rx = recv(port, rx_buffer + 8, 2048, 0);
@@ -741,6 +740,7 @@ int main(int argc, const char* argv[]) {
     stream.bEndOfStream = HI_FALSE;
     stream.bEndOfFrame  = codec_mode_stream ? HI_FALSE : HI_TRUE;
 
+    uint32_t rtp_header = 0;
     if (rx_buffer[8] == 0x80) {
       rtp_header = 12;
     }
