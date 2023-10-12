@@ -1,4 +1,4 @@
-// x86_64-linux-musl-gcc vdec.c -o vdec -s -static
+// x86_64-linux-musl-gcc vdec-i386.c -o vdec -s -static
 
 #include <stdint.h>
 #include <string.h>
@@ -89,25 +89,38 @@ static uint8_t* decode_frame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t head
 
 int main(int argc, const char* argv[]) {
 	struct sockaddr_in address;
-	uint16_t listen_port = 5600;
+	uint16_t input_port = 5600;
+	uint16_t output_port = 6000;
+	char output_addr[64];
 
 	uint8_t* rx_buffer = malloc(1024 * 1024);
 	uint8_t* nal_buffer = malloc(1024 * 1024);
 	uint32_t nal_buffer_used = 0;
-	uint32_t rtp_header = 0;
 
 	int port = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	memset(&address, 0x00, sizeof(address));
 	address.sin_family = AF_INET;
-	address.sin_port = htons(listen_port);
+	address.sin_port = htons(input_port);
 	bind(port, (struct sockaddr*)&address, sizeof(struct sockaddr_in));
 
 	if (argc > 1) {
-		listen_port = atoi(argv[1]);
+		input_port = atoi(argv[1]);
 	}
 
-	FILE *file = fopen("file.mp4", "wb");
-	printf("Monitor port: %d\n", listen_port);
+	if (argc > 2) {
+		strcpy(output_addr, argv[2]);
+	} else {
+		strcpy(output_addr, "127.0.0.1");
+	}
+
+	if (argc > 3) {
+		output_port = atoi(argv[3]);
+	}
+
+	address.sin_port = htons(output_port);
+	address.sin_addr.s_addr = inet_addr(output_addr);
+
+	printf("Input: %d, Output: %s:%d\n", input_port, output_addr, output_port);
 
 	while (true) {
 		int rx = recv(port, rx_buffer + 8, 2048, 0);
@@ -123,13 +136,14 @@ int main(int argc, const char* argv[]) {
 			rx_buffer[4 + r], rx_buffer[5 + r], rx_buffer[6 + r], rx_buffer[7 + r]);
 #endif
 
+		uint32_t rtp_header = 0;
 		if (rx_buffer[8] == 0x80) {
 			rtp_header = 12;
 		}
 
 		uint32_t size = 0;
-		uint8_t* buffer = decode_frame(rx_buffer + 8, rx, rtp_header,
-			nal_buffer, &nal_buffer_used, &size);
+		uint8_t* buffer = decode_frame(rx_buffer + 8, rx,
+			rtp_header, nal_buffer, &nal_buffer_used, &size);
 		if (!buffer) {
 			continue;
 		}
@@ -145,9 +159,8 @@ int main(int argc, const char* argv[]) {
 			buffer[4 + t], buffer[5 + t], buffer[6 + t], buffer[7 + t]);
 #endif
 
-		fwrite(buffer, sizeof(char), size, file);
+		sendto(port, buffer, size, 0, (struct sockaddr*)&address, sizeof(struct sockaddr_in));
 	}
 
-	fclose(file);
 	return 0;
 }
