@@ -21,6 +21,12 @@ jobs:
           bash build.sh vdec
           cp -Tr build/Release/bin output
 
+      - name: Sample
+        run: |
+          sudo apt-get update
+          sudo apt-get install musl-dev
+          x86_64-linux-musl-gcc x86/vdec-i386.c -o vdec-i386 -s -static
+
       - name: Upload
         uses: softprops/action-gh-release@v1
         with:
@@ -29,3 +35,4 @@ jobs:
             output/venc
             output/vdec
             output/osd
+            vdec-i386

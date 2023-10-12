@@ -60,7 +60,6 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
   uint8_t nal_type = 0;
   uint8_t start_bit = 0;
   uint8_t end_bit = 0;
-  uint8_t original_nal = 0;
   uint8_t copy_size = 4;
 
   uint8_t* in_buffer = NULL;
