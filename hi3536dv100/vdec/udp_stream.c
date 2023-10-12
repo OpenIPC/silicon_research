@@ -54,35 +54,46 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
   rx_size   -= sizeof(struct VideoFrame);*/
   
   // - Get NAL type
-  uint8_t fragment_type = rx_buffer[0]  & 0x1F;
-  uint8_t nal_type      = rx_buffer[1]  & 0x1F;
-  uint8_t start_bit     = rx_buffer[1]  & 0x80;
-  uint8_t end_bit       = rx_buffer[1]  & 0x40;
+  uint8_t fragment_type_avc = rx_buffer[0] & 0x1F;
+  uint8_t fragment_type_hevc = (rx_buffer[0] >> 1) & 0x3F;
 
-  uint8_t * in_buffer   = NULL;
-  uint32_t  in_size     = 0;
+  uint8_t nal_type = 0;
+  uint8_t start_bit = 0;
+  uint8_t end_bit = 0;
+  uint8_t original_nal = 0;
+  uint8_t copy_size = 4;
 
-  if (fragment_type == 28) {
-    // - Calculate original NAL type
-    uint8_t original_nal = (rx_buffer[0] & 0xE0) | nal_type;
-    
-    rx_buffer ++;
-    rx_size   --;
-    
+  uint8_t* in_buffer = NULL;
+  uint32_t in_size = 0;
+
+  if (fragment_type_avc == 28 || fragment_type_hevc == 49) {
+    if (fragment_type_avc == 28) {
+      start_bit = rx_buffer[1] & 0x80;
+      end_bit = rx_buffer[1] & 0x40;
+      nal_buffer[4] = (rx_buffer[0] & 0xE0) | (rx_buffer[1] & 0x1F);
+    } else {
+      start_bit = rx_buffer[2] & 0x80;
+      end_bit = rx_buffer[2] & 0x40;
+      nal_buffer[4] = (rx_buffer[0] & 0x81) | (rx_buffer[2] & 0x3F) << 1;
+      nal_buffer[5] = rx_buffer[1];
+      copy_size++;
+      rx_buffer++;
+      rx_size--;
+    }
+
+    rx_buffer++;
+    rx_size--;
+
     if (start_bit && !end_bit && (*nal_buffer_used) == 0) {
       // - Write NAL header
       nal_buffer[0] = 0;
       nal_buffer[1] = 0;
       nal_buffer[2] = 0;
       nal_buffer[3] = 1;
-  
+
       // - Copy data
-      memcpy(nal_buffer + 4, rx_buffer, rx_size);
-      
-      // - Patch NAL 
-      nal_buffer[4]       = original_nal;
-      (*nal_buffer_used)  = rx_size + 4;
-      
+      memcpy(nal_buffer + copy_size, rx_buffer, rx_size);
+      (*nal_buffer_used) = rx_size + copy_size;
     } else if (!start_bit && !end_bit && (*nal_buffer_used) != 0) {
       rx_buffer ++;
       rx_size   --;
