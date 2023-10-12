@@ -1,0 +1,31 @@
+name: Build
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Build
+        run: |
+          bash build.sh venc
+          cp -Tr build/Release/bin output
+          bash build.sh vdec
+          cp -Tr build/Release/bin output
+
+      - name: Upload
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          files: |
+            output/venc
+            output/vdec
+            output/osd
