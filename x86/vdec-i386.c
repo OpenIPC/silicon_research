@@ -20,7 +20,6 @@ static uint8_t* decode_frame(uint8_t* rx_buffer, uint32_t rx_size,
 	uint8_t fragment_type_avc = rx_buffer[0] & 0x1F;
 	uint8_t fragment_type_hevc = (rx_buffer[0] >> 1) & 0x3F;
 
-	uint8_t nal_type = 0;
 	uint8_t start_bit = 0;
 	uint8_t end_bit = 0;
 	uint8_t copy_size = 4;
@@ -34,7 +33,7 @@ static uint8_t* decode_frame(uint8_t* rx_buffer, uint32_t rx_size,
 			start_bit = rx_buffer[2] & 0x80;
 			end_bit = rx_buffer[2] & 0x40;
 			nal_buffer[4] = (rx_buffer[0] & 0x81) | (rx_buffer[2] & 0x3F) << 1;
-			nal_buffer[5] = rx_buffer[1];
+			nal_buffer[5] = 1;
 			copy_size++;
 			rx_buffer++;
 			rx_size--;
@@ -95,16 +94,16 @@ int main(int argc, const char* argv[]) {
 
 	uint8_t* rx_buffer = malloc(1024 * 1024);
 	uint8_t* nal_buffer = malloc(1024 * 1024);
-
 	int port = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	memset(&address, 0x00, sizeof(address));
-	address.sin_family = AF_INET;
-	address.sin_port = htons(input_port);
-	bind(port, (struct sockaddr*)&address, sizeof(struct sockaddr_in));
 
 	if (argc > 1) {
 		input_port = atoi(argv[1]);
 	}
+
+	memset(&address, 0x00, sizeof(address));
+	address.sin_family = AF_INET;
+	address.sin_port = htons(input_port);
+	bind(port, (struct sockaddr*)&address, sizeof(struct sockaddr_in));
 
 	if (argc > 2) {
 		strcpy(output_addr, argv[2]);
