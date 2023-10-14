@@ -1,5 +1,8 @@
 name: Build
 on:
+  pull_request:
+    branches:
+      - master
   push:
     branches:
       - master
@@ -9,25 +12,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Build
+      - name: Build venc/vdec
         run: |
           bash build.sh venc
           cp -Tr build/Release/bin output
           bash build.sh vdec
           cp -Tr build/Release/bin output
 
-      - name: Sample
+      - name: Build sample
         run: |
           sudo apt-get update
           sudo apt-get install musl-dev
           x86_64-linux-musl-gcc x86/vdec-i386.c -o vdec-i386 -s -static
 
-      - name: Upload
+      - name: Upload binaries
+        if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: latest
