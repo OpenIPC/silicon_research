@@ -15,7 +15,7 @@ else
 fi
 
 if [ ! -e $PWD/toolchain/$DL ]; then
-	wget -c $LINK/$DL.tgz -P $PWD
+	wget -c -nv $LINK/$DL.tgz -P $PWD
 	mkdir -p $PWD/toolchain/$DL
 	tar -xf $PWD/$DL.tgz -C $PWD/toolchain/$DL --strip-components=1 || exit 1
 	rm -f $PWD/$DL.tgz
