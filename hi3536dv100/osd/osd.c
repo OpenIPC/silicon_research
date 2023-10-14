@@ -1,11 +1,14 @@
 #include "osd.h"
 #include "horizon.h"
+#include "ui.h"
+#include "queue.h"
+#include "mavlink_parser.h"
 
 // - Temporary buffer for LVGL
 #define DISPLAY_BUFFER_SIZE (1024 * 1024)
 lv_color_t display_buffer[DISPLAY_BUFFER_SIZE];
 
-extern const lv_font_t aero_14;
+Queue queue;
 
 /**
  * @brief Entry point
@@ -29,7 +32,7 @@ int main(int argc, const char* argv[]) {
 
   // - Request display size
   fbdev_get_sizes(&display_driver.hor_res, &display_driver.ver_res, NULL);
-
+  
   // - Register display driver
   display_driver.draw_buf   = &display_buffer_descriptor;
   display_driver.flush_cb   = fbdev_flush;
@@ -40,30 +43,16 @@ int main(int argc, const char* argv[]) {
   lv_disp_set_bg_opa(NULL, LV_OPA_TRANSP);
   
   
-  // - Create horizon
-  lv_obj_t* horizon = horizon_create();
+  initQueue(&queue);
   
-  
-  
-  horizon_setRoll(horizon, -30);
-  horizon_setPitch(horizon, 90);
-  
-  
-  // - Battery label
-  { lv_obj_t* label = lv_label_create(lv_scr_act());
-    lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_text_font(label, &lv_font_montserrat_48, 0);
-    lv_obj_set_style_text_color(label, lv_color_make(255, 0, 0), 0);
-    lv_obj_set_style_text_opa(label, 255, 0);
-    
-    lv_label_set_text(label, LV_SYMBOL_BATTERY_1 " 15%");
-    lv_obj_set_style_opa(label, 250, 0);
-    lv_obj_set_pos(label, 100, 20);
-  }
+  ui_init();
 
-  
-  horizon_demo(horizon);
-  
+  pthread_t ui_thread;
+  pthread_t mavlink_thread;
+
+  pthread_create(&ui_thread, NULL, ui_updating_thread, 0);
+  pthread_create(&mavlink_thread, NULL, mavlink_handler, 0);
+
   // - Run display service in tickless mode
   while(1) {
     lv_timer_handler();
