@@ -1,4 +1,10 @@
-// x86_64-linux-musl-gcc vdec-i386.c -o vdec -s -static -Wall
+/*
+ * x86_64-linux-musl-gcc vdec-i386.c -o vdec -s -static -Wall
+ * 
+ * Usage:
+ * ./vdec 5600 192.168.1.10 6000 0
+ * gst-launch-1.0 udpsrc port=6000 ! application/x-rtp ! rtph265depay ! avdec_h265 ! autovideosink sync=false
+ */
 
 #include <stdint.h>
 #include <string.h>
@@ -24,7 +30,7 @@ struct RTPHeader {
 static struct sockaddr_in address;
 static uint32_t in_nal_size = 0;
 static uint16_t rtp_sequence = 0;
-static bool debug = false;
+static uint32_t debug = 0;
 
 static void send_data(int port, uint8_t* data, uint32_t size) {
 	struct RTPHeader rtp_header;
@@ -50,9 +56,10 @@ static void send_data(int port, uint8_t* data, uint32_t size) {
 		printf("> Cannot send packet: %s [%dKB]\n", strerror(errno), size / 1024);
 	}
 
-	if (debug) {
+	if (debug > 1) {
+		int sx_size = (debug > 2) ? size : 8;
 		printf("SX: ");
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < sx_size; i++) {
 			printf("0x%02X, ", data[i]);
 		}
 		printf("len: %d\n", size);
@@ -67,42 +74,31 @@ static void create_fragment(int port, uint8_t* data, uint32_t size) {
 	if (size > MAX_SIZE) {
 		uint8_t nal_type_avc = data[0] & 0x1F;
 		uint8_t nal_type_hevc = (data[0] >> 1) & 0x3F;
-		uint8_t nal_bits_avc = data[0] & 0xE0;
-		uint8_t nal_bits_hevc = data[0] & 0x81;
 		uint8_t rx_size = 0;
 		bool first = true;
 
 		while (size) {
 			uint32_t chunk_size = size > MAX_SIZE ? MAX_SIZE : size;
 			if (nal_type_avc == 1 || nal_type_avc == 5) {
+				data[-1] = (data[0] & 0xE0) | 28;
+				data[0] = first ? 0x80 | nal_type_avc : nal_type_avc;
 				rx_size = 2;
-				if (first) {
-					data[-1] = nal_bits_avc | 28;
-					data[0] = 0x80 | nal_type_avc;
-				} else {
-					data[-1] = nal_bits_avc | 28;
-					data[0] = nal_type_avc;
-					if (chunk_size == size) {
-						data[0] |= 0x40;
-						rx_size--;
-					}
+
+				if (chunk_size == size) {
+					data[0] |= 0x40;
+					rx_size--;
 				}
 			}
 
 			if (nal_type_hevc == 1 || nal_type_hevc == 19) {
+				data[-1] = (data[0] & 0x81) | 49 << 1;
+				data[0] = 1;
+				data[1] = first ? 0x80 | nal_type_hevc : nal_type_hevc;
 				rx_size = 3;
-				if (first) {
-					data[-1] = nal_bits_hevc | 49 << 1;
-					data[0] = 1;
-					data[1] = 0x80 | nal_type_hevc;
-				} else {
-					data[-1] = nal_bits_hevc | 49 << 1;
-					data[0] = 1;
-					data[1] = nal_type_hevc;
-					if (chunk_size == size) {
-						data[1] |= 0x40;
-						rx_size--;
-					}
+
+				if (chunk_size == size) {
+					data[1] |= 0x40;
+					rx_size--;
 				}
 			}
 
@@ -227,8 +223,9 @@ int main(int argc, const char* argv[]) {
 		}
 
 		if (debug) {
+			int rx_size = (debug > 2) ? rx + 8 : 28;
 			printf("RX: ");
-			for (int i = 20; i < rx + 8; i++) {
+			for (int i = 20; i < rx_size; i++) {
 				printf("0x%02X, ", rx_buffer[i]);
 			}
 			printf("len: %d\n", rx - 12);
@@ -250,8 +247,9 @@ int main(int argc, const char* argv[]) {
 		}
 
 		if (debug) {
+			int tx_size = (debug > 2) ? size : 12;
 			printf("TX: ");
-			for (int i = 4; i < size; i++) {
+			for (int i = 4; i < tx_size; i++) {
 				printf("0x%02X, ", buffer[i]);
 			}
 			printf("len: %d\n", size - 4);
