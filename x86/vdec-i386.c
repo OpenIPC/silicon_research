@@ -139,7 +139,7 @@ int main(int argc, const char* argv[]) {
 		}
 
 		uint32_t rtp_header = 0;
-		if (rx_buffer[8] == 0x80) {
+		if (rx_buffer[8] & 0x80 && rx_buffer[9] & 0x60) {
 			rtp_header = 12;
 		}
 
