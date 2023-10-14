@@ -709,7 +709,6 @@ int main(int argc, const char* argv[]) {
   
   uint8_t*  rx_buffer       = malloc(1024 * 1024);
   uint8_t*  nal_buffer      = malloc(1024 * 1024);
-  uint32_t  nal_buffer_used = 0;
   
   // - Open write file
   if (write_stream_path) {
@@ -741,12 +740,12 @@ int main(int argc, const char* argv[]) {
     stream.bEndOfFrame  = codec_mode_stream ? HI_FALSE : HI_TRUE;
 
     uint32_t rtp_header = 0;
-    if (rx_buffer[8] == 0x80) {
+    if (rx_buffer[8] & 0x80) {
       rtp_header = 12;
     }
 
     // - Decode UDP stream
-    stream.pu8Addr = decodeUDPFrame(rx_buffer + 8, (uint32_t)rx, rtp_header, nal_buffer, &nal_buffer_used, &stream.u32Len);
+    stream.pu8Addr = decodeUDPFrame(rx_buffer + 8, (uint32_t)rx, rtp_header, nal_buffer, &stream.u32Len);
     if (!stream.pu8Addr) {
       continue;
     }

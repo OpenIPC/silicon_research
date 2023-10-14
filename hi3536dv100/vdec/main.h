@@ -79,10 +79,9 @@ int VO_HDMI_init(HI_HDMI_ID_E device_id, VO_INTF_SYNC_E interface_mode);
  * @param rx_size - Size of UDP data
  * @param header_size - Size of data before payload
  * @param nal_buffer - Buffer for NAL reassembly
- * @param nal_buffer_used - Current 
  * @param out_nal_size
  */
-uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_size, uint8_t* nal_buffer, uint32_t* nal_buffer_used, uint32_t* out_nal_size);
+uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_size, uint8_t* nal_buffer, uint32_t* out_nal_size);
 
 /* --- Console arguments parser --- */
 #define __BeginParseConsoleArguments__( printHelpFunction ) if( argc < 2 || (argc == 2 &&  (!strcmp( argv[ 1 ], "--help" ) || !strcmp( argv[ 1 ], "/?" ) || !strcmp( argv[ 1 ], "/h" )))) { printHelpFunction(); return 1; } for (int ArgID = 1; ArgID < argc; ArgID++) {const char* Arg = argv[ ArgID ];

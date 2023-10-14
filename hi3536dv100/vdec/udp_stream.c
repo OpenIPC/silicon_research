@@ -1,10 +1,8 @@
 #include "main.h"
 
 uint32_t prev_frame_id = 0;
-
-uint32_t frames_received  = 0;
-uint32_t frames_lost      = 0;
-
+uint32_t frames_received = 0;
+uint32_t frames_lost = 0;
 
 #pragma pack(push, 1)
 struct VideoFrame {
@@ -20,15 +18,11 @@ struct VideoFrame {
 
 #pragma pack(pop)
 
-uint32_t prev_sequence_id = 0;
+static uint32_t prev_sequence_id = 0;
+static uint32_t in_nal_size = 0;
 
-
-
-
-uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_size, uint8_t* nal_buffer, uint32_t* nal_buffer_used, uint32_t* out_nal_size) {
-  rx_buffer += header_size;
-  rx_size   -= header_size;
-  
+uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size,
+	uint32_t header_size, uint8_t* nal_buffer, uint32_t* out_nal_size) {
   // - Access video frame information
   /*struct VideoFrame* frame = (struct VideoFrame*)rx_buffer;
   
@@ -52,18 +46,17 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
   // - Skip frame header
   rx_buffer += sizeof(struct VideoFrame);
   rx_size   -= sizeof(struct VideoFrame);*/
+
+  rx_buffer += header_size;
+  rx_size -= header_size;
   
   // - Get NAL type
   uint8_t fragment_type_avc = rx_buffer[0] & 0x1F;
   uint8_t fragment_type_hevc = (rx_buffer[0] >> 1) & 0x3F;
 
-  uint8_t nal_type = 0;
   uint8_t start_bit = 0;
   uint8_t end_bit = 0;
   uint8_t copy_size = 4;
-
-  uint8_t* in_buffer = NULL;
-  uint32_t in_size = 0;
 
   if (fragment_type_avc == 28 || fragment_type_hevc == 49) {
     if (fragment_type_avc == 28) {
@@ -74,7 +67,7 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
       start_bit = rx_buffer[2] & 0x80;
       end_bit = rx_buffer[2] & 0x40;
       nal_buffer[4] = (rx_buffer[0] & 0x81) | (rx_buffer[2] & 0x3F) << 1;
-      nal_buffer[5] = rx_buffer[1];
+      nal_buffer[5] = 1;
       copy_size++;
       rx_buffer++;
       rx_size--;
@@ -83,7 +76,7 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
     rx_buffer++;
     rx_size--;
 
-    if (start_bit && !end_bit && (*nal_buffer_used) == 0) {
+    if (start_bit) {
       // - Write NAL header
       nal_buffer[0] = 0;
       nal_buffer[1] = 0;
@@ -92,51 +85,45 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size, uint32_t header_si
 
       // - Copy data
       memcpy(nal_buffer + copy_size, rx_buffer, rx_size);
-      (*nal_buffer_used) = rx_size + copy_size;
-    } else if (!start_bit && !end_bit && (*nal_buffer_used) != 0) {
-      rx_buffer ++;
-      rx_size   --;
-      memcpy(nal_buffer + (*nal_buffer_used), rx_buffer, rx_size);
-      *nal_buffer_used += rx_size;
-      
-    } else if (!start_bit && end_bit && (*nal_buffer_used) != 0) {
-      rx_buffer ++;
-      rx_size   --;
-      
-      memcpy(nal_buffer + (*nal_buffer_used), rx_buffer, rx_size);
-      *nal_buffer_used += rx_size;
-     
+      in_nal_size = rx_size + copy_size;
+    } else if (end_bit) {
+      rx_buffer++;
+      rx_size--;
+
+      memcpy(nal_buffer + in_nal_size, rx_buffer, rx_size);
+      in_nal_size += rx_size;
 
       // - Store NAL size
-      *out_nal_size = *nal_buffer_used;
-      
-      // - Reset NAL buffer
-      *nal_buffer_used = 0;
-      
+      *out_nal_size = in_nal_size;
+      in_nal_size = 0;
+
       // - Return NAL
       //printf("> DEFRAG NAL %d : Size = %d\n", nal_buffer[3] & 0x1F, *out_nal_size);
-      
-      frames_received ++;
-      
+
+      frames_received++;
       return nal_buffer;
+    } else {
+      rx_buffer++;
+      rx_size--;
+      memcpy(nal_buffer + in_nal_size, rx_buffer, rx_size);
+      in_nal_size += rx_size;
     }
-    
+
     // - No frame yet
     return NULL;
-    
   } else {
     // - Create frame prefix
     rx_buffer[-4] = 0;
     rx_buffer[-3] = 0;
     rx_buffer[-2] = 0;
     rx_buffer[-1] = 1;
-  
-    *out_nal_size     = rx_size + 4;
-    *nal_buffer_used  = 0;
-    
+
+    *out_nal_size = rx_size + copy_size;
+    in_nal_size = 0;
+
     // - Return NAL
     //printf("> GOOD NAL %d : Size = %d bytes\n", fragment_type, *out_nal_size);
-    frames_received ++;
-    return rx_buffer - 4;
+    frames_received++;
+    return rx_buffer - copy_size;
   }
 }
