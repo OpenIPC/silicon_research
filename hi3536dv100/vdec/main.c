@@ -864,7 +864,7 @@ char s1[30] = "0";
 char s2[30] = "0";
 char s3[30] = "0";
 char s4[30] = "0";
-char *ptr[30];
+char *ptr;
 
 void* __MAVLINK_THREAD__(void* arg) {
 
@@ -1007,10 +1007,10 @@ void* __MAVLINK_THREAD__(void* arg) {
                         insertString(s4, ".", 2);
                     };
                 };
-                s1_double = strtod(s1, *ptr);
-                s2_double = strtod(s2, *ptr);
-                s3_double = strtod(s3, *ptr);
-                s4_double = strtod(s4, *ptr);
+                s1_double = strtod(s1, &ptr);
+                s2_double = strtod(s2, &ptr);
+                s3_double = strtod(s3, &ptr);
+                s4_double = strtod(s4, &ptr);
             };
             telemetry_distance = distanceEarth(s1_double, s2_double, s3_double, s4_double);
 
