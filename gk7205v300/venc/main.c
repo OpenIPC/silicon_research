@@ -1,4 +1,5 @@
 #include "main.h"
+#include <stdbool.h>
 #include <time.h>
 
 // - Configuration profiles
@@ -1381,104 +1382,103 @@ void transmit(int socket_handle, uint8_t* tx_buffer, uint32_t tx_size, struct so
 
 }
 
-void sendPacket(uint8_t* pack_data, uint32_t pack_size, int socket_handle, struct sockaddr* dst_address, uint32_t max_size) {
-  // - Detect h264 NAL prefix
+void sendPacket(uint8_t* pack_data, uint32_t pack_size,
+    int socket_handle, struct sockaddr* dst_address, uint32_t max_size) {
   if (pack_data[0] == 0 && pack_data[1] == 0 && pack_data[2] == 0 && pack_data[3] == 1) {
-    // - Skip NAL prefix
     pack_data += 4;
     pack_size -= 4;
-  
-    // - Update statistics
-    { frame_id    ++;
-      frames_sent ++;
-    
-      if (pack_size > nal_max_size) {
-        nal_max_size = pack_size;
-      }
-      
-      if (pack_size <= max_size) {
-        single_packets ++;
-      }
+
+    frame_id++;
+    frames_sent++;
+
+    if (pack_size > nal_max_size) {
+      nal_max_size = pack_size;
+    }
+
+    if (pack_size <= max_size) {
+      single_packets++;
     }
 
     // - Get NAL type
-    uint8_t nal_type  = pack_data[0] & 0x1F;
-
-    //printf("NAL Type = %d, Size = %d\n", nal_type, pack_size);
-
-    // - Count NAL by type
+    uint8_t nal_type = pack_data[0] & 0x1F;
     switch (nal_type) {
-      case 1: s_count++;    break;
-      case 5: idr_count++;  break;
-      case 6: sei_count++;  break;
-      case 7: sps_count++;  break;
-      case 8: pps_count++;  break;
-      default:
-        //printf("NAL = %d\n", nal_type);
-        break;
+    case 1:
+      s_count++;
+      break;
+    case 5:
+      idr_count++;
+      break;
+    case 6:
+      sei_count++;
+      break;
+    case 7:
+      sps_count++;
+      break;
+    case 8:
+      pps_count++;
+      break;
+    default:
+      break;
     }
-  
-    // - Check if fragmentation needed
+
     if (pack_size > max_size) {
-      uint32_t  nal_size  = pack_size;
-      uint8_t   nal_bits  = pack_data[0] & 0xE0;
-      
-      int is_first  = 1;
-      int is_last   = 0;
-      
+      uint8_t nal_type_avc = pack_data[0] & 0x1F;
+      uint8_t nal_type_hevc = (pack_data[0] >> 1) & 0x3F;
+      uint8_t nal_bits_avc = pack_data[0] & 0xE0;
+      uint8_t nal_bits_hevc = pack_data[0] & 0x81;
+
+      bool start_bit = true;
+      uint8_t tx_size = 2;
+
       while (pack_size) {
         uint32_t chunk_size = pack_size > max_size ? max_size : pack_size;
-        is_last = (chunk_size == pack_size) ? 1 : 0;
+        if (nal_type_avc == 1 || nal_type_avc == 5) {
+          tx_buffer[0] = nal_bits_avc | 28;
+          tx_buffer[1] = nal_type_avc;
 
-        if (is_first) {
-          // - Copy NAL bits and set frag type
-          pack_data[-1] = nal_bits | 28;
-        
-          // - Set flags
-          pack_data[0] = 0x80 | nal_type;
-          
-        } else {
-          pack_data[-2] = nal_bits | 28;
-          pack_data[-1] = nal_type;
-          
-          if (is_last == 1) pack_data[-1] |= 0x40;
+          if (start_bit) {
+            pack_data++;
+            pack_size--;
+            tx_buffer[1] = 0x80 | nal_type_avc;
+            start_bit = false;
+          }
+
+          if (chunk_size == pack_size) {
+            tx_buffer[1] |= 0x40;
+          }
         }
-        
 
-        // - Calculate Tx size
-        uint32_t tx_size = chunk_size + (is_first ? 1 : 2);
-        
-        // - Flush Tx buffer
-        if (tx_buffer_used) {
-          transmit(socket_handle, tx_buffer, tx_buffer_used, dst_address);
-          packets_sent      ++;
-          bytes_sent        += tx_buffer_used;
-          tx_buffer_used    = 0;
+        if (nal_type_hevc == 1 || nal_type_hevc == 19) {
+          tx_buffer[0] = nal_bits_hevc | 49 << 1;
+          tx_buffer[1] = 1;
+          tx_buffer[2] = nal_type_hevc;
+          tx_size = 3;
+
+          if (start_bit) {
+            pack_data += 2;
+            pack_size -= 2;
+            tx_buffer[2] = 0x80 | nal_type_hevc;
+            start_bit = false;
+          }
+
+          if (chunk_size == pack_size) {
+            tx_buffer[2] |= 0x40;
+          }
         }
-        
-        // - Insert frame header
-        memcpy(tx_buffer, pack_data - (is_first ? 1 : 2), chunk_size + (is_first ? 1 : 2));
 
-        // - Send chunk
-        transmit(socket_handle, tx_buffer, tx_size, dst_address);
-        
-        packets_sent  ++;
-        bytes_sent    += tx_size;
-        
-        pack_data     += chunk_size;
-        pack_size     -= chunk_size;
-        
-        // - Reset first marker
-        is_first = 0;
-        
+        memcpy(tx_buffer + tx_size, pack_data, chunk_size + tx_size);
+        transmit(socket_handle, tx_buffer, chunk_size + tx_size, dst_address);
+
+        packets_sent++;
+        bytes_sent += chunk_size + tx_size;
+
+        pack_data += chunk_size;
+        pack_size -= chunk_size;
       }
-
-    // - Send non-fragment
     } else {
       transmit(socket_handle, pack_data, pack_size, dst_address);
       packets_sent++;
     }
-  
   } else {
     // - Get NAL type
     printf("*** Unknown NAL prefix\n");
