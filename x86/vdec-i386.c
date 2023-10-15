@@ -75,40 +75,53 @@ static void create_fragment(int port, uint8_t* data, uint32_t size) {
 	if (size > MAX_SIZE) {
 		uint8_t nal_type_avc = data[0] & 0x1F;
 		uint8_t nal_type_hevc = (data[0] >> 1) & 0x3F;
-		uint8_t rx_size = 0;
-		bool first = true;
+		uint8_t nal_bits_avc = data[0] & 0xE0;
+		uint8_t nal_bits_hevc = data[0] & 0x81;
+
+		bool start_bit = true;
+		uint8_t tx_size = 2;
 
 		while (size) {
-			uint32_t chunk_size = size > MAX_SIZE ? MAX_SIZE : size;
+			uint32_t chunk = size > MAX_SIZE ? MAX_SIZE : size;
 			if (nal_type_avc == 1 || nal_type_avc == 5) {
-				data[-1] = (data[0] & 0xE0) | 28;
-				data[0] = first ? 0x80 | nal_type_avc : nal_type_avc;
-				rx_size = 2;
+				tx_buffer[0] = nal_bits_avc | 28;
+				tx_buffer[1] = nal_type_avc;
 
-				if (chunk_size == size) {
-					data[0] |= 0x40;
-					rx_size--;
+				if (start_bit) {
+					data++;
+					size--;
+					tx_buffer[1] = 0x80 | nal_type_avc;
+					start_bit = false;
+				}
+
+				if (chunk == size) {
+					tx_buffer[1] |= 0x40;
 				}
 			}
 
 			if (nal_type_hevc == 1 || nal_type_hevc == 19) {
-				data[-1] = (data[0] & 0x81) | 49 << 1;
-				data[0] = 1;
-				data[1] = first ? 0x80 | nal_type_hevc : nal_type_hevc;
-				rx_size = 3;
+				tx_buffer[0] = nal_bits_hevc | 49 << 1;
+				tx_buffer[1] = 1;
+				tx_buffer[2] = nal_type_hevc;
+				tx_size = 3;
 
-				if (chunk_size == size) {
-					data[1] |= 0x40;
-					rx_size--;
+				if (start_bit) {
+					data += 2;
+					size -= 2;
+					tx_buffer[2] = 0x80 | nal_type_hevc;
+					start_bit = false;
+				}
+
+				if (chunk == size) {
+					tx_buffer[2] |= 0x40;
 				}
 			}
 
-			memcpy(tx_buffer, data - 1, chunk_size + rx_size);
-			send_data(port, tx_buffer, chunk_size + rx_size);
+			memcpy(tx_buffer + tx_size, data, chunk + tx_size);
+			send_data(port, tx_buffer, chunk + tx_size);
 
-			data += chunk_size;
-			size -= chunk_size;
-			first = false;
+			data += chunk;
+			size -= chunk;
 		}
 	} else {
 		send_data(port, data, size);
@@ -126,10 +139,6 @@ static uint8_t* decode_frame(uint8_t* rx_buffer, uint32_t rx_size,
 	uint8_t start_bit = 0;
 	uint8_t end_bit = 0;
 	uint8_t copy_size = 4;
-
-	if (debug) {
-		printf("> Type [H264 %02d] [H265 %02d]\n", fragment_type_avc, fragment_type_hevc);
-	}
 
 	if (fragment_type_avc == 28 || fragment_type_hevc == 49) {
 		if (fragment_type_avc == 28) {
