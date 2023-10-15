@@ -68,18 +68,19 @@ static void send_data(int port, uint8_t* data, uint32_t size) {
 }
 
 static void create_fragment(int port, uint8_t* data, uint32_t size) {
-	uint8_t tx_buffer[1024 * 64];
-	data += 4;
-	size -= 4;
+	uint8_t prefix = 4;
+	data += prefix;
+	size -= prefix;
 
-	if (size > MAX_SIZE) {
+	if (size > MAX_SIZE + prefix) {
 		uint8_t nal_type_avc = data[0] & 0x1F;
 		uint8_t nal_type_hevc = (data[0] >> 1) & 0x3F;
 		uint8_t nal_bits_avc = data[0] & 0xE0;
 		uint8_t nal_bits_hevc = data[0] & 0x81;
 
-		bool start_bit = true;
+		uint8_t tx_buffer[4096];
 		uint8_t tx_size = 2;
+		bool start_bit = true;
 
 		while (size) {
 			uint32_t chunk = size > MAX_SIZE ? MAX_SIZE : size;
