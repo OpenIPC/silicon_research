@@ -4,6 +4,7 @@
  * Usage:
  * ./vdec 5600 192.168.1.10 6000 0
  * gst-launch-1.0 udpsrc port=6000 ! application/x-rtp ! rtph265depay ! avdec_h265 ! autovideosink sync=false
+ * 
  */
 
 #include <stdint.h>
@@ -126,6 +127,10 @@ static uint8_t* decode_frame(uint8_t* rx_buffer, uint32_t rx_size,
 	uint8_t end_bit = 0;
 	uint8_t copy_size = 4;
 
+	if (debug) {
+		printf("> Type [H264 %02d] [H265 %02d]\n", fragment_type_avc, fragment_type_hevc);
+	}
+
 	if (fragment_type_avc == 28 || fragment_type_hevc == 49) {
 		if (fragment_type_avc == 28) {
 			start_bit = rx_buffer[1] & 0x80;
@@ -222,18 +227,18 @@ int main(int argc, const char* argv[]) {
 			continue;
 		}
 
-		if (debug) {
-			int rx_size = (debug > 2) ? rx + 8 : 28;
-			printf("RX: ");
-			for (int i = 20; i < rx_size; i++) {
-				printf("0x%02X, ", rx_buffer[i]);
-			}
-			printf("len: %d\n", rx - 12);
-		}
-
 		uint32_t rtp_header = 0;
 		if (rx_buffer[8] & 0x80 && rx_buffer[9] & 0x60) {
 			rtp_header = 12;
+		}
+
+		if (debug) {
+			int rx_size = (debug > 2) ? rx + 8 : 16 + rtp_header;
+			printf("RX: ");
+			for (int i = 8 + rtp_header; i < rx_size; i++) {
+				printf("0x%02X, ", rx_buffer[i]);
+			}
+			printf("len: %d\n", rx - rtp_header);
 		}
 
 		uint32_t size = 0;
