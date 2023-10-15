@@ -86,30 +86,20 @@ uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size,
       // - Copy data
       memcpy(nal_buffer + copy_size, rx_buffer, rx_size);
       in_nal_size = rx_size + copy_size;
-    } else if (end_bit) {
-      rx_buffer++;
-      rx_size--;
-
-      memcpy(nal_buffer + in_nal_size, rx_buffer, rx_size);
-      in_nal_size += rx_size;
-
-      // - Store NAL size
-      *out_nal_size = in_nal_size;
-      in_nal_size = 0;
-
-      // - Return NAL
-      //printf("> DEFRAG NAL %d : Size = %d\n", nal_buffer[3] & 0x1F, *out_nal_size);
-
-      frames_received++;
-      return nal_buffer;
     } else {
       rx_buffer++;
       rx_size--;
       memcpy(nal_buffer + in_nal_size, rx_buffer, rx_size);
       in_nal_size += rx_size;
+
+      if (end_bit) {
+        *out_nal_size = in_nal_size;
+        in_nal_size = 0;
+        frames_received++;
+        return nal_buffer;
+      }
     }
 
-    // - No frame yet
     return NULL;
   } else {
     // - Create frame prefix
