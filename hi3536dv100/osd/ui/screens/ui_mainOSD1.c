@@ -1,6 +1,7 @@
 // Author: Dinh Cong Bang from Viet Nam
 // LVGL version: 8.2.0
 
+#include <stdio.h>
 #include "../ui.h"
 
 void set_arrow_to_home(uint16_t hdg)
