@@ -1385,8 +1385,9 @@ void transmit(int socket_handle, uint8_t* tx_buffer, uint32_t tx_size, struct so
 void sendPacket(uint8_t* pack_data, uint32_t pack_size,
     int socket_handle, struct sockaddr* dst_address, uint32_t max_size) {
   if (pack_data[0] == 0 && pack_data[1] == 0 && pack_data[2] == 0 && pack_data[3] == 1) {
-    pack_data += 4;
-    pack_size -= 4;
+    uint8_t prefix = 4;
+    pack_data += prefix;
+    pack_size -= prefix;
 
     frame_id++;
     frames_sent++;
@@ -1421,7 +1422,7 @@ void sendPacket(uint8_t* pack_data, uint32_t pack_size,
       break;
     }
 
-    if (pack_size > max_size) {
+    if (pack_size > max_size + prefix) {
       uint8_t nal_type_avc = pack_data[0] & 0x1F;
       uint8_t nal_type_hevc = (pack_data[0] >> 1) & 0x3F;
       uint8_t nal_bits_avc = pack_data[0] & 0xE0;
