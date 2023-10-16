@@ -5,12 +5,12 @@ if [ "$1" = "vdec" ]; then
 	SDK=hi3536dv100
 	ABI=glibc
 	DL=cortex_a7-gcc12-glibc-4_9
-elif [ "$1" = "venc" ]; then
+elif [ "$1" = "venc" ] || [ "$1" = "venc-hisi" ]; then
 	SDK=gk7205v300
 	ABI=musl
 	DL=cortex_a7_thumb2-gcc12-musl-4_9
 else
-	echo "Usage: $0 [venc|vdec]"
+	echo "Usage: $0 [vdec|venc|venc-hisi]"
 	exit 1
 fi
 
@@ -19,6 +19,11 @@ if [ ! -e $PWD/toolchain/$DL ]; then
 	mkdir -p $PWD/toolchain/$DL
 	tar -xf $PWD/$DL.tgz -C $PWD/toolchain/$DL --strip-components=1 || exit 1
 	rm -f $PWD/$DL.tgz
+fi
+
+if [ "$1" = "venc-hisi" ]; then
+	sdk/hi3516ev300/build.sh $DL
+	exit 0
 fi
 
 rm -rf build
