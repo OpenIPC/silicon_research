@@ -39,13 +39,6 @@ killall majestic
 /tmp/venc
 ```
 
-## Known bugs
-Add a symlink from `/dev/venc` to `/dev/ven` on your IP camera in order to make it work:
-```sh
-# on camera
-ln -s /dev/venc /dev/ven
-```
-
 ## RU
 Пример того, как запустить GK7205V300, используя только низкоуровневый API HiMPP.
 
@@ -69,11 +62,6 @@ cmake --build build-gk7205v300-release
 Перед запуском примера на камере необходимо остановить стандартный для прошивок OpenIPC стример - majestic.
 
 Если через некоторе время после его остановки камера уходит в перезагрузку - отключите WDT в конфигурационном файле majestic.
-
-## Известные ошибки
-Пример может не запускаться на камере из-за несоответветствия имени устройства в драйвере и в HiMPP.
-
-Лечится созданием символьной ссылки /dev/venc -> /dev/ven на вашей IP-камере.
 
 ## Ground Station on NVR
 ### RoadMap

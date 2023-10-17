@@ -45,7 +45,8 @@ target_link_libraries(${NAME}
   drc
   ir_auto
   voice_engine
-  
+  securec
+
   pthread
   dl
   m

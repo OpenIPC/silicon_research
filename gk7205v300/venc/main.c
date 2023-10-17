@@ -94,9 +94,6 @@ void printHelp() {
     "    --roi          - Enable ROI\n"
     "    --roi-qp [QP]  - ROI quality points              (Default: 20)\n"
     "\n"
-    "  Notes:\n"
-    "    1. Dont forget 'ln -s /dev/venc /dev/ven' before start!\n"
-    "\n"
   );
 }
 
