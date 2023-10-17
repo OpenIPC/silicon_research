@@ -24,7 +24,7 @@ uint32_t  tx_buffer_used = 0;
 void printHelp() {
   printf(
     "\n"
-    "\t\tOpenIPC FPV Streamer for GK7205 + IMX307 v23.09-27\n"
+    "\t\tOpenIPC FPV Streamer for HiSilicon/Goke (%s)\n"
     "\n"
     "  Usage:\n"
     "    venc [Arguments]\n"
@@ -93,7 +93,8 @@ void printHelp() {
     "\n"
     "    --roi          - Enable ROI\n"
     "    --roi-qp [QP]  - ROI quality points              (Default: 20)\n"
-    "\n"
+    "\n",
+    __DATE__
   );
 }
 
