@@ -1,6 +1,5 @@
-/build-*
-/compile_commands.json
-/.ctagsd
-/.cache
+compile_commands.json
 build
+firmware
 toolchain
+hi3536dv100/osd/lvgl

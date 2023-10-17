@@ -7,7 +7,6 @@ add_executable(${NAME}
   
   main.c
   compat.c
-  config.c
   common.c
   
   sensor/imx307_2l_cmos.c
@@ -18,11 +17,11 @@ add_executable(${NAME}
 )
 
 target_include_directories(${NAME}
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
   PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/sdk/gk7205v300/include
-    ${CMAKE_SOURCE_DIR}/sdk/gk7205v300/gmp/include
+    ${CMAKE_SOURCE_DIR}/sdk/hi3516ev300/include
+    ${CMAKE_SOURCE_DIR}
 )
 
 target_link_libraries(${NAME}
@@ -35,28 +34,19 @@ target_link_libraries(${NAME}
   gk_ae
   gk_awb
 
-  isp
-  ae
-  awb
   dehaze
-  ldci
-  upvqe
-  dnvqe
   drc
   ir_auto
+  ldci
+  dnvqe
+  upvqe
   voice_engine
   securec
-
-  pthread
-  dl
-  m
 )
 
 target_link_directories(${NAME}
   PUBLIC
-    ${CMAKE_SOURCE_DIR}/sdk/gk7205v300/lib
-    ${CMAKE_SOURCE_DIR}/sdk/gk7205v300/gmp/lib_nolog/static
-    ${CMAKE_SOURCE_DIR}/sdk/gk7205v300/gmp/lib_nolog/static/base
+    ${CMAKE_SOURCE_DIR}/firmware/general/package/goke-osdrv-gk7205v200/files/lib
 )
 
 set_target_properties (${NAME} PROPERTIES

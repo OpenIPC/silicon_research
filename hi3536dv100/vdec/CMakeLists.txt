@@ -33,14 +33,12 @@ target_link_libraries(${NAME}
   VoiceEngine
   jpeg
   hdmi
-  pthread
-  dl
   m
 )
 
 target_link_directories(${NAME}
   PUBLIC
-    ${CMAKE_SOURCE_DIR}/sdk/hi3536dv100/lib
+    ${CMAKE_SOURCE_DIR}/firmware/general/package/hisilicon-osdrv-hi3536dv100/files/lib
 )
 
 set_target_properties (${NAME} PROPERTIES
