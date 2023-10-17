@@ -5,12 +5,11 @@ if [ "$1" = "vdec" ]; then
 	SDK=hi3536dv100
 	ABI=glibc
 	DL=cortex_a7-gcc12-glibc-4_9
-elif [ "$1" = "venc" ] || [ "$1" = "venc-hisi" ]; then
+elif [ "$1" = "venc-goke" ] || [ "$1" = "venc-hisi" ]; then
 	SDK=gk7205v300
-	ABI=musl
 	DL=cortex_a7_thumb2-gcc12-musl-4_9
 else
-	echo "Usage: $0 [vdec|venc|venc-hisi]"
+	echo "Usage: $0 [vdec|venc-goke|venc-hisi]"
 	exit 1
 fi
 
@@ -25,13 +24,13 @@ if [ ! -e firmware ]; then
 	git clone https://github.com/openipc/firmware --depth=1
 fi
 
-if [ ! -e hi3536dv100/osd/lvgl ]; then
-	git clone https://github.com/lvgl/lvgl hi3536dv100/osd/lvgl -b release/v8.3 --depth=1
+if [ "$1" = "venc-goke" ] || [ "$1" = "venc-hisi" ]; then
+	make -B CC=toolchain/$DL/bin/arm-linux-gcc FILE=$1
+	exit 0
 fi
 
-if [ "$1" = "venc-hisi" ]; then
-	sdk/hi3516ev300/build.sh $DL
-	exit 0
+if [ ! -e hi3536dv100/osd/lvgl ]; then
+	git clone https://github.com/lvgl/lvgl hi3536dv100/osd/lvgl -b release/v8.3 --depth=1
 fi
 
 rm -rf build
