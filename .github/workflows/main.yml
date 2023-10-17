@@ -19,15 +19,14 @@ jobs:
         run: |
           bash build.sh vdec
           cp -Tr build/Release/bin output
-          bash build.sh venc
-          cp -Tr build/Release/bin output
+          bash build.sh venc-goke
           bash build.sh venc-hisi
 
       - name: Build sample
         run: |
           sudo apt-get update
           sudo apt-get install musl-dev
-          x86_64-linux-musl-gcc x86/vdec-i386.c -o vdec-i386 -s -static
+          x86_64-linux-musl-gcc sample/vdec-sample.c -o vdec-sample -s -static
 
       - name: Upload binaries
         if: github.event_name != 'pull_request'
@@ -36,6 +35,6 @@ jobs:
           tag_name: latest
           files: |
             output/vdec
-            output/venc
-            vdec-i386
+            vdec-sample
+            venc-goke
             venc-hisi

@@ -18,6 +18,16 @@ static const ISP_CMOS_LCAC_S g_stIspLCac = {
     30,
     /*VarThr*/
     0,
+    /*au16RLumaThd*/
+    { 1500, 1500, 0 },
+    /*au16GLumaThd*/
+    { 1500, 1500, 0 },
+    /*au16BLumaThd*/
+    { 4095, 1500, 0 },
+    /*au16YLumaThd*/
+    { 3200, 1500, 0 },
+    /*as16CbCrRatio*/
+    { -50, -50, -50 },
     /*enOpMode*/
     0,
     /*stManual*/
@@ -40,6 +50,16 @@ static const ISP_CMOS_LCAC_S g_stIspLCacWdr = {
     30,
     /*VarThr*/
     130,
+    /*au16RLumaThd*/
+    { 1500, 1500, 0 },
+    /*au16GLumaThd*/
+    { 1500, 1500, 0 },
+    /*au16BLumaThd*/
+    { 4095, 1500, 0 },
+    /*au16YLumaThd*/
+    { 3200, 1500, 0 },
+    /*as16CbCrRatio*/
+    { -50, -50, -50 },
     /*enOpMode*/
     0,
     /*stManual*/

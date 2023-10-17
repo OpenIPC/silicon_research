@@ -18,20 +18,6 @@
 #include <netinet/in.h>
 #include <pthread.h>
 
-#ifdef TARGET_PLATFORM_EABI_MUSL
-  #define PROT_READ  0x1
-  #define PROT_WRITE 0x2
-  #define PROT_EXEC  0x4
-
-  #define MAP_SHARED  0x01
-  #define MAP_PRIVATE 0x02
-
-  #define MAP_FAILED ((void *)-1)
-
-  void *mmap64(void *start, size_t len, int prot, int flags, int fd, off_t off);
-  int munmap(void *__addr, size_t __len);
-#endif
-
 #include "hi_common.h"
 #include "hi_buffer.h"
 #include "hi_comm_sys.h"

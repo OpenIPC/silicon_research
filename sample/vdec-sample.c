@@ -1,5 +1,5 @@
 /*
- * x86_64-linux-musl-gcc vdec-i386.c -o vdec -s -static -Wall
+ * x86_64-linux-musl-gcc vdec-sample.c -o vdec-sample -s -static -Wall
  * 
  * Usage:
  * ./vdec 5600 192.168.1.10 6000 0
