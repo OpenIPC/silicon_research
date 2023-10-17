@@ -2,7 +2,7 @@
 SRC=gk7205v300/venc
 INC=sdk/hi3516ev300
 SNS=sdk/hi3516ev300/sensor
-LIB="-lisp -lmpi -ldnvqe -lupvqe -l_hiae -l_hiawb -l_hildci -l_hidrc -l_hidehaze -lVoiceEngine"
+LIB="-lisp -lmpi -ldnvqe -lupvqe -l_hiae -l_hiawb -l_hildci -l_hidrc -l_hidehaze -lVoiceEngine -lsecurec"
 
 echo Building venc-hisi
 toolchain/$1/bin/arm-linux-gcc -o venc-hisi -Os -s -I $INC/include -L $INC/lib $LIB \
