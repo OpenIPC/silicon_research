@@ -2,7 +2,7 @@
  * x86_64-linux-musl-gcc vdec-sample.c -o vdec-sample -s -static -Wall
  * 
  * Usage:
- * ./vdec 5600 192.168.1.10 6000 0
+ * ./vdec-sample 5600 192.168.1.10 6000 0
  * gst-launch-1.0 udpsrc port=6000 ! application/x-rtp ! rtph265depay ! avdec_h265 ! autovideosink sync=false
  * 
  */
