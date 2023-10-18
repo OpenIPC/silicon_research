@@ -34,7 +34,7 @@ jobs:
         with:
           tag_name: latest
           files: |
-            output/vdec
             vdec-sample
-            venc-goke
-            venc-hisi
+            output/vdec
+            output/venc-goke
+            output/venc-hisi

@@ -25,7 +25,7 @@ if [ ! -e firmware ]; then
 fi
 
 if [ "$1" = "venc-goke" ] || [ "$1" = "venc-hisi" ]; then
-	make -B CC=toolchain/$DL/bin/arm-linux-gcc FILE=$1
+	make -B CC=toolchain/$DL/bin/arm-linux-gcc TARGET=$1
 	exit 0
 fi
 
