@@ -24,11 +24,6 @@ if [ "$1" = "venc-goke" ] || [ "$1" = "venc-hisi" ]; then
 	exit 0
 fi
 
-if [ ! -e hi3536dv100/osd/lvgl ]; then
-	git clone https://github.com/lvgl/lvgl hi3536dv100/osd/lvgl -b release/v8.3 --depth=1
-fi
-
 rm -rf build
-cmake -Bbuild -DTARGET_BUILD=Release -DTARGET_PLATFORM=hi3536dv100 \
-	-DTARGET_PLATFORM_TOOLCHAIN_GCC_PATH=$PWD/toolchain/$DL/bin
+cmake -Bbuild -DTARGET_BUILD=Release -DTARGET_PLATFORM=hi3536dv100 -DTOOLCHAIN_GCC_PATH=$PWD/toolchain/$DL/bin
 cmake --build build --parallel 8

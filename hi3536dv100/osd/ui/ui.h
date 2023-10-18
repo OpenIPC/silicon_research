@@ -8,12 +8,12 @@
 extern "C" {
 #endif
 
-    #include "lvgl/lvgl.h"
-
+#include "lvgl.h"
 #include "ui_helpers.h"
 #include "components/ui_comp.h"
 #include "components/ui_comp_hook.h"
 #include "ui_events.h"
+
 // SCREEN: ui_mainOSD1
 void ui_mainOSD1_screen_init(void);
 extern lv_obj_t *ui_mainOSD1;

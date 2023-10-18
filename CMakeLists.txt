@@ -26,3 +26,11 @@ execute_process(
     ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
     ${CMAKE_SOURCE_DIR}/compile_commands.json
 )
+
+include(FetchContent)
+FetchContent_Declare(
+  lvgl
+  URL https://github.com/lvgl/lvgl/archive/refs/tags/v8.3.10.tar.gz)
+
+FetchContent_MakeAvailable(lvgl)
+target_include_directories(lvgl PUBLIC "${CMAKE_CURRENT_LIST_DIR}/hi3536dv100/osd")
