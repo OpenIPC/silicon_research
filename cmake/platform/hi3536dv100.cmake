@@ -10,4 +10,4 @@ set_option (TOOLCHAIN_COMPILER_OPTIONS_DEBUG   "-O0")
 set_option (TOOLCHAIN_COMPILER_OPTIONS_RELEASE "-Os -s")
 
 set_option (TARGET_PLATFORM_TOOLCHAIN          "gcc")
-set_option (TARGET_PLATFORM_TOOLCHAIN_GCC_TYPE "arm-openipc-linux-gnueabi")
+set_option (TARGET_PLATFORM_TOOLCHAIN_GCC_TYPE "arm-linux")
