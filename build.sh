@@ -2,11 +2,8 @@
 LINK="https://github.com/openipc/firmware/releases/download/latest"
 
 if [ "$1" = "vdec" ]; then
-	SDK=hi3536dv100
-	ABI=glibc
 	DL=cortex_a7-gcc12-glibc-4_9
 elif [ "$1" = "venc-goke" ] || [ "$1" = "venc-hisi" ]; then
-	SDK=gk7205v300
 	DL=cortex_a7_thumb2-gcc12-musl-4_9
 else
 	echo "Usage: $0 [vdec|venc-goke|venc-hisi]"
@@ -34,6 +31,6 @@ if [ ! -e hi3536dv100/osd/lvgl ]; then
 fi
 
 rm -rf build
-cmake -Bbuild -DTARGET_BUILD=Release -DTARGET_PLATFORM=$SDK -DTARGET_PLATFORM_EABI=$ABI \
+cmake -Bbuild -DTARGET_BUILD=Release -DTARGET_PLATFORM=hi3536dv100 \
 	-DTARGET_PLATFORM_TOOLCHAIN_GCC_PATH=$PWD/toolchain/$DL/bin
 cmake --build build --parallel 8

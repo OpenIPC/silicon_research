@@ -7,7 +7,6 @@ else ifeq ($(TARGET),venc-goke)
 	SDK := gk7205v300
 	LIB := -lhi_mpi -lhi_isp -lhi_ae -lhi_awb -lgk_api -lgk_isp -lgk_ae -lgk_awb \
 		-ldehaze -ldrc -lldci -lir_auto -ldnvqe -lupvqe -lvoice_engine -lsecurec
-	INC := -I sdk/hi3516ev300/include
 	DRV ?= firmware/general/package/goke-osdrv-gk7205v200/files/lib
 endif
 
@@ -19,4 +18,4 @@ FILE ?= $(TARGET)
 
 $(TARGET):
 	@mkdir -p output
-	$(CC) $(VENC) $(SENSOR) -I sdk/$(SDK)/include $(INC) -L $(DRV) $(LIB) -Os -s -o output/$(FILE)
+	$(CC) $(VENC) $(SENSOR) -I sdk/$(SDK)/include -L $(DRV) $(LIB) -Os -s -o output/$(FILE)
