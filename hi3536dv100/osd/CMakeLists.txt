@@ -23,7 +23,7 @@ target_include_directories(osd
     ${CMAKE_SOURCE_DIR}
 )
 
-target_link_libraries(osd 
+target_link_libraries(osd
   PUBLIC
     lvgl
     m
@@ -31,6 +31,4 @@ target_link_libraries(osd
     pthread
 )
 
-
-add_subdirectory(lvgl)
 add_subdirectory(items)
