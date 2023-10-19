@@ -1,6 +1,4 @@
-compile_commands.json
-build
 firmware
-output
 toolchain
-hi3536dv100/osd/lvgl
+vdec/vdec
+venc/venc
