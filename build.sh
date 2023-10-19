@@ -1,6 +1,12 @@
 #!/bin/bash
 DL="https://github.com/openipc/firmware/releases/download/latest"
-CC=cortex_a7_thumb2-gcc12-musl-4_9
+
+if [ "$1" = "vdec" ]; then
+	CC=cortex_a7-gcc12-glibc-4_9
+else
+	CC=cortex_a7_thumb2-gcc12-musl-4_9
+fi
+
 GCC=../toolchain/$CC/bin/arm-linux-gcc
 
 if [ ! -e toolchain/$CC ]; then
