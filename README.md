@@ -18,23 +18,23 @@ This example includes profiles for most popular sensors.
 Video output format is H.264 over UDP with NAL fragmentation like in RTP, although NAL prefixes are omitted. 
 Keep in mind that this is not a valid RTP stream! 
 To receive and display video stream extra coding is needed. 
-The NAL defragmentation algorithm is described in **udp_depay.c**.
+The NAL defragmentation algorithm is described in **vdec-sample.c**.
 
 ## How to build
 Build script usage:
 ```bash
-./build.sh venc
+./build.sh venc-goke
+./build.sh venc-hisi
 ./build.sh vdec
 ```
 
 Upload the compiled binary onto your camera:
 ```bash
-scp -O build/Release/bin/venc root@192.168.1.10:/tmp
+scp -O venc/venc root@192.168.1.10:/tmp
 ```
 
 Run it there but don't forget to stop majestic (pre-packaged OpenIPC streamer) first:
 ```sh
-# on camera
 killall majestic
 /tmp/venc
 ```
@@ -44,19 +44,14 @@ killall majestic
 
 Этот пример настроен и протестирован на IP-камере с IMX335 на борту. Если вы хотите использовать другой сенсор, вам следует изменить профили конфигурации платы в исходном коде. Пример содержит профили для наиболее популярных сенсоров.
 
-Формат выходного видео - h264 по UDP с фрагментацией NAL по аналогии с RTP, но не является корректным RTP и не содержит NAL префиксы. Для приема и отображения видеопотока требуется дополнительная утилита. Алгоритм дефрагментации NAL описан в **udp_depay.c**.
+Формат выходного видео - h264 по UDP с фрагментацией NAL по аналогии с RTP, но не является корректным RTP и не содержит NAL префиксы. Для приема и отображения видеопотока требуется дополнительная утилита. Алгоритм дефрагментации NAL описан в **vdec-sample.c**.
 
 ## Как собрать
 Перед началом убедитесь, что у вас есть набор инструментов для вашей камеры (собранный при помощи OpenIPC). 
 
 Также вам потребуется соответствующая камера с установленной прошивкой OpenIPC.
 ``` bash
-cmake -Bbuild-gk7205v300-release -DTARGET_BUILD=Release \
-  -DTARGET_PLATFORM=gk7205v300 \
-  -DTARGET_PLATFORM_EABI=musl  \
-  -DTARGET_PLATFORM_TOOLCHAIN_GCC_PATH=/path/to/toolchain/bin
-
-cmake --build build-gk7205v300-release
+./build.sh vdec
 ```
 
 Перед запуском примера на камере необходимо остановить стандартный для прошивок OpenIPC стример - majestic.

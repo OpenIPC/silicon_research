@@ -1,29 +1,29 @@
 #!/bin/bash
-LINK="https://github.com/openipc/firmware/releases/download/latest"
+DL="https://github.com/openipc/firmware/releases/download/latest"
+CC=cortex_a7_thumb2-gcc12-musl-4_9
+GCC=../toolchain/$CC/bin/arm-linux-gcc
 
-if [ "$1" = "vdec" ] || [ "$1" = "venc-goke" ] || [ "$1" = "venc-hisi" ]; then
-	DL=cortex_a7_thumb2-gcc12-musl-4_9
-else
-	echo "Usage: $0 [vdec|venc-goke|venc-hisi]"
-	exit 1
-fi
-
-if [ ! -e toolchain/$DL ]; then
-	wget -c -nv --show-progress $LINK/$DL.tgz -P $PWD
-	mkdir -p toolchain/$DL
-	tar -xf $DL.tgz -C toolchain/$DL --strip-components=1 || exit 1
-	rm -f $DL.tgz
+if [ ! -e toolchain/$CC ]; then
+	wget -c -nv --show-progress $DL/$CC.tgz -P $PWD
+	mkdir -p toolchain/$CC
+	tar -xf $CC.tgz -C toolchain/$CC --strip-components=1 || exit 1
+	rm -f $CC.tgz
 fi
 
 if [ ! -e firmware ]; then
 	git clone https://github.com/openipc/firmware --depth=1
 fi
 
-if [ "$1" = "venc-goke" ] || [ "$1" = "venc-hisi" ]; then
-	make -B CC=toolchain/$DL/bin/arm-linux-gcc TARGET=$1
-	exit 0
+if [ "$1" = "vdec" ]; then
+	DRV=../firmware/general/package/hisilicon-osdrv-hi3536dv100/files/lib
+	make -C vdec -B CC=$GCC DRV=$DRV
+elif [ "$1" = "venc-goke" ]; then
+	DRV=../firmware/general/package/goke-osdrv-gk7205v200/files/lib
+	make -C venc -B CC=$GCC DRV=$DRV $1
+elif [ "$1" = "venc-hisi" ]; then
+	DRV=../firmware/general/package/hisilicon-osdrv-hi3516ev200/files/lib
+	make -C venc -B CC=$GCC DRV=$DRV $1
+else
+	echo "Usage: $0 [vdec|venc-goke|venc-hisi]"
+	exit 1
 fi
-
-rm -rf build
-cmake -Bbuild -DTARGET_BUILD=Release -DTARGET_PLATFORM=hi3536dv100 -DTOOLCHAIN_GCC_PATH=$PWD/toolchain/$DL/bin
-cmake --build build --parallel 8
