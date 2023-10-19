@@ -125,7 +125,7 @@ static HI_VOID HDMI_EventCallBack(HI_HDMI_EVENT_TYPE_E event, HI_VOID *pPrivateD
 void printHelp() {
   printf(
     "\n"
-    "\t\tOpenIPC FPV Decoder for HI3536 v23.09-27\n"
+    "\t\tOpenIPC FPV Decoder for HI3536 (%s)\n"
     "\n"
     "  Usage:\n"
     "    vdec [Arguments]\n"
@@ -154,7 +154,8 @@ void printHelp() {
     "    --bg-r [Value]         - Background color red component    (Default: 0)\n"
     "    --bg-g [Value]         - Background color green component  (Default: 96)\n"
     "    --bg-b [Value]         - Background color blue component   (Default: 0)\n"
-    "\n"
+    "\n",
+    __DATE__
   );
 }
 

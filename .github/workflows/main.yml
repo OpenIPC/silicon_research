@@ -18,9 +18,10 @@ jobs:
       - name: Build venc/vdec
         run: |
           bash build.sh vdec
-          cp -Tr build/Release/bin output
           bash build.sh venc-goke
+          mv venc/venc venc/venc-goke
           bash build.sh venc-hisi
+          mv venc/venc venc/venc-hisi
 
       - name: Build sample
         run: |
@@ -35,6 +36,6 @@ jobs:
           tag_name: latest
           files: |
             vdec-sample
-            output/vdec
-            output/venc-goke
-            output/venc-hisi
+            vdec/vdec
+            venc/venc-goke
+            venc/venc-hisi
