@@ -359,7 +359,11 @@ int main(int argc, const char* argv[]) {
       HI_MPI_VB_Exit();
     }
   }
-  
+
+  MPP_VERSION_S version;
+  HI_MPI_SYS_GetVersion(&version);
+  printf("> [%s]\n", version.aVersion);
+
   // - Configure video buffer for decoder
   { VB_CONF_S vb_conf;
   
