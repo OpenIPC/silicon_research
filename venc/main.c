@@ -1,5 +1,6 @@
 #include "main.h"
 #include <stdbool.h>
+#include <signal.h>
 #include <time.h>
 
 // - Configuration profiles
@@ -97,6 +98,7 @@ void printHelp() {
 		"    --low-delay    - Enable low delay mode\n"
 		"    --mirror       - Mirror image\n"
 		"    --flip         - Flip image\n"
+		"    --exp          - Limit exposure\n"
 		"\n"
 		"    --roi          - Enable ROI\n"
 		"    --roi-qp [QP]  - ROI quality points              (Default: 20)\n"
@@ -110,6 +112,11 @@ SensorType sensor_type = IMX307;
 uint32_t sensor_width = 1280;
 uint32_t sensor_height = 720;
 uint32_t sensor_framerate = 60;
+bool loop_running = true;
+
+static void handler(int value) {
+	loop_running = false;
+}
 
 /**
  * @brief Example video capture (h264)
@@ -133,6 +140,7 @@ int main(int argc, const char* argv[]) {
 	uint32_t mipi_sensor_id = 0;
 
 	uint32_t isp_framerate = 45;
+	uint32_t block_count = 2;
 
 	uint32_t image_width = 1280; // - Encoded image width
 	uint32_t image_height = 720; // - Encoded image height
@@ -163,6 +171,7 @@ int main(int argc, const char* argv[]) {
 	int enable_slices = 1;
 	int enable_lowdelay = 0;
 	int enable_roi = 0;
+	bool limit_exposure = false;
 
 	int image_mirror = HI_FALSE;
 	int image_flip = HI_FALSE;
@@ -245,7 +254,9 @@ int main(int argc, const char* argv[]) {
 			sensor_type = IMX335;
 			sensor_width = image_width = 2592;
 			sensor_height = image_height = 1520;
-			isp_framerate = 30;
+			sensor_framerate = 25;
+			isp_framerate = 25;
+			block_count = 4;
 
 		} else {
 			printf("> ERROR: Unknown version [%s]\n", value);
@@ -271,6 +282,10 @@ int main(int argc, const char* argv[]) {
 	}
 	__OnArgument("--flip") {
 		image_flip = HI_TRUE;
+		continue;
+	}
+	__OnArgument("--exp") {
+		limit_exposure = true;
 		continue;
 	}
 	__OnArgument("-c") {
@@ -408,7 +423,7 @@ int main(int argc, const char* argv[]) {
 	VI_CHN_ATTR_S* vi_channel_profile = 0;
 
 	switch (sensor_type) {
-	case IMX307: {
+	case IMX307:
 		mipi_profile = &MIPI_4lane_CHN0_SENSOR_IMX307_12BIT_2M_NOWDR_ATTR;
 		isp_profile = &ISP_PROFILE_IMX307_MIPI_2M_30FPS;
 		sns_object = &stSnsImx307_2l_Obj;
@@ -427,9 +442,9 @@ int main(int argc, const char* argv[]) {
 		}
 
 		mipi_profile->mipi_attr.input_data_type = DATA_TYPE_RAW_12BIT;
-	}; break;
+		break;
 
-	case IMX335: {
+	case IMX335:
 		mipi_profile = &MIPI_4lane_CHN0_SENSOR_IMX335_10BIT_4M_WDR2TO1_ATTR;
 		isp_profile = &ISP_PROFILE_IMX335_MIPI_4M_30FPS;
 		sns_object = &stSnsImx335Obj;
@@ -438,7 +453,7 @@ int main(int argc, const char* argv[]) {
 		vi_pipe_profile = &PIPE_ATTR_RAW10_420_3DNR_RFR;
 		vi_channel_profile = &CHN_ATTR_420_SDR8_LINEAR;
 		vi_vpss_mode = VI_OFFLINE_VPSS_ONLINE;
-	}; break;
+		break;
 	}
 
 	// - Update VI pipe / channel resolution
@@ -478,9 +493,6 @@ int main(int argc, const char* argv[]) {
 	PERI_CRG60 =  (uint32_t*)(mem + 0x00F0);
 	//printf("> PERI_CRG60 = 0x%x\n", *PERI_CRG60);
    // *PERI_CRG60 &= ~0x1C;
-
-
-
 	PERI_CRG61  = (uint32_t*)(mem + 0x00F4);
 	//printf("> PERI_CRG61 = 0x%x\n", *PERI_CRG61);
 
@@ -498,19 +510,7 @@ int main(int argc, const char* argv[]) {
 	// --------------------------------------------------------------
 	// --- Reset previous configuration
 	// --------------------------------------------------------------
-	{
-		int ret = HI_MPI_SYS_Exit();
-
-		for (uint32_t i = 0; i < VB_MAX_USER; i++) {
-			ret = HI_MPI_VB_ExitModCommPool(i);
-		}
-
-		for (uint32_t i = 0; i < VB_MAX_POOLS; i++) {
-			ret = HI_MPI_VB_DestroyPool(i);
-		}
-
-		ret = HI_MPI_VB_Exit();
-	}
+	int ret = HI_MPI_SYS_Exit();
 
 	// --------------------------------------------------------------
 	// --- Setup memory pools and initialize system
@@ -528,7 +528,7 @@ int main(int argc, const char* argv[]) {
 			PIXEL_FORMAT_RGB_BAYER_12BPP, COMPRESS_MODE_NONE, DEFAULT_ALIGN);
 
 	// - Memory pool for VENC
-	vb_conf.astCommPool[1].u32BlkCnt = 2;
+	vb_conf.astCommPool[1].u32BlkCnt = block_count;
 	vb_conf.astCommPool[1].u64BlkSize = COMMON_GetPicBufferSize(image_width,
 		image_height, PIXEL_FORMAT_YVU_SEMIPLANAR_420, DATA_BITWIDTH_8,
 		COMPRESS_MODE_NONE, DEFAULT_ALIGN);
@@ -760,6 +760,22 @@ int main(int argc, const char* argv[]) {
 		int ret = HI_MPI_ISP_Init(vi_pipe_id);
 		if (ret != HI_SUCCESS) {
 			printf("ERROR: Unable to init ISP\n");
+			return ret;
+		}
+	}
+
+	if (limit_exposure) {
+		ISP_EXPOSURE_ATTR_S attr;
+		ret = HI_MPI_ISP_GetExposureAttr(0, &attr);
+		if (ret != HI_SUCCESS) {
+			printf("ERROR: Unable to get exposure\n");
+			return ret;
+		}
+
+		attr.stAuto.stExpTimeRange.u32Max = 10000 * 1000 / sensor_framerate;
+		ret = HI_MPI_ISP_SetExposureAttr(0, &attr);
+		if (ret != HI_SUCCESS) {
+			printf("ERROR: Unable to set exposure\n");
 			return ret;
 		}
 	}
@@ -1249,7 +1265,9 @@ int main(int argc, const char* argv[]) {
 	// - Prepare Tx buffer
 	tx_buffer = malloc(65536);
 	printf("> Ready for streaming\n");
-	while (1) {
+	signal(SIGINT, handler);
+
+	while (loop_running) {
 		// - Run ISP
 		// HI_MPI_ISP_RunOnce(vi_pipe_id);
 
@@ -1262,16 +1280,31 @@ int main(int argc, const char* argv[]) {
 		}
 	}
 
+	printf("> Stop streaming\n");
+
+	HI_MPI_ISP_Exit(vi_pipe_id);
+	HI_MPI_VPSS_StopGrp(vpss_group_id);
+	HI_MPI_VPSS_DestroyGrp(vpss_group_id);
+
+	HI_MPI_VI_DisableChn(vi_pipe_id, vi_channel_id);
+	HI_MPI_VI_StopPipe(vi_pipe_id);
+	HI_MPI_VI_DestroyPipe(vi_pipe_id);
+	HI_MPI_VI_DisableDev(vi_pipe_id);
+
+	HI_MPI_SYS_Exit();
+	HI_MPI_VB_Exit();
+
 	return 0;
 }
 
-void* __ISP_THREAD__(void* param) { HI_MPI_ISP_Run((VI_PIPE)param); }
+void* __ISP_THREAD__(void* param) {
+	HI_MPI_ISP_Run((VI_PIPE)param);
+}
 
 double getTimeInterval(
 	struct timespec* timestamp, struct timespec* last_meansure_timestamp) {
 	return (timestamp->tv_sec - last_meansure_timestamp->tv_sec) +
-		   (timestamp->tv_nsec - last_meansure_timestamp->tv_nsec) /
-			   1000000000.;
+		   (timestamp->tv_nsec - last_meansure_timestamp->tv_nsec) / 1000000000.;
 }
 
 struct timespec last_timestamp = {0, 0};
@@ -1283,7 +1316,6 @@ uint64_t jitter_sum = 0;
 uint64_t jitter_cnt = 0;
 
 uint32_t nal_max_size = 0;
-
 uint32_t single_packets = 0;
 
 uint32_t pps_count = 0;
@@ -1291,7 +1323,6 @@ uint32_t sps_count = 0;
 uint32_t idr_count = 0;
 uint32_t sei_count = 0;
 uint32_t s_count = 0;
-
 uint32_t packets_sent = 0;
 
 int processStream(VENC_CHN channel_id, int socket_handle,
