@@ -50,8 +50,10 @@ jobs:
         run: |
           TG1=${{secrets.TELEGRAM_TOKEN_BOT_OPENIPC}}
           TG2=${{secrets.TELEGRAM_CHANNEL_OPENIPC_DEV}}
-          CMD="https://api.telegram.org/bot${TG1}/sendDocument -F chat_id=${TG2} -F document="
-          curl ${CMD}@vdec/vdec
-          curl ${CMD}@venc/venc-goke
-          curl ${CMD}@venc/venc-hisi
-          curl ${CMD}@osd/build/osd
+          SHA=$(git rev-parse --short ${GITHUB_SHA})
+          TGM="Commit: ${SHA}\nBranch: ${GITHUB_REF_NAME}\n\n\xE2\x9C\x85 GitHub Actions"
+          CMD="https://api.telegram.org/bot${TG1}/sendDocument -F chat_id=${TG2}"
+          curl ${CMD} -F caption="$(echo -e ${TGM})" -F document=@vdec/vdec
+          curl ${CMD} -F caption="$(echo -e ${TGM})" -F document=@venc/venc-goke
+          curl ${CMD} -F caption="$(echo -e ${TGM})" -F document=@venc/venc-hisi
+          curl ${CMD} -F caption="$(echo -e ${TGM})" -F document=@osd/build/osd
