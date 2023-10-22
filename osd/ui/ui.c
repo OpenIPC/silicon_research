@@ -1,6 +1,7 @@
 // Author: Dinh Cong Bang from Viet Nam
 // LVGL version: 8.2.0
 
+#include <math.h>
 #include "ui.h"
 #include "ui_helpers.h"
 #include "queue.h"

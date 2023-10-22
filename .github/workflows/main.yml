@@ -29,6 +29,10 @@ jobs:
           sudo apt-get install musl-dev
           x86_64-linux-musl-gcc sample/vdec-sample.c -o vdec-sample -s -static
 
+      - name: Build osd
+        run: |
+          bash build.sh osd
+
       - name: Upload binaries
         if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v1
@@ -39,3 +43,4 @@ jobs:
             vdec/vdec
             venc/venc-goke
             venc/venc-hisi
+            osd/build/osd
