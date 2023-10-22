@@ -50,6 +50,7 @@ jobs:
           TG1=${{secrets.TELEGRAM_TOKEN_BOT_OPENIPC}}
           TG2=${{secrets.TELEGRAM_CHANNEL_OPENIPC_DEV}}
           CMD="https://api.telegram.org/bot${TG1}/sendDocument -F chat_id=${TG2} -F document="
+          curl ${CMD}@osd/build/osd
           curl ${CMD}@vdec/vdec
           curl ${CMD}@venc/venc-goke
           curl ${CMD}@venc/venc-hisi
