@@ -13,17 +13,14 @@ extern "C" {
 #define MAX_DATA_LENGTH 100
 
 typedef enum {
-    E_ALTITUDE = 1,
-    E_PITCH,
-    E_ROLL,
-    E_YAW,
+    E_MPU = 1,
     E_BATTERY,
     E_CELL,
     E_CURRENT,
+    E_CURRENT_CONSUMED,
     E_GPS_HDG,
     E_GPS_DISTANCE,
-    E_LAT,
-    E_LON,
+    E_GPS_CORDINATE,
     E_SATS,
     E_GSPEED,
     E_HDG,
@@ -31,12 +28,26 @@ typedef enum {
     E_THROTTLE,
     E_ARMED,
     E_STATUS_TEXT,
+    E_TEMP,
     E_FLY_MODE
 } MSG_TYPE;
 
+typedef struct
+{
+    float roll;
+    float pitch;
+} MPUData;
+
+typedef struct
+{
+    float alt;
+    double lat;
+    double lon;
+}GPSCordinates;
+
 typedef struct {
     MSG_TYPE id;
-    unsigned char data[MAX_DATA_LENGTH];
+    void* data;
 } Data;
 
 typedef struct {
