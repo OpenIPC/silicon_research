@@ -7,7 +7,8 @@
 #include "util.h"
 
 ///////////////////// VARIABLES ////////////////////
-
+extern bool s_bHasReceivedGPSInfo;
+extern bool s_bHasReceivedGPSPos;
 
 // SCREEN: ui_mainOSD1
 void ui_mainOSD1_screen_init(void);
@@ -71,99 +72,154 @@ void* ui_updating_thread (void* arg)
         MSG_TYPE type = item.id;
         switch ((int)type)
         {
-            //uint16_t
-            case E_ALTITUDE:
+            case E_MPU:
             {
-                uint16_t alt = byteArrayToUint16(item.data);
-                char tmp[10] = "";
-                sprintf(tmp, "%d", alt);
-                set_imgtext(ui_Altitude, tmp, "m");
+                MPUData mpu = *(MPUData*)item.data;
+                float roll_angle = mapf(mpu.roll, -180, 180, 0, 3600);
+                lv_img_set_angle(ui_imgVertical, roll_angle);
+                lv_obj_center(ui_imgVertical);
+                lv_obj_set_style_translate_y(ui_imgVertical, sin(deg2rad(mpu.pitch)) * 180, 0);
             }
             break;
             //float
             case E_BATTERY:
             {
-                float volt = byteArrayToFloat(item.data);
+                static uint8_t numCell = 1;
+                float volt = *(float*)item.data;
                 char tmp[10] = "";
-                sprintf(tmp, "%.00f", volt);
+                sprintf(tmp, "%.2f", volt);
                 set_imgtext(ui_TotalVolt, tmp, "V");
-            }
-            break;
-            //uint16_t
-            case E_CURRENT:
-            {
-                uint16_t curr = byteArrayToUint16(item.data);
-                char tmp[10] = "";
-                sprintf(tmp, "%d", curr);
-                set_imgtext(ui_Current, tmp, "mAh");
-            }
-            break;
-            //float
-            case E_CELL:
-            {
-                float volt = byteArrayToFloat(item.data);
-                char tmp[10] = "";
-                sprintf(tmp, "%.00f", volt);
+
+                float cell = 0.0f;
+                if(numCell == 1)
+                {
+                    for(; numCell < 10; numCell++)
+                    {
+                        cell = volt/numCell;
+                        if(cell >= 2.80f && cell <= 4.35f)
+                        {
+                            break;
+                        }
+                    }
+                }
+                cell = volt/numCell;
+                memset(tmp, 0, 10);
+                sprintf(tmp, "%.2f", cell);
                 set_imgtext(ui_CellVolt, tmp, "V");
             }
             break;
-            // uint16_t
+            //uint16_t
+            case E_CURRENT_CONSUMED:
+            {
+                uint16_t curr_consumed = *(uint16_t*)item.data;
+                char tmp[20] = "";
+                sprintf(tmp, "%d", curr_consumed);
+                set_texttext(ui_Current, tmp, " mAh");
+            }
+            break;
+            //uint16_t
+            case E_TEMP:
+            {
+                uint16_t temp = *(uint16_t*)item.data;
+                char tmp[20] = "";
+                sprintf(tmp, "%d", temp);
+                set_imgtext(ui_Thermo, tmp, " C");
+            }
+            break;
+            // char
             case E_SATS:
             {
-                char numSats = item.data[0];
-                char tmp[5] = "";
-                sprintf(tmp, "%d", numSats);
-                set_imgtext(ui_GPS, tmp, "");
+                if(s_bHasReceivedGPSInfo)
+                {
+                    char numSats = *(char*)item.data;
+                    char tmp[5] = "";
+                    sprintf(tmp, "%d", numSats);
+                    set_imgtext(ui_GPS, tmp, "");
+                    lv_obj_clear_flag(ui_GPS, LV_OBJ_FLAG_HIDDEN);
+                }
+                else
+                {
+                    lv_obj_add_flag(ui_GPS, LV_OBJ_FLAG_HIDDEN);
+                }
             }
             break;
             // uint16_t
             case E_HDG:
             {
-                uint16_t hdg = byteArrayToUint16(item.data);
-                set_arrow_to_home(hdg);
+                uint16_t hdg = *(uint16_t*)item.data;
+                set_arrow_to_home(hdg, s_bHasReceivedGPSInfo);
             }
             break;
             // double
             case E_GPS_DISTANCE:
             {
-                double dist = byteArrayToDouble(item.data);
-                char tmp[10] = "";
-                sprintf(tmp, "%d", dist);
-                set_imgtext(ui_Home, tmp, "m");
+                if(s_bHasReceivedGPSInfo && s_bHasReceivedGPSPos)
+                {
+                    double dist = *(double*)item.data;
+                    char tmp[10] = "";
+                    sprintf(tmp, "%d", dist);
+                    set_imgtext(ui_Home, tmp, "m");
+                    lv_obj_clear_flag(ui_Home, LV_OBJ_FLAG_HIDDEN);
+                }
+                else
+                {
+                    lv_obj_add_flag(ui_Home, LV_OBJ_FLAG_HIDDEN);
+                }
             }
             break;
-            // double
-            case E_LAT:
+            //GPS cordinate
+            case E_GPS_CORDINATE:
             {
-                double lat = byteArrayToDouble(item.data);
-                char tmp[15] = "";
-                sprintf(tmp, "%.00000000f", lat);
-                set_imgtext(ui_Lat, tmp, "");
-            }
-            break;
-            // double
-            case E_LON:
-            {
-                double lon = byteArrayToDouble(item.data);
-                char tmp[15] = "";
-                sprintf(tmp, "%.00000000f", lon);
-                set_imgtext(ui_Long, tmp, "");
+                if(s_bHasReceivedGPSInfo && s_bHasReceivedGPSPos)
+                {
+                    GPSCordinates gps = *(GPSCordinates*)item.data;
+                    char tmp[15] = "";
+                    sprintf(tmp, "%d", gps.alt);
+                    set_imgtext(ui_Altitude, tmp, "m");
+
+                    memset(tmp, 0, 15);
+                    sprintf(tmp, "%.7f", gps.lat);
+                    set_imgtext(ui_Lat, tmp, "");
+
+                    memset(tmp, 0, 15);
+                    sprintf(tmp, "%.7f", gps.lon);
+                    set_imgtext(ui_Long, tmp, "");
+
+                    lv_obj_clear_flag(ui_Altitude, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_clear_flag(ui_Lat, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_clear_flag(ui_Long, LV_OBJ_FLAG_HIDDEN);
+                }
+                else
+                {
+                    lv_obj_add_flag(ui_Altitude, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_add_flag(ui_Lat, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_add_flag(ui_Long, LV_OBJ_FLAG_HIDDEN);
+                }
             }
             break;
             //Float
             case E_GSPEED:
             {
-                float speed = byteArrayToFloat(item.data);
-                char tmp[10] = "";
-                sprintf(tmp, "%.0f", speed);
-                set_imgtext(ui_Speed, tmp, "Km/h");
+                if(s_bHasReceivedGPSInfo && s_bHasReceivedGPSPos)
+                {
+                    float speed = *(float*)item.data;
+                    char tmp[10] = "";
+                    sprintf(tmp, "%.1f", speed);
+                    set_imgtext(ui_Speed, tmp, "Km/h");
+                    lv_obj_clear_flag(ui_Speed, LV_OBJ_FLAG_HIDDEN);
+                }
+                else
+                {
+                    lv_obj_add_flag(ui_Speed, LV_OBJ_FLAG_HIDDEN);
+                }
             }
             break;
             //uint16_t
             case E_RSSI:
             {
-                uint16_t rssi = byteArrayToUint16(item.data);
+                uint16_t rssi = 0;
                 char tmp[10] = "";
+                rssi = mapu32(*(uint16_t*)item.data, 0, 255, 0, 100);
                 sprintf(tmp, "%d", rssi);
                 set_imgtext(ui_RCSignal, tmp, "");
             }
@@ -171,7 +227,7 @@ void* ui_updating_thread (void* arg)
             //uint16_t
             case E_THROTTLE:
             {
-                uint16_t throttle = byteArrayToUint16(item.data);
+                uint16_t throttle = *(uint16_t*)item.data;
                 char tmp[10] = "";
                 sprintf(tmp, "%d", throttle);
                 set_imgtext(ui_Throttle, tmp, "");
@@ -180,26 +236,73 @@ void* ui_updating_thread (void* arg)
             //int
             case E_ARMED:
             {
+                static lv_timer_t *timer_flight = NULL;
+                static int16_t seconds = -1;
+                static lv_timer_t *timer_arm = NULL;
+                char arm = *(char*)item.data;                
+                lv_label_set_text(ui_StatusText, (arm == 0) ? "Armed" : "Disarmed");
+                
+                void update_labelArmed_timer(lv_timer_t *timer_arm) {
+                    lv_timer_pause(timer_arm);
+                    lv_label_set_text(ui_StatusText, "");
+                }
 
+                /*Handle for arm text*/
+                if(timer_arm == NULL)
+                {
+                    timer_arm = lv_timer_create(update_labelArmed_timer, 5000, NULL);
+                }
+                else
+                {
+                    lv_timer_reset(timer_arm);
+                    lv_timer_resume(timer_arm);
+                }
+
+                /*Handle for flight time*/
+                void update_flight_timer(lv_timer_t *timer_flight) {
+                    seconds++;
+                    uint8_t hours, minutes, remainingSeconds;
+
+                    hours = seconds / 3600; // Calculate the number of hours
+                    minutes = (seconds % 3600) / 60; // Calculate the number of minutes
+                    remainingSeconds = seconds % 60; // Calculate the remaining seconds
+                    char tmp[15] = "";
+                    sprintf(tmp, "%d:%02d:%02d", hours, minutes, remainingSeconds);
+                    lv_label_set_text(ui_comp_get_child(ui_Time, UI_COMP_ITEMIMGTEXT_LABEL2),tmp);
+                }
+                if(seconds == -1 && arm == 1)
+                {
+                    seconds = 0;
+                    timer_flight = lv_timer_create(update_flight_timer, 1000, NULL);
+                }
+                else if(arm == 0 && timer_flight != NULL)
+                {
+                    lv_timer_pause(timer_flight);
+                }
+                else if(arm == 1 && timer_flight != NULL)
+                {
+                    lv_timer_resume(timer_flight);
+                }
             }
             break;
             //text
             case E_STATUS_TEXT:
             {
-                set_text(ui_StatusText, item.data);
+                set_text(ui_StatusText, (char*)item.data);
             }
             break;
             //text
             case E_FLY_MODE:
             {
-                set_text(ui_flyMode, item.data);
+                set_text(ui_flyMode, (char*)item.data);
             }
             break;
-            //Todo:
-            //Receive Roll, Pitch to control vertical line
+
             default:
                 break;
         }
+        free(item.data);
+        item.data = NULL;
 
     }
 }

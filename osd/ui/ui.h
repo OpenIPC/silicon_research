@@ -63,7 +63,7 @@ LV_IMG_DECLARE( ui_img_icon_altw_png);   // assets\icon_altw.png
 
 void ui_init(void);
 void* ui_updating_thread (void* arg);
-void set_arrow_to_home(uint16_t hdg);
+void set_arrow_to_home(uint16_t hdg, bool hasGPS);
 void set_fly_time(int mins, int seconds);
 void set_text(lv_obj_t* object, const char* text1);
 void set_texttext(lv_obj_t* object, const char* text1, const char* text2);
