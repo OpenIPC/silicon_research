@@ -51,6 +51,7 @@
 
 #define ALIGN_UP(x, a) ((x + a - 1) & (~(a - 1)))
 #define ALIGN_BACK(x, a) ((a) * (((x) / (a))))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 #include "fbg_fbdev.h"
 #include "fbgraphics.h"

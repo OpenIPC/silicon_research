@@ -790,7 +790,6 @@ int main(int argc, const char* argv[]) {
 			uint32_t write_size = stream.u32Len;
 			uint32_t write_done = 0;
 
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 			while (write_size) {
 				uint32_t chunk_size =
 					MIN(write_size, write_buffer_capacity - write_buffer_size);
