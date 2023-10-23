@@ -6,12 +6,11 @@
 [logo]: https://openipc.org/assets/openipc-logo-black.svg
 [telegram_fpv]: https://t.me/+BMyMoolVOpkzNWUy
 
-## goke_venc
-### EN
+## Encoder
 
 Here is an example of getting video from a GK7205V300 board using only HiMPP low level API.
 
-This example is configured for and tested on an IP camera using IMX335 image sensor. 
+This example is configured and tested on an IP camera using IMX335 image sensor. 
 If your module has another sensor, you need to adjust board configuration profile in the source code. 
 This example includes profiles for most popular sensors.
 
@@ -33,38 +32,11 @@ Upload the compiled binary onto your camera:
 scp -O venc/venc root@192.168.1.10:/tmp
 ```
 
-Run it there but don't forget to stop majestic (pre-packaged OpenIPC streamer) first:
+Stop majestic (pre-packaged streamer) and the start venc:
 ```sh
 killall majestic
 /tmp/venc
 ```
-
-## RU
-Пример того, как запустить GK7205V300, используя только низкоуровневый API HiMPP.
-
-Этот пример настроен и протестирован на IP-камере с IMX335 на борту. Если вы хотите использовать другой сенсор, вам следует изменить профили конфигурации платы в исходном коде. Пример содержит профили для наиболее популярных сенсоров.
-
-Формат выходного видео - h264 по UDP с фрагментацией NAL по аналогии с RTP, но не является корректным RTP и не содержит NAL префиксы. Для приема и отображения видеопотока требуется дополнительная утилита. Алгоритм дефрагментации NAL описан в **vdec-sample.c**.
-
-## Как собрать
-Перед началом убедитесь, что у вас есть набор инструментов для вашей камеры (собранный при помощи OpenIPC). 
-
-Также вам потребуется соответствующая камера с установленной прошивкой OpenIPC.
-``` bash
-./build.sh vdec
-```
-
-Перед запуском примера на камере необходимо остановить стандартный для прошивок OpenIPC стример - majestic.
-
-Если через некоторе время после его остановки камера уходит в перезагрузку - отключите WDT в конфигурационном файле majestic.
-
-## Ground Station on NVR
-### RoadMap
-- [X] ~~Взять [vdec](https://github.com/OpenIPC/silicon_research)~~
-- [ ] Взять библиотеку mavlink
-- [ ] Взять cairo, научить работать с framebuffer (копипаста из интернета). 
-- [ ] Можно взять что-то другое, например имеющийся wifibc телеметрию и отучить её от opengl
-- [ ] Всё это поженить в новом проекте, создать пакет для OpenIPC, его развивать.
 
 ### Links
 * https://github.com/svpcom/wfb-ng-osd
