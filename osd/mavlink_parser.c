@@ -17,7 +17,7 @@
 #include "util.h"
 #include "mavlink/common/mavlink.h"
 
-#define MAVLINK_PORT  14550
+#define MAVLINK_PORT  14750
 
 extern Queue queue;
 
