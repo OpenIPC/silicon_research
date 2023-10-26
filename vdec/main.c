@@ -504,9 +504,9 @@ int main(int argc, const char* argv[]) {
 
 	switch (protocol.enType) {
 		case PT_H264:
-			protocol.stH264PrtclParam.s32MaxPpsNum = 32;
+			protocol.stH264PrtclParam.s32MaxPpsNum = 256;
 			protocol.stH264PrtclParam.s32MaxSpsNum = 32;
-			protocol.stH264PrtclParam.s32MaxSliceNum = 32;
+			protocol.stH264PrtclParam.s32MaxSliceNum = 100;
 			ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
 			if (ret != HI_SUCCESS) {
 				printf("ERROR: Unable to set VDEC protocol parameters\n");
@@ -516,14 +516,16 @@ int main(int argc, const char* argv[]) {
 			HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
 			printf("> VDEC Protocol = Type: %s, PPS: %d, SLICE: %d, SPS: %d\n",
 				(codec_id == PT_H264 ? "H264" : (codec_id == PT_H265 ? "H265" : "Unknown")),
-				protocol.stH264PrtclParam.s32MaxPpsNum, protocol.stH264PrtclParam.s32MaxSliceNum,
+				protocol.stH264PrtclParam.s32MaxPpsNum,
+				protocol.stH264PrtclParam.s32MaxSliceNum,
 				protocol.stH264PrtclParam.s32MaxSpsNum);
 			break;
 
 		case PT_H265:
-			protocol.stH265PrtclParam.s32MaxPpsNum = 16;
+			protocol.stH265PrtclParam.s32MaxPpsNum = 64;
 			protocol.stH265PrtclParam.s32MaxSpsNum = 16;
-			protocol.stH265PrtclParam.s32MaxSliceSegmentNum = 16;
+			protocol.stH265PrtclParam.s32MaxVpsNum = 16;
+			protocol.stH265PrtclParam.s32MaxSliceSegmentNum = 100;
 			ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
 			if (ret != HI_SUCCESS) {
 				printf("ERROR: Unable to set VDEC protocol parameters\n");
@@ -533,7 +535,8 @@ int main(int argc, const char* argv[]) {
 			HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
 			printf("> VDEC Protocol = Type: %s, PPS: %d, SLICE: %d, SPS: %d\n",
 				(codec_id == PT_H264 ? "H264" : (codec_id == PT_H265 ? "H265" : "Unknown")),
-				protocol.stH265PrtclParam.s32MaxPpsNum, protocol.stH265PrtclParam.s32MaxSliceSegmentNum,
+				protocol.stH265PrtclParam.s32MaxPpsNum,
+				protocol.stH265PrtclParam.s32MaxSliceSegmentNum,
 				protocol.stH265PrtclParam.s32MaxSpsNum);
 			break;
 
