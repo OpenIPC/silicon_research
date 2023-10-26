@@ -91,18 +91,14 @@ struct _fbg* fbg_customSetup(int width, int height, int components,
 	fbg->comp_offset = components - 3;
 
 	fbg->line_length = fbg->width * fbg->components;
-
 	fbg->width_n_height = fbg->width * fbg->height;
-
 	fbg->size = fbg->width * fbg->height * fbg->components;
-
 	fbg->user_context = user_context;
 
 	if (initialize_buffers) {
 		fbg->back_buffer = calloc(1, fbg->size * sizeof(char));
 		if (!fbg->back_buffer) {
 			fprintf(stderr, "fbg_customSetup: back_buffer calloc failed!\n");
-
 			user_free(fbg);
 
 			free(fbg);
@@ -113,7 +109,6 @@ struct _fbg* fbg_customSetup(int width, int height, int components,
 		fbg->disp_buffer = calloc(1, fbg->size * sizeof(char));
 		if (!fbg->disp_buffer) {
 			fprintf(stderr, "fbg_customSetup: disp_buffer calloc failed!\n");
-
 			user_free(fbg);
 
 			free(fbg->back_buffer);
@@ -124,20 +119,15 @@ struct _fbg* fbg_customSetup(int width, int height, int components,
 	}
 
 	fbg->initialize_buffers = initialize_buffers;
-
 	gettimeofday(&fbg->fps_start, NULL);
-
 	fbg_textColor(fbg, 255, 255, 255);
-
 	fbg->allow_resizing = allow_resizing;
 
 #ifdef FBG_PARALLEL
 	fbg->state = 1;
 	fbg->frame = 0;
 	fbg->fps = 0;
-
 	fbg->tasks = 0;
-
 	fbg->fragment_queue_size = 7;
 #endif
 
@@ -1379,7 +1369,6 @@ struct _fbg_img* fbg_loadJPEG(struct _fbg* fbg, const char* filename) {
 
 	if (!data) {
 		fprintf(stderr, "fbg_loadJPEG '%s' : malloc failed.\n", filename);
-
 		fclose(f);
 
 		return NULL;
@@ -1394,9 +1383,7 @@ struct _fbg_img* fbg_loadJPEG(struct _fbg* fbg, const char* filename) {
 	nj_result_t nj_err = njDecode(data, size);
 	if (nj_err != NJ_OK) {
 		free(data);
-
-		fprintf(stderr,
-			"fbg_loadJPEG '%s' : njDecode failed with error code '%i'.\n",
+		fprintf(stderr, "fbg_loadJPEG '%s' : njDecode failed with error code '%i'.\n",
 			filename, nj_err);
 
 		return NULL;
@@ -1404,14 +1391,11 @@ struct _fbg_img* fbg_loadJPEG(struct _fbg* fbg, const char* filename) {
 
 	width = njGetWidth();
 	height = njGetHeight();
-
 	free(data);
 
 	struct _fbg_img* img = fbg_createImage(fbg, width, height);
 	if (!img) {
-		fprintf(stderr, "fbg_loadJPEG '%s' : Image data allocation failed\n",
-			filename);
-
+		fprintf(stderr, "fbg_loadJPEG '%s' : Image data allocation failed\n", filename);
 		njDone();
 
 		return NULL;
@@ -1440,8 +1424,7 @@ struct _fbg_img* fbg_loadJPEG(struct _fbg* fbg, const char* filename) {
 	pix_pointer = data;
 	pix_pointer2 = img->data;
 
-	int i;
-	for (i = 0; i < njGetImageSize(); i += 1) {
+	for (int i = 0; i < njGetImageSize(); i += 1) {
 		*pix_pointer2++ = *pix_pointer++;
 		*pix_pointer2++ = *pix_pointer++;
 		*pix_pointer2++ = *pix_pointer++;
@@ -1468,17 +1451,13 @@ struct _fbg_img* fbg_loadPNG(struct _fbg* fbg, const char* filename) {
 	}
 
 	if (error) {
-		fprintf(
-			stderr, "fbg_loadPNG %u: %s\n", error, lodepng_error_text(error));
-
+		fprintf(stderr, "fbg_loadPNG %u: %s\n", error, lodepng_error_text(error));
 		return NULL;
 	}
 
 	struct _fbg_img* img = fbg_createImage(fbg, width, height);
 	if (!img) {
-		fprintf(stderr, "fbg_loadPNG : Image '%s' data allocation failed\n",
-			filename);
-
+		fprintf(stderr, "fbg_loadPNG : Image '%s' data allocation failed\n", filename);
 		free(data);
 
 		return NULL;
@@ -1505,7 +1484,6 @@ struct _fbg_img* fbg_loadPNG(struct _fbg* fbg, const char* filename) {
 	}
 
 	memcpy(img->data, data, width * height * fbg->components);
-
 	free(data);
 
 	return img;
@@ -1525,8 +1503,7 @@ struct _fbg_img* fbg_loadPNGFromMemory(
 	}
 
 	if (error) {
-		fprintf(
-			stderr, "fbg_loadPNG %u: %s\n", error, lodepng_error_text(error));
+		fprintf(stderr, "fbg_loadPNG %u: %s\n", error, lodepng_error_text(error));
 
 		return NULL;
 	}
@@ -1534,7 +1511,6 @@ struct _fbg_img* fbg_loadPNGFromMemory(
 	struct _fbg_img* img = fbg_createImage(fbg, width, height);
 	if (!img) {
 		fprintf(stderr, "fbg_loadPNG : Image  data allocation failed\n");
-
 		free(data);
 
 		return NULL;
@@ -1544,9 +1520,8 @@ struct _fbg_img* fbg_loadPNGFromMemory(
 		unsigned char* pix_pointer = data;
 		unsigned char* pix_pointer2 = data;
 
-		int y, x;
-		for (y = 0; y < height; y += 1) {
-			for (x = 0; x < width; x += 1) {
+		for (int y = 0; y < height; y += 1) {
+			for (int x = 0; x < width; x += 1) {
 				int b = *pix_pointer2++;
 				pix_pointer2++;
 				int r = *pix_pointer2++;
@@ -1561,7 +1536,6 @@ struct _fbg_img* fbg_loadPNGFromMemory(
 	}
 
 	memcpy(img->data, data, width * height * fbg->components);
-
 	free(data);
 
 	return img;
@@ -1585,9 +1559,7 @@ struct _fbg_img* fbg_loadSTBImage(struct _fbg* fbg, const char* filename) {
 
 	struct _fbg_img* img = fbg_createImage(fbg, width, height);
 	if (!img) {
-		fprintf(stderr, "fbg_loadSTBImage: Image '%s' data allocation failed\n",
-			filename);
-
+		fprintf(stderr, "fbg_loadSTBImage: Image '%s' data allocation failed\n", filename);
 		stbi_image_free(data);
 
 		return NULL;
@@ -1630,21 +1602,17 @@ struct _fbg_img* fbg_loadSTBImageFromMemory(
 	int width;
 	int height;
 	int components;
-	output = stbi_load_from_memory(
-		buffer, size, &width, &height, &components, fbg->components);
+	output = stbi_load_from_memory(buffer, size, &width, &height, &components, fbg->components);
+
 	if (!output) {
 		fprintf(stderr, "fbg_loadSTBImage: %s\n", stbi_failure_reason());
-
 		return NULL;
 	}
 
 	struct _fbg_img* img = fbg_createImage(fbg, width, height);
 	if (!img) {
-		fprintf(stderr,
-			"fbg_loadSTBImageFromMemory: Image of %ix%i data allocation "
-			"failed\n",
-			width, height);
-
+		fprintf(stderr, "fbg_loadSTBImageFromMemory: Image of %ix%i data allocation "
+			"failed\n", width, height);
 		stbi_image_free(output);
 
 		return NULL;
@@ -1675,14 +1643,11 @@ struct _fbg_img* fbg_loadImageFromMemory(
 
 void fbg_image(struct _fbg* fbg, struct _fbg_img* img, int x, int y) {
 	unsigned char* pix_pointer =
-		(unsigned char*)(fbg->back_buffer + (y * fbg->line_length) +
-						 x * fbg->components);
+		(unsigned char*)(fbg->back_buffer + (y * fbg->line_length) + x * fbg->components);
 	unsigned char* img_pointer = img->data;
 
-	int i = 0;
 	int w3 = img->width * fbg->components;
-
-	for (i = 0; i < img->height; i += 1) {
+	for (int i = 0; i < img->height; i += 1) {
 		memcpy(pix_pointer, img_pointer, w3);
 		pix_pointer += fbg->line_length;
 		img_pointer += w3;
@@ -1693,17 +1658,13 @@ void fbg_imageColorkey(struct _fbg* fbg, struct _fbg_img* img, int x, int y,
 	int cr, int cg, int cb) {
 	unsigned char* img_pointer = img->data;
 
-	int i = 0, j = 0;
-
-	for (i = 0; i < img->height; i += 1) {
+	for (int i = 0; i < img->height; i += 1) {
 		unsigned char* pix_pointer =
-			(unsigned char*)(fbg->back_buffer + ((y + i) * fbg->line_length) +
-							 x * fbg->components);
-		for (j = 0; j < img->width; j += 1) {
+			(unsigned char*)(fbg->back_buffer + ((y + i) * fbg->line_length) + x * fbg->components);
+		for (int j = 0; j < img->width; j += 1) {
 			int ir = *img_pointer++, ig = *img_pointer++, ib = *img_pointer++;
 
 			img_pointer += fbg->comp_offset;
-
 			if (ir == cr && ig == cg && ib == cb) {
 				pix_pointer += fbg->components;
 				continue;
@@ -1728,8 +1689,7 @@ void fbg_imageClip(struct _fbg* fbg, struct _fbg_img* img, int x, int y, int cx,
 	img_pointer += cx * fbg->components;
 
 	int i = 0;
-	int w3 = _FBG_MIN(
-		(cw - cx) * fbg->components, (fbg->width - x) * fbg->components);
+	int w3 = _FBG_MIN((cw - cx) * fbg->components, (fbg->width - x) * fbg->components);
 	int h = ch - cy;
 
 	for (i = 0; i < h; i += 1) {
@@ -1765,7 +1725,6 @@ void fbg_imageEx(struct _fbg* fbg, struct _fbg_img* img, int x, int y, float sx,
 	int w2 = (float)(cw + cx) * sx;
 	int h2 = (float)(ch + cy) * sy;
 	int i, j;
-
 	int d = w2 - cx2;
 
 	if (d >= (fbg->width - x)) {
@@ -1773,8 +1732,7 @@ void fbg_imageEx(struct _fbg* fbg, struct _fbg_img* img, int x, int y, float sx,
 	}
 
 	unsigned char* pix_pointer =
-		(unsigned char*)(fbg->back_buffer +
-						 (y * fbg->line_length + x * fbg->components));
+		(unsigned char*)(fbg->back_buffer + (y * fbg->line_length + x * fbg->components));
 
 	for (i = cy2; i < h2; i += 1) {
 		py = floorf(x_ratio_inv * (float)i);
@@ -1782,12 +1740,9 @@ void fbg_imageEx(struct _fbg* fbg, struct _fbg_img* img, int x, int y, float sx,
 		for (j = cx2; j < w2; j += 1) {
 			px = floorf(y_ratio_inv * (float)j);
 
-			unsigned char* img_pointer =
-				(unsigned char*)(img->data +
+			unsigned char* img_pointer = (unsigned char*)(img->data +
 								 ((px + py * img->width) * fbg->components));
-
 			memcpy(pix_pointer, img_pointer, fbg->components);
-
 			pix_pointer += fbg->components;
 		}
 
@@ -1797,7 +1752,6 @@ void fbg_imageEx(struct _fbg* fbg, struct _fbg_img* img, int x, int y, float sx,
 
 void fbg_freeImage(struct _fbg_img* img) {
 	free(img->data);
-
 	free(img);
 }
 

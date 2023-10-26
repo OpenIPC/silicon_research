@@ -29,21 +29,15 @@ static HI_VOID HDMI_HotPlug_Proc(HI_VOID* pPrivateData) {
 	} else {
 		printf("get sink caps success!\n");
 		printf("Video latency: %d\n", stCaps.u8Video_Latency);
-
 		printf("Native format = %d\n", stCaps.enNativeVideoFormat);
 
 		for (int i = 0; i < 49; i++) {
-			printf("FMT #%d = %s\n", i,
-				stCaps.bVideoFmtSupported[i] ? "YES" : "-");
+			printf("FMT #%d = %s\n", i, stCaps.bVideoFmtSupported[i] ? "YES" : "-");
 		}
 	}
 
-	s32Ret = HI_MPI_HDMI_GetAttr(stArgs.enHdmi, &stAttr);
-	// CHECK_RET_SUCCESS_NO_RET(s32Ret);
-
-	s32Ret = HI_MPI_HDMI_SetAttr(stArgs.enHdmi, &stAttr);
-	// CHECK_RET_SUCCESS_NO_RET(s32Ret);
-
+	HI_MPI_HDMI_GetAttr(stArgs.enHdmi, &stAttr);
+	HI_MPI_HDMI_SetAttr(stArgs.enHdmi, &stAttr);
 	HI_MPI_HDMI_Start(stArgs.enHdmi);
 
 	return;
@@ -116,9 +110,6 @@ static HI_VOID HDMI_EventCallBack(
 
 		case HI_HDMI_EVENT_NO_PLUG:
 			HDMI_UnPlug_Proc(pPrivateData);
-			break;
-
-		default:
 			break;
 	}
 
@@ -538,9 +529,6 @@ int main(int argc, const char* argv[]) {
 				protocol.stH265PrtclParam.s32MaxPpsNum,
 				protocol.stH265PrtclParam.s32MaxSliceSegmentNum,
 				protocol.stH265PrtclParam.s32MaxSpsNum);
-			break;
-
-		default:
 			break;
 	}
 
