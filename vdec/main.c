@@ -1,9 +1,11 @@
 #include "main.h"
+
 #define earthRadiusKm 6371.0
 
 typedef struct hiHDMI_ARGS_S {
 	HI_HDMI_ID_E enHdmi;
 } HDMI_ARGS_S;
+
 HDMI_ARGS_S g_stHdmiArgs;
 HI_HDMI_CALLBACK_FUNC_S g_stCallbackFunc;
 
@@ -13,9 +15,8 @@ static HI_VOID HDMI_HotPlug_Proc(HI_VOID* pPrivateData) {
 	HI_HDMI_ATTR_S stAttr;
 	HI_HDMI_SINK_CAPABILITY_S stCaps;
 
-	// printf("EVENT: HPD\n");
-
-	// CHECK_POINTER_NO_RET(pPrivateData);
+	//printf("EVENT: HPD\n");
+	//CHECK_POINTER_NO_RET(pPrivateData);
 
 	memset(&stAttr, 0, sizeof(HI_HDMI_ATTR_S));
 	memset(&stArgs, 0, sizeof(HDMI_ARGS_S));
@@ -48,7 +49,9 @@ static HI_VOID HDMI_HotPlug_Proc(HI_VOID* pPrivateData) {
 	return;
 }
 
-double deg2rad(double deg) { return (deg * M_PI / 180); }
+double deg2rad(double deg) {
+	return (deg * M_PI / 180);
+}
 
 double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d) {
 	double lat1r, lon1r, lat2r, lon2r, u, v;
@@ -58,42 +61,46 @@ double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d) {
 	lon2r = deg2rad(lon2d);
 	u = sin((lat2r - lat1r) / 2);
 	v = sin((lon2r - lon1r) / 2);
-	return 2.0 * earthRadiusKm *
-		   asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+
+	return 2.0 * earthRadiusKm * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
 }
 
 size_t numOfChars(const char s[]) {
 	size_t n = 0;
-	while (s[n] != '\0')
+	while (s[n] != '\0') {
 		++n;
+	}
+
 	return n;
 }
 
 char* insertString(char s1[], const char s2[], size_t pos) {
 	size_t n1 = numOfChars(s1);
 	size_t n2 = numOfChars(s2);
-	if (n1 < pos)
+	if (n1 < pos) {
 		pos = n1;
+	}
+
 	for (size_t i = 0; i < n1 - pos; i++) {
 		s1[n1 + n2 - i - 1] = s1[n1 - i - 1];
 	}
+
 	for (size_t i = 0; i < n2; i++) {
 		s1[pos + i] = s2[i];
 	}
+
 	s1[n1 + n2] = '\0';
+
 	return s1;
 }
 
 static HI_VOID HDMI_UnPlug_Proc(HI_VOID* pPrivateData) {
 	HDMI_ARGS_S stArgs;
-
-	// printf("EVENT: UN-HPD\n");
-
-	// CHECK_POINTER_NO_RET(pPrivateData);
+	//printf("EVENT: UN-HPD\n");
+	//CHECK_POINTER_NO_RET(pPrivateData);
 
 	memset(&stArgs, 0, sizeof(HDMI_ARGS_S));
 	memcpy(&stArgs, pPrivateData, sizeof(HDMI_ARGS_S));
-
 	HI_MPI_HDMI_Stop(stArgs.enHdmi);
 
 	return;
@@ -101,15 +108,18 @@ static HI_VOID HDMI_UnPlug_Proc(HI_VOID* pPrivateData) {
 
 static HI_VOID HDMI_EventCallBack(
 	HI_HDMI_EVENT_TYPE_E event, HI_VOID* pPrivateData) {
+
 	switch (event) {
-	case HI_HDMI_EVENT_HOTPLUG:
-		HDMI_HotPlug_Proc(pPrivateData);
-		break;
-	case HI_HDMI_EVENT_NO_PLUG:
-		HDMI_UnPlug_Proc(pPrivateData);
-		break;
-	default:
-		break;
+		case HI_HDMI_EVENT_HOTPLUG:
+			HDMI_HotPlug_Proc(pPrivateData);
+			break;
+
+		case HI_HDMI_EVENT_NO_PLUG:
+			HDMI_UnPlug_Proc(pPrivateData);
+			break;
+
+		default:
+			break;
 	}
 
 	return;
@@ -159,15 +169,12 @@ void printHelp() {
 }
 
 extern uint32_t frames_received;
-
 uint32_t stats_rx_bytes = 0;
 struct timespec last_timestamp = {0, 0};
 
-double getTimeInterval(
-	struct timespec* timestamp, struct timespec* last_meansure_timestamp) {
+double getTimeInterval(struct timespec* timestamp, struct timespec* last_meansure_timestamp) {
 	return (timestamp->tv_sec - last_meansure_timestamp->tv_sec) +
-		   (timestamp->tv_nsec - last_meansure_timestamp->tv_nsec) /
-			   1000000000.;
+		   (timestamp->tv_nsec - last_meansure_timestamp->tv_nsec) / 1000000000.;
 }
 
 uint16_t mavlink_port = 14550;
@@ -175,15 +182,13 @@ uint32_t vo_width = 1280;
 uint32_t vo_height = 720;
 
 int main(int argc, const char* argv[]) {
-	VO_INTF_SYNC_E vo_mode =
-		VO_OUTPUT_720P60; // VO_OUTPUT_1080P60; //VO_OUTPUT_2560x1440_30;
-						  // //VO_OUTPUT_2560x1440_30;// VO_OUTPUT_1080P60;
-
+	VO_INTF_SYNC_E vo_mode = VO_OUTPUT_720P60;
 	uint32_t vo_framerate = 60;
 
 	VDEC_CHN vdec_channel_id = 0;
 	uint32_t vdec_max_width = 1920;
 	uint32_t vdec_max_height = 1080;
+	int ret = 0;
 
 	VPSS_GRP vpss_group_id = 0;
 	VPSS_CHN vpss_channel_id = 0;
@@ -199,18 +204,15 @@ int main(int argc, const char* argv[]) {
 	int write_stream_file = -1;
 
 	int enable_osd = 0;
-
+	int codec_mode_stream = 1;
 	PAYLOAD_TYPE_E codec_id = PT_H264;
 
-	int codec_mode_stream = 1;
-
-	// --------------------------------------------------------------
-	// --- Load console arguments
-	// --------------------------------------------------------------
+	// Load console arguments
 	__BeginParseConsoleArguments__(printHelp) __OnArgument("-p") {
 		listen_port = atoi(__ArgValue);
 		continue;
 	}
+
 	__OnArgument("-c") {
 		const char* codec = __ArgValue;
 		if (!strcmp(codec, "h264")) {
@@ -222,6 +224,7 @@ int main(int argc, const char* argv[]) {
 		}
 		continue;
 	}
+
 	__OnArgument("-d") {
 		const char* format = __ArgValue;
 		if (!strcmp(format, "stream")) {
@@ -233,6 +236,7 @@ int main(int argc, const char* argv[]) {
 		}
 		continue;
 	}
+
 	__OnArgument("-m") {
 		const char* mode = __ArgValue;
 		if (!strcmp(mode, "720p60")) {
@@ -302,432 +306,273 @@ int main(int argc, const char* argv[]) {
 	}
 
 	__EndParseConsoleArguments__
-	// --------------------------------------------------------------
-	// --- Reset previous configuration
-	// --------------------------------------------------------------
-	{
-		int ret = HI_MPI_SYS_Exit();
 
-		for (uint32_t i = 0; i < VB_MAX_USER; i++) {
-			ret = HI_MPI_VB_ExitModCommPool(i);
-		}
+	// Reset previous configuration
+	ret = HI_MPI_SYS_Exit();
 
-		for (uint32_t i = 0; i < VB_MAX_POOLS; i++) {
-			ret = HI_MPI_VB_DestroyPool(i);
-		}
-
-		ret = HI_MPI_VB_Exit();
+	for (uint32_t i = 0; i < VB_MAX_USER; i++) {
+		ret = HI_MPI_VB_ExitModCommPool(i);
 	}
 
-	// --------------------------------------------------------------
-	// --- Setup memory pools and initialize system
-	// --------------------------------------------------------------
-	{
-		VB_CONF_S vb_conf;
-		memset(&vb_conf, 0x00, sizeof(vb_conf));
-
-		// - Set maximum memory pools count
-		vb_conf.u32MaxPoolCnt = 16;
-
-		// - Configure video buffer
-		{
-			int ret = HI_MPI_VB_SetConf(&vb_conf);
-			if (ret) {
-				printf("ERROR: Configure VB failed : 0x%x\n", ret);
-			}
-		}
-
-		// - Initilize video buffer
-		{
-			int ret = HI_MPI_VB_Init();
-			if (ret) {
-				printf("ERROR: Init VB failed : 0x%x\n", ret);
-			}
-		}
+	for (uint32_t i = 0; i < VB_MAX_POOLS; i++) {
+		ret = HI_MPI_VB_DestroyPool(i);
 	}
 
-	// -- Configure system
-	{
-		MPP_SYS_CONF_S sys_config;
-		sys_config.u32AlignWidth = 16;
-		int ret = HI_MPI_SYS_SetConf(&sys_config);
-		if (ret) {
-			printf("ERROR: Init VB failed : 0x%x\n", ret);
-		}
+	ret = HI_MPI_VB_Exit();
+
+	// Setup memory pools and initialize system
+	VB_CONF_S vb_conf;
+	memset(&vb_conf, 0x00, sizeof(vb_conf));
+
+	// Set maximum memory pools count
+	vb_conf.u32MaxPoolCnt = 16;
+
+	// Configure video buffer
+	ret = HI_MPI_VB_SetConf(&vb_conf);
+	if (ret) {
+		printf("ERROR: Configure VB failed : 0x%x\n", ret);
 	}
 
-	// - Initialize system
-	{
-		int ret = HI_MPI_SYS_Init();
-		if (ret) {
-			printf("ERROR: Init SYS failed : 0x%x\n", ret);
-			HI_MPI_VB_Exit();
-		}
+	// Initilize video buffer
+	ret = HI_MPI_VB_Init();
+	if (ret) {
+		printf("ERROR: Init VB failed : 0x%x\n", ret);
+	}
+
+	// Configure system
+	MPP_SYS_CONF_S sys_config;
+	sys_config.u32AlignWidth = 16;
+	ret = HI_MPI_SYS_SetConf(&sys_config);
+	if (ret) {
+		printf("ERROR: Init VB failed : 0x%x\n", ret);
+	}
+
+	// Initialize system
+	ret = HI_MPI_SYS_Init();
+	if (ret) {
+		printf("ERROR: Init SYS failed : 0x%x\n", ret);
+		HI_MPI_VB_Exit();
 	}
 
 	MPP_VERSION_S version;
 	HI_MPI_SYS_GetVersion(&version);
 	printf("[%s]\n", version.aVersion);
 
-	// - Configure video buffer for decoder
-	{
-		VB_CONF_S vb_conf;
-
-		// - Release previous pool configuration
-		int ret = HI_MPI_VB_ExitModCommPool(VB_UID_VDEC);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to release VDEC memory pool\n");
-			return 1;
-		}
-
-		vb_conf.u32MaxPoolCnt = 1;
-		vb_conf.astCommPool[0].u32BlkCnt = 4;
-		vb_conf.astCommPool[0].u32BlkSize =
-			vdec_max_width * vdec_max_height * 3;
-
-		// - Calculate required size for video buffer
-		VB_PIC_BLK_SIZE(vdec_max_width, vdec_max_height, codec_id,
-			vb_conf.astCommPool[0].u32BlkSize);
-
-		printf("> VDEC picture block size = %d\n",
-			vb_conf.astCommPool[0].u32BlkSize);
-
-		ret = HI_MPI_VB_SetModPoolConf(VB_UID_VDEC, &vb_conf);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to configure ModComPool\n");
-			return 1;
-		}
-
-		ret = HI_MPI_VB_InitModCommPool(VB_UID_VDEC);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to init ModComPool = 0x%x\n", ret);
-			return 1;
-		}
+	// Release previous pool configuration
+	ret = HI_MPI_VB_ExitModCommPool(VB_UID_VDEC);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to release VDEC memory pool\n");
+		return 1;
 	}
 
-	{
-		int ret = HI_MPI_VO_SetDispBufLen(vo_layer_id, 2);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to set display buffer length\n");
-			return 1;
-		}
+	// Configure video buffer for decoder
+	memset(&vb_conf, 0x00, sizeof(vb_conf));
+	vb_conf.u32MaxPoolCnt = 1;
+	vb_conf.astCommPool[0].u32BlkCnt = 4;
+	vb_conf.astCommPool[0].u32BlkSize = vdec_max_width * vdec_max_height * 3;
+
+	// Calculate required size for video buffer
+	VB_PIC_BLK_SIZE(vdec_max_width, vdec_max_height,
+		codec_id, vb_conf.astCommPool[0].u32BlkSize);
+
+	printf("> VDEC picture block size = %d\n", vb_conf.astCommPool[0].u32BlkSize);
+
+	ret = HI_MPI_VB_SetModPoolConf(VB_UID_VDEC, &vb_conf);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to configure ModComPool\n");
+		return 1;
 	}
 
-	// - Initialize VO
-	VO_init(
-		vo_device_id, VO_INTF_HDMI, vo_mode, vo_framerate, background_color);
+	ret = HI_MPI_VB_InitModCommPool(VB_UID_VDEC);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to init ModComPool = 0x%x\n", ret);
+		return 1;
+	}
 
-	// - Initialize HDMI
+	ret = HI_MPI_VO_SetDispBufLen(vo_layer_id, 2);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to set display buffer length\n");
+		return 1;
+	}
+
+	// Initialize VO
+	VO_init(vo_device_id, VO_INTF_HDMI, vo_mode, vo_framerate, background_color);
+
+	// Initialize HDMI
 	VO_HDMI_init(0, vo_mode);
 
-	/*{ VO_PUB_ATTR_S vo_config;
-	   memset(&vo_config, 0x00, sizeof(VO_PUB_ATTR_S));
-
-	   int ret = HI_MPI_VO_GetPubAttr(vo_device_id, &vo_config);
-	   if (ret != HI_SUCCESS) {
-		 printf("ERROR: Unable to GET video timing = 0x%x\n");
-		 return 1;
-	   }
-
-	   printf("> Video timing for mode = %d:\n"
-		 "bSynm      = %d\n"
-		 "\n"
-		 "bIop       = %d\n"
-		 "u8Intfb    = %d\n"
-		 "\n"
-		 "u16Vact    = %d\n"
-		 "u16Vbb     = %d\n"
-		 "u16Vfb     = %d\n"
-		 "\n"
-		 "u16Hact    = %d\n"
-		 "u16Hbb     = %d\n"
-		 "u16Hfb     = %d\n"
-		 "u16Hmid    = %d\n"
-		 "\n"
-		 "u16Bvact   = %d\n"
-		 "u16Bvbb    = %d\n"
-		 "u16Bvfb    = %d\n"
-		 "\n"
-		 "u16Hpw     = %d\n"
-		 "u16Vpw     = %d\n"
-		 "\n"
-		 "bIdv       = %d\n"
-		 "bIhs       = %d\n"
-		 "bIvs       = %d\n"
-
-		 ,
-		 vo_config.enIntfType,
-		 vo_config.stSyncInfo.bSynm,
-
-		 vo_config.stSyncInfo.bIop,
-		 vo_config.stSyncInfo.u8Intfb,
-
-		 vo_config.stSyncInfo.u16Vact,
-		 vo_config.stSyncInfo.u16Vbb,
-		 vo_config.stSyncInfo.u16Vfb,
-
-		 vo_config.stSyncInfo.u16Hact,
-		 vo_config.stSyncInfo.u16Hbb,
-		 vo_config.stSyncInfo.u16Hfb,
-		 vo_config.stSyncInfo.u16Hmid,
-
-		 vo_config.stSyncInfo.u16Bvact,
-		 vo_config.stSyncInfo.u16Bvbb,
-		 vo_config.stSyncInfo.u16Bvfb,
-
-		 vo_config.stSyncInfo.u16Hpw,
-		 vo_config.stSyncInfo.u16Vpw,
-
-		 vo_config.stSyncInfo.bIdv,
-		 vo_config.stSyncInfo.bIhs,
-		 vo_config.stSyncInfo.bIvs
-
-	   );
-	 }*/
-
-	{
-		int ret = HI_MPI_VO_GetDevFrameRate(vo_device_id, &vo_framerate);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to set VO framerate = 0x%x\n");
-			return ret;
-		}
-		printf("> VO framerate = %d\n", vo_framerate);
+	ret = HI_MPI_VO_GetDevFrameRate(vo_device_id, &vo_framerate);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to set VO framerate = 0x%x\n");
+		return ret;
 	}
 
-	// - Configure video layer
-	{
-		VO_VIDEO_LAYER_ATTR_S layer_config;
-		memset(&layer_config, 0x00, sizeof(layer_config));
-		int ret = HI_MPI_VO_GetVideoLayerAttr(vo_layer_id, &layer_config);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to get VO layer information\n");
-			return 1;
-		}
+	printf("> VO framerate = %d\n", vo_framerate);
 
-		layer_config.enPixFormat = PIXEL_FORMAT_YUV_SEMIPLANAR_420;
-		layer_config.bDoubleFrame = HI_FALSE;
-		layer_config.bClusterMode = HI_TRUE;
-
-		layer_config.u32DispFrmRt = vo_framerate;
-
-		layer_config.stDispRect.u32Width = vo_width;
-		layer_config.stDispRect.u32Height = vo_height;
-		layer_config.stDispRect.s32X = 0;
-		layer_config.stDispRect.s32Y = 0;
-
-		layer_config.stImageSize.u32Width = vo_width;
-		layer_config.stImageSize.u32Height = vo_height;
-
-		ret = HI_MPI_VO_SetVideoLayerAttr(vo_layer_id, &layer_config);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to configure video layer = 0x%x\n", ret);
-			return 1;
-		}
+	// Configure video layer
+	VO_VIDEO_LAYER_ATTR_S layer_config;
+	memset(&layer_config, 0x00, sizeof(layer_config));
+	ret = HI_MPI_VO_GetVideoLayerAttr(vo_layer_id, &layer_config);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to get VO layer information\n");
+		return 1;
 	}
 
-	// - Enable video layer
-	{
-		int ret = HI_MPI_VO_EnableVideoLayer(vo_layer_id);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to enable video layer = 0x%x\n", ret);
-			return 1;
-		}
+	layer_config.enPixFormat = PIXEL_FORMAT_YUV_SEMIPLANAR_420;
+	layer_config.bDoubleFrame = HI_FALSE;
+	layer_config.bClusterMode = HI_TRUE;
+	layer_config.u32DispFrmRt = vo_framerate;
+
+	layer_config.stDispRect.u32Width = vo_width;
+	layer_config.stDispRect.u32Height = vo_height;
+	layer_config.stDispRect.s32X = 0;
+	layer_config.stDispRect.s32Y = 0;
+
+	layer_config.stImageSize.u32Width = vo_width;
+	layer_config.stImageSize.u32Height = vo_height;
+
+	ret = HI_MPI_VO_SetVideoLayerAttr(vo_layer_id, &layer_config);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to configure video layer = 0x%x\n", ret);
+		return 1;
 	}
 
-	// - Configure video channel
-	{
-		VO_CHN_ATTR_S channel_config;
-		int ret =
-			HI_MPI_VO_GetChnAttr(vo_layer_id, vo_channel_id, &channel_config);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to get channel configuration\n");
-			return 1;
-		}
-
-		channel_config.bDeflicker = HI_FALSE;
-		channel_config.u32Priority = 0;
-
-		channel_config.stRect.s32X = 0;
-		channel_config.stRect.s32Y = 0;
-		channel_config.stRect.u32Width = vo_width;
-		channel_config.stRect.u32Height = vo_height;
-
-		ret = HI_MPI_VO_SetChnAttr(vo_layer_id, vo_channel_id, &channel_config);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to configure channel\n");
-			return 1;
-		}
-
-		ret = HI_MPI_VO_EnableChn(vo_layer_id, vo_channel_id);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to enable video channel\n");
-			return 1;
-		}
-
-		/*uint32_t rate = 0;
-		HI_MPI_VO_GetChnFrameRate(vo_layer_id, vo_channel_id, &rate);
-		printf("Channel framerate = %d\n", rate);*/
+	// Enable video layer
+	ret = HI_MPI_VO_EnableVideoLayer(vo_layer_id);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to enable video layer = 0x%x\n", ret);
+		return 1;
 	}
 
-	// --------------------------------------------
-	// --- Start VDEC
-	// --------------------------------------------
-	// - Start decode at 1920x1080 maximum resolution
-	{
-		VDEC_CHN_ATTR_S config;
-		memset(&config, 0x00, sizeof(config));
-		config.enType = codec_id;
-		config.u32BufSize = vdec_max_width * vdec_max_height *
-							3; // vdec_max_width * vdec_max_height;
-		config.u32Priority = 128;
-		config.u32PicWidth = vdec_max_width;
-		config.u32PicHeight = vdec_max_height;
+	// Configure video channel
+	VO_CHN_ATTR_S channel_config;
+	ret = HI_MPI_VO_GetChnAttr(vo_layer_id, vo_channel_id, &channel_config);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to get channel configuration\n");
+		return 1;
+	}
 
-		config.stVdecVideoAttr.bTemporalMvpEnable = HI_FALSE;
-		config.stVdecVideoAttr.enMode =
-			codec_mode_stream ? VIDEO_MODE_STREAM : VIDEO_MODE_FRAME;
-		config.stVdecVideoAttr.u32RefFrameNum = 1;
+	channel_config.bDeflicker = HI_FALSE;
+	channel_config.u32Priority = 0;
+	channel_config.stRect.s32X = 0;
+	channel_config.stRect.s32Y = 0;
+	channel_config.stRect.u32Width = vo_width;
+	channel_config.stRect.u32Height = vo_height;
 
-		// - Create VDEC channel
-		int ret = HI_MPI_VDEC_CreateChn(vdec_channel_id, &config);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to create VDEC channel\n");
-			return 1;
-		}
+	ret = HI_MPI_VO_SetChnAttr(vo_layer_id, vo_channel_id, &channel_config);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to configure channel\n");
+		return 1;
+	}
 
-		//- Set channel extra parameters
-		/*{ VDEC_CHN_PARAM_S channel;
-		  ret = HI_MPI_VDEC_GetChnParam(vdec_channel_id, &channel);
-		  if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to get VDEC channel parameters\n");
-			return 1;
-		  }
+	ret = HI_MPI_VO_EnableChn(vo_layer_id, vo_channel_id);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to enable video channel\n");
+		return 1;
+	}
 
-		  channel.s32DisplayFrameNum  = 2;
-		  channel.s32ChanErrThr       = 40;
-		  channel.s32ChanStrmOFThr    = 0;
-		  channel.s32DecMode          = 2;
-		  channel.s32DecOrderOutput   = 1;
-		  channel.enVideoFormat       = VIDEO_FORMAT_TILE64;
-		  channel.enCompressMode      = COMPRESS_MODE_NONE;
+	// Start VDEC at 1920x1080 maximum resolution
+	VDEC_CHN_ATTR_S config;
+	memset(&config, 0x00, sizeof(config));
+	config.enType = codec_id;
+	config.u32BufSize = vdec_max_width * vdec_max_height * 3;
+	config.u32Priority = 128;
+	config.u32PicWidth = vdec_max_width;
+	config.u32PicHeight = vdec_max_height;
 
-		  ret = HI_MPI_VDEC_SetChnParam(vdec_channel_id, &channel);
-		  if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to set VDEC channel config\n");
-			return 1;
-		  }
-		}*/
+	config.stVdecVideoAttr.bTemporalMvpEnable = HI_FALSE;
+	config.stVdecVideoAttr.enMode = codec_mode_stream ? VIDEO_MODE_STREAM : VIDEO_MODE_FRAME;
+	config.stVdecVideoAttr.u32RefFrameNum = 1;
 
-		// - Set display mode
-		ret = HI_MPI_VDEC_SetDisplayMode(
-			vdec_channel_id, VIDEO_DISPLAY_MODE_PREVIEW);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to set VDEC display mode\n");
-			return 1;
-		}
+	// Create VDEC channel
+	ret = HI_MPI_VDEC_CreateChn(vdec_channel_id, &config);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to create VDEC channel\n");
+		return 1;
+	}
 
-		// - Read decoder protocol information
-		{
-			VDEC_PRTCL_PARAM_S protocol;
-			HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
+	// Set display mode
+	ret = HI_MPI_VDEC_SetDisplayMode(vdec_channel_id, VIDEO_DISPLAY_MODE_PREVIEW);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to set VDEC display mode\n");
+		return 1;
+	}
 
-			switch (protocol.enType) {
-			case PT_H264: {
-				// - Configure video stream
-				protocol.stH264PrtclParam.s32MaxPpsNum = 32;
-				protocol.stH264PrtclParam.s32MaxSpsNum = 32;
-				protocol.stH264PrtclParam.s32MaxSliceNum = 32;
+	// Read decoder protocol information
+	VDEC_PRTCL_PARAM_S protocol;
+	HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
 
-				ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
-				if (ret != HI_SUCCESS) {
-					printf("ERROR: Unable to set VDEC protocol parameters\n");
-					return 1;
-				}
-
-				HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
-				printf(
-					"> VDEC Protocol = Type: %s, PPS: %d, SLICE: %d, SPS: %d\n",
-					(codec_id == PT_H264
-							? "H264"
-							: (codec_id == PT_H265 ? "H265" : "Unknown")),
-					protocol.stH264PrtclParam.s32MaxPpsNum,
-					protocol.stH264PrtclParam.s32MaxSliceNum,
-					protocol.stH264PrtclParam.s32MaxSpsNum);
-
-			}; break;
-
-			case PT_H265: {
-				// - Configure video stream
-				protocol.stH265PrtclParam.s32MaxPpsNum = 16;
-				protocol.stH265PrtclParam.s32MaxSpsNum = 16;
-				protocol.stH265PrtclParam.s32MaxSliceSegmentNum = 16;
-
-				ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
-				if (ret != HI_SUCCESS) {
-					printf("ERROR: Unable to set VDEC protocol parameters\n");
-					return 1;
-				}
-
-				HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
-				printf(
-					"> VDEC Protocol = Type: %s, PPS: %d, SLICE: %d, SPS: %d\n",
-					(codec_id == PT_H264
-							? "H264"
-							: (codec_id == PT_H265 ? "H265" : "Unknown")),
-					protocol.stH265PrtclParam.s32MaxPpsNum,
-					protocol.stH265PrtclParam.s32MaxSliceSegmentNum,
-					protocol.stH265PrtclParam.s32MaxSpsNum);
-
-			}; break;
-
-			default:
-				break;
+	switch (protocol.enType) {
+		case PT_H264:
+			protocol.stH264PrtclParam.s32MaxPpsNum = 32;
+			protocol.stH264PrtclParam.s32MaxSpsNum = 32;
+			protocol.stH264PrtclParam.s32MaxSliceNum = 32;
+			ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
+			if (ret != HI_SUCCESS) {
+				printf("ERROR: Unable to set VDEC protocol parameters\n");
+				return 1;
 			}
-		}
+
+			HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
+			printf("> VDEC Protocol = Type: %s, PPS: %d, SLICE: %d, SPS: %d\n",
+				(codec_id == PT_H264 ? "H264" : (codec_id == PT_H265 ? "H265" : "Unknown")),
+				protocol.stH264PrtclParam.s32MaxPpsNum, protocol.stH264PrtclParam.s32MaxSliceNum,
+				protocol.stH264PrtclParam.s32MaxSpsNum);
+			break;
+
+		case PT_H265:
+			protocol.stH265PrtclParam.s32MaxPpsNum = 16;
+			protocol.stH265PrtclParam.s32MaxSpsNum = 16;
+			protocol.stH265PrtclParam.s32MaxSliceSegmentNum = 16;
+			ret = HI_MPI_VDEC_SetProtocolParam(vdec_channel_id, &protocol);
+			if (ret != HI_SUCCESS) {
+				printf("ERROR: Unable to set VDEC protocol parameters\n");
+				return 1;
+			}
+
+			HI_MPI_VDEC_GetProtocolParam(vdec_channel_id, &protocol);
+			printf("> VDEC Protocol = Type: %s, PPS: %d, SLICE: %d, SPS: %d\n",
+				(codec_id == PT_H264 ? "H264" : (codec_id == PT_H265 ? "H265" : "Unknown")),
+				protocol.stH265PrtclParam.s32MaxPpsNum, protocol.stH265PrtclParam.s32MaxSliceSegmentNum,
+				protocol.stH265PrtclParam.s32MaxSpsNum);
+			break;
+
+		default:
+			break;
 	}
 
-	// --------------------------------------------
-	// --- Assemble pipeline
-	// --------------------------------------------
-	{
-		MPP_CHN_S src;
-		MPP_CHN_S dst;
+	// Assemble pipeline
+	MPP_CHN_S src;
+	MPP_CHN_S dst;
 
-		src.enModId = HI_ID_VDEC;
-		src.s32DevId = 0;
-		src.s32ChnId = vdec_channel_id;
+	src.enModId = HI_ID_VDEC;
+	src.s32DevId = 0;
+	src.s32ChnId = vdec_channel_id;
 
-		dst.enModId = HI_ID_VOU;
-		dst.s32DevId = vo_layer_id;
-		dst.s32ChnId = vo_channel_id;
+	dst.enModId = HI_ID_VOU;
+	dst.s32DevId = vo_layer_id;
+	dst.s32ChnId = vo_channel_id;
 
-		int ret = HI_MPI_SYS_Bind(&src, &dst);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to bind VDEC -> VO\n");
-			return 1;
-		}
+	ret = HI_MPI_SYS_Bind(&src, &dst);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to bind VDEC -> VO\n");
+		return 1;
 	}
 
-	// - Start VDEC
-	{
-		int ret = HI_MPI_VDEC_StartRecvStream(vdec_channel_id);
-		if (ret != HI_SUCCESS) {
-			printf("ERROR: Unable to start VDEC channel\n");
-			return 1;
-		}
+	// Start VDEC
+	ret = HI_MPI_VDEC_StartRecvStream(vdec_channel_id);
+	if (ret != HI_SUCCESS) {
+		printf("ERROR: Unable to start VDEC channel\n");
+		return 1;
 	}
 
-	// --------------------------------------------
-	// --- Create socket
-	// --------------------------------------------
+	// Create socket
 	int port = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	{
-		struct sockaddr_in address;
-		memset(&address, 0x00, sizeof(address));
-		address.sin_family = AF_INET;
-		address.sin_port = htons(listen_port);
-		bind(port, (struct sockaddr*)&address, sizeof(struct sockaddr_in));
-	}
+	struct sockaddr_in address;
+	memset(&address, 0x00, sizeof(address));
+	address.sin_family = AF_INET;
+	address.sin_port = htons(listen_port);
+	bind(port, (struct sockaddr*)&address, sizeof(struct sockaddr_in));
 
 	if (fcntl(port, F_SETFL, O_NONBLOCK) == -1) {
 		printf("ERROR: Unable to set non-blocking mode\n");
@@ -737,13 +582,13 @@ int main(int argc, const char* argv[]) {
 	uint8_t* rx_buffer = malloc(1024 * 1024);
 	uint8_t* nal_buffer = malloc(1024 * 1024);
 
-	// - Open write file
+	// Open write file
 	if (write_stream_path) {
 		write_stream_file = open(write_stream_path, O_RDWR | O_CREAT,
 			S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	}
 
-	// - Start ISP service thread
+	// Start ISP service thread
 	pthread_t osd_thread;
 	if (enable_osd) {
 		pthread_create(&osd_thread, NULL, __OSD_THREAD__, 0);
@@ -755,7 +600,7 @@ int main(int argc, const char* argv[]) {
 	uint32_t write_buffer_size = 0;
 
 	while (1) {
-		int rx = recv(port, rx_buffer + 8, 2048, 0);
+		int rx = recv(port, rx_buffer + 8, 4096, 0);
 		if (rx <= 0) {
 			usleep(1);
 			continue;
@@ -771,34 +616,30 @@ int main(int argc, const char* argv[]) {
 			rtp_header = 12;
 		}
 
-		// - Decode UDP stream
-		stream.pu8Addr = decodeUDPFrame(rx_buffer + 8, (uint32_t)rx, rtp_header,
-			nal_buffer, &stream.u32Len);
+		// Decode UDP stream
+		stream.pu8Addr = decodeUDPFrame(rx_buffer + 8, rx,
+			rtp_header, nal_buffer, &stream.u32Len);
 		if (!stream.pu8Addr) {
 			continue;
 		}
+
 		if (stream.u32Len < 5) {
 			printf("> Broken frame\n");
 		}
 
-		uint8_t nal_type = stream.pu8Addr[4] & 0x1F;
-		// printf("NAL Type = %d, Size = %d\n", nal_type, stream.u32Len - 4);
 		stats_rx_bytes += stream.u32Len;
 
-		// - Write file
+		// Write file
 		if (write_stream_file != -1) {
 			uint32_t write_size = stream.u32Len;
 			uint32_t write_done = 0;
 
 			while (write_size) {
-				uint32_t chunk_size =
-					MIN(write_size, write_buffer_capacity - write_buffer_size);
-
-				memcpy(write_buffer + write_buffer_size,
-					stream.pu8Addr + write_done, chunk_size);
+				uint32_t chunk_size = MIN(write_size, write_buffer_capacity - write_buffer_size);
+				memcpy(write_buffer + write_buffer_size, stream.pu8Addr + write_done, chunk_size);
 				write_buffer_size += chunk_size;
 
-				// - Flush buffer
+				// Flush buffer
 				if (write_buffer_size == write_buffer_capacity) {
 					write(write_stream_file, write_buffer, write_buffer_size);
 					write_buffer_size = 0;
@@ -809,55 +650,11 @@ int main(int argc, const char* argv[]) {
 			}
 		}
 
-		// - Send frame into decoder
-		{
-			int ret = HI_MPI_VDEC_SendStream(vdec_channel_id, &stream, 0);
-			if (ret != HI_SUCCESS) {
-				printf("WARN: Unable to send data into VDEC = 0x%x\n", ret);
-			}
+		// Send frame into decoder
+		int ret = HI_MPI_VDEC_SendStream(vdec_channel_id, &stream, 0);
+		if (ret != HI_SUCCESS) {
+			printf("WARN: Unable to send data into VDEC = 0x%x\n", ret);
 		}
-
-		// - Query decoder status
-		/*{ VDEC_CHN_STAT_S stats;
-		  memset(&stats, 0x00, sizeof(stats));
-		  int ret = HI_MPI_VDEC_Query(vdec_channel_id, &stats);
-		  if (ret != HI_SUCCESS) {
-			printf("WARN: Unable to query statistics = 0x%x\n", ret);
-
-		  } else {
-			printf("> R: %d, RxFrames: %d, DecFrames: %d | BufSize: %d, BufPic:
-		%d | E_SUP: %d, E_FMT: %d, E_PAK: %d, E_PBUF: %d, E_PSIZE: %d, E_PRTCL:
-		%d, E_REF: %d\n", stats.bStartRecvStream, stats.u32RecvStreamFrames,
-			  stats.u32DecodeStreamFrames,
-			  stats.u32LeftStreamBytes,
-			  stats.u32LeftPics,
-
-			  stats.stVdecDecErr.s32StreamUnsprt,
-			  stats.stVdecDecErr.s32FormatErr,
-			  stats.stVdecDecErr.s32PackErr,
-			  stats.stVdecDecErr.s32PicBufSizeErrSet,
-			  stats.stVdecDecErr.s32PicSizeErrSet,
-			  stats.stVdecDecErr.s32PrtclNumErrSet,
-			  stats.stVdecDecErr.s32RefErrSet
-			);
-		  }
-		}*/
-
-		/*{ VIDEO_FRAME_INFO_S frame;
-		  int ret = HI_MPI_VDEC_GetImage(vdec_channel_id, &frame, 0);
-		  if (ret == 0) {
-
-			printf("> FRAME: %d x %d\n", frame.stVFrame.u32Width,
-		frame.stVFrame.u32Height);
-
-			HI_MPI_VO_SendFrame(vo_layer_id, vo_channel_id, &frame, 0);
-
-			// - Release frame
-			HI_MPI_VDEC_ReleaseImage(vdec_channel_id, &frame);
-		  } else {
-			printf("> NO frame = 0x%x\n", ret);
-		  }
-		}*/
 	}
 
 	return 0;
@@ -895,45 +692,37 @@ char s4[30] = "0";
 char* ptr;
 
 void* __MAVLINK_THREAD__(void* arg) {
-
-	// - Create socket
+	// Create socket
 	int fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (fd < 0) {
 		printf("ERROR: Unable to create MavLink socket: %s\n", strerror(errno));
 		return 0;
 	}
 
-	// - Bind port
-	{
-		struct sockaddr_in addr = {};
-		memset(&addr, 0, sizeof(addr));
-		addr.sin_family = AF_INET;
-		inet_pton(AF_INET, "0.0.0.0",
-			&(addr.sin_addr));				 // listen on all network interfaces
-		addr.sin_port = htons(mavlink_port); // default port on the ground
-		if (bind(fd, (struct sockaddr*)(&addr), sizeof(addr)) != 0) {
-			printf("ERROR: Unable to bind MavLink port: %s\n", strerror(errno));
-			return 0;
-		}
+	// Bind port
+	struct sockaddr_in addr = {};
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	inet_pton(AF_INET, "0.0.0.0", &(addr.sin_addr));
+	addr.sin_port = htons(mavlink_port);
+
+	if (bind(fd, (struct sockaddr*)(&addr), sizeof(addr)) != 0) {
+		printf("ERROR: Unable to bind MavLink port: %s\n", strerror(errno));
+		return 0;
 	}
 
-	// - Set Rx timeout
-	{
-		struct timeval tv;
-		tv.tv_sec = 0;
-		tv.tv_usec = 100000;
-		if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
-			printf("ERROR: Unable to bind MavLink rx timeout: %s\n",
-				strerror(errno));
-			return 0;
-		}
+	// Set Rx timeout
+	struct timeval tv;
+	tv.tv_sec = 0;
+	tv.tv_usec = 100000;
+	if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+		printf("ERROR: Unable to bind MavLink rx timeout: %s\n", strerror(errno));
+		return 0;
 	}
 
 	char buffer[2048];
-
 	while (1) {
 		memset(buffer, 0x00, sizeof(buffer));
-
 		int ret = recv(fd, buffer, sizeof(buffer), 0);
 		if (ret < 0) {
 			continue;
@@ -942,142 +731,136 @@ void* __MAVLINK_THREAD__(void* arg) {
 			return 0;
 		}
 
-		// - Parse
+		// Parse
 		mavlink_message_t message;
 		mavlink_status_t status;
 		for (int i = 0; i < ret; ++i) {
-			if (mavlink_parse_char(
-					MAVLINK_COMM_0, buffer[i], &message, &status) == 1) {
+			if (mavlink_parse_char(MAVLINK_COMM_0, buffer[i], &message, &status) == 1) {
 				switch (message.msgid) {
-				case MAVLINK_MSG_ID_HEARTBEAT:
-					// handle_heartbeat(&message);
-					break;
+					case MAVLINK_MSG_ID_HEARTBEAT:
+						// handle_heartbeat(&message);
+						break;
 
-				case MAVLINK_MSG_ID_ALTITUDE: {
-					mavlink_altitude_t alt;
-					mavlink_msg_altitude_decode(&message, &alt);
-					telemetry_altitude = alt.altitude_relative;
+					case MAVLINK_MSG_ID_ALTITUDE:
+						mavlink_altitude_t alt;
+						mavlink_msg_altitude_decode(&message, &alt);
+						telemetry_altitude = alt.altitude_relative;
+						break;
 
-				}; break;
+					case MAVLINK_MSG_ID_SYS_STATUS:
+						mavlink_sys_status_t bat;
+						mavlink_msg_sys_status_decode(&message, &bat);
+						telemetry_battery = bat.voltage_battery;
+						telemetry_current = bat.current_battery;
+						break;
 
-				case MAVLINK_MSG_ID_SYS_STATUS: {
-					mavlink_sys_status_t bat;
-					mavlink_msg_sys_status_decode(&message, &bat);
-					telemetry_battery = bat.voltage_battery;
-					telemetry_current = bat.current_battery;
+					case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
+						mavlink_rc_channels_raw_t rc_channels_raw;
+						mavlink_msg_rc_channels_raw_decode( &message, &rc_channels_raw);
+						telemetry_rssi = rc_channels_raw.rssi;
+						telemetry_throttle = (rc_channels_raw.chan4_raw - 1000) / 10;
 
-				}; break;
+						if (telemetry_throttle < 0) {
+							telemetry_throttle = 0;
+						}
+						telemetry_arm = rc_channels_raw.chan5_raw;
+						break;
 
-				case MAVLINK_MSG_ID_RC_CHANNELS_RAW: {
-					mavlink_rc_channels_raw_t rc_channels_raw;
-					mavlink_msg_rc_channels_raw_decode(
-						&message, &rc_channels_raw);
-					telemetry_rssi = rc_channels_raw.rssi;
-					telemetry_throttle =
-						(rc_channels_raw.chan4_raw - 1000) / 10;
-					if (telemetry_throttle < 0) {
-						telemetry_throttle = 0;
-					};
-					telemetry_arm = rc_channels_raw.chan5_raw;
+					case MAVLINK_MSG_ID_GPS_RAW_INT:
+						mavlink_gps_raw_int_t gps;
+						mavlink_msg_gps_raw_int_decode(&message, &gps);
+						telemetry_sats = gps.satellites_visible;
+						telemetry_lat = gps.lat;
+						telemetry_lon = gps.lon;
+						if (telemetry_arm > 1700) {
+							if (armed < 1) {
+								armed = 1;
+								telemetry_lat_base = telemetry_lat;
+								telemetry_lon_base = telemetry_lon;
+							}
 
-				}; break;
+							sprintf(s1, "%.00f", telemetry_lat);
+							if (telemetry_lat < 10000000) {
+								insertString(s1, "0.", 0);
+							}
+							if (telemetry_lat > 9999999) {
+								if (numOfChars(s1) == 8) {
+									insertString(s1, ".", 1);
+								} else {
+									insertString(s1, ".", 2);
+								}
+							}
 
-				case MAVLINK_MSG_ID_GPS_RAW_INT: {
-					mavlink_gps_raw_int_t gps;
-					mavlink_msg_gps_raw_int_decode(&message, &gps);
-					telemetry_sats = gps.satellites_visible;
-					telemetry_lat = gps.lat;
-					telemetry_lon = gps.lon;
-					if (telemetry_arm > 1700) {
-						if (armed < 1) {
-							armed = 1;
-							telemetry_lat_base = telemetry_lat;
-							telemetry_lon_base = telemetry_lon;
-						};
-						sprintf(s1, "%.00f", telemetry_lat);
-						if (telemetry_lat < 10000000) {
-							insertString(s1, "0.", 0);
-						};
-						if (telemetry_lat > 9999999) {
-							if (numOfChars(s1) == 8) {
-								insertString(s1, ".", 1);
-							} else {
-								insertString(s1, ".", 2);
-							};
-						};
-						sprintf(s2, "%.00f", telemetry_lon);
-						if (telemetry_lon < 10000000) {
-							insertString(s2, "0.", 0);
-						};
-						if (telemetry_lon > 9999999) {
-							if (numOfChars(s2) == 8) {
-								insertString(s2, ".", 1);
-							} else {
-								insertString(s2, ".", 2);
-							};
-						};
-						sprintf(s3, "%.00f", telemetry_lat_base);
-						if (telemetry_lat_base < 10000000) {
-							insertString(s3, "0.", 0);
-						};
-						if (telemetry_lat_base > 9999999) {
-							if (numOfChars(s3) == 8) {
-								insertString(s3, ".", 1);
-							} else {
-								insertString(s3, ".", 2);
-							};
-						};
-						sprintf(s4, "%.00f", telemetry_lon_base);
-						if (telemetry_lon_base < 10000000) {
-							insertString(s4, "0.", 0);
-						};
-						if (telemetry_lon_base > 9999999) {
-							if (numOfChars(s4) == 8) {
-								insertString(s4, ".", 1);
-							} else {
-								insertString(s4, ".", 2);
-							};
-						};
-						s1_double = strtod(s1, &ptr);
-						s2_double = strtod(s2, &ptr);
-						s3_double = strtod(s3, &ptr);
-						s4_double = strtod(s4, &ptr);
-					};
-					telemetry_distance = distanceEarth(
-						s1_double, s2_double, s3_double, s4_double);
+							sprintf(s2, "%.00f", telemetry_lon);
+							if (telemetry_lon < 10000000) {
+								insertString(s2, "0.", 0);
+							}
+							if (telemetry_lon > 9999999) {
+								if (numOfChars(s2) == 8) {
+									insertString(s2, ".", 1);
+								} else {
+									insertString(s2, ".", 2);
+								}
+							}
 
-				}; break;
+							sprintf(s3, "%.00f", telemetry_lat_base);
+							if (telemetry_lat_base < 10000000) {
+								insertString(s3, "0.", 0);
+							}
+							if (telemetry_lat_base > 9999999) {
+								if (numOfChars(s3) == 8) {
+									insertString(s3, ".", 1);
+								} else {
+									insertString(s3, ".", 2);
+								}
+							}
 
-				case MAVLINK_MSG_ID_VFR_HUD: {
-					mavlink_vfr_hud_t vfr;
-					mavlink_msg_vfr_hud_decode(&message, &vfr);
-					telemetry_gspeed = vfr.groundspeed * 3.6;
-					telemetry_vspeed = vfr.climb;
+							sprintf(s4, "%.00f", telemetry_lon_base);
+							if (telemetry_lon_base < 10000000) {
+								insertString(s4, "0.", 0);
+							}
 
-				}; break;
+							if (telemetry_lon_base > 9999999) {
+								if (numOfChars(s4) == 8) {
+									insertString(s4, ".", 1);
+								} else {
+									insertString(s4, ".", 2);
+								}
+							}
 
-				case MAVLINK_MSG_ID_GLOBAL_POSITION_INT: {
-					mavlink_global_position_int_t global_position_int;
-					mavlink_msg_global_position_int_decode(
-						&message, &global_position_int);
-					telemetry_hdg = global_position_int.hdg / 100;
+							s1_double = strtod(s1, &ptr);
+							s2_double = strtod(s2, &ptr);
+							s3_double = strtod(s3, &ptr);
+							s4_double = strtod(s4, &ptr);
+						}
+						telemetry_distance = distanceEarth(s1_double, s2_double, s3_double, s4_double);
+						break;
 
-				}; break;
+					case MAVLINK_MSG_ID_VFR_HUD:
+						mavlink_vfr_hud_t vfr;
+						mavlink_msg_vfr_hud_decode(&message, &vfr);
+						telemetry_gspeed = vfr.groundspeed * 3.6;
+						telemetry_vspeed = vfr.climb;
+						break;
 
-				case MAVLINK_MSG_ID_ATTITUDE: {
-					mavlink_attitude_t att;
-					mavlink_msg_attitude_decode(&message, &att);
-					telemetry_pitch =
-						att.pitch * (180.0 / 3.141592653589793238463);
-					telemetry_roll =
-						att.roll * (180.0 / 3.141592653589793238463);
-					telemetry_yaw = att.yaw * (180.0 / 3.141592653589793238463);
-				}; break;
+					case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
+						mavlink_global_position_int_t global_position_int;
+						mavlink_msg_global_position_int_decode( &message, &global_position_int);
+						telemetry_hdg = global_position_int.hdg / 100;
+						break;
 
-				default:
-					printf("> MavLink message %d from %d/%d\n", message.msgid,
-						message.sysid, message.compid);
-					break;
+					case MAVLINK_MSG_ID_ATTITUDE:
+						mavlink_attitude_t att;
+						mavlink_msg_attitude_decode(&message, &att);
+						telemetry_pitch = att.pitch * (180.0 / 3.141592653589793238463);
+						telemetry_roll = att.roll * (180.0 / 3.141592653589793238463);
+						telemetry_yaw = att.yaw * (180.0 / 3.141592653589793238463);
+						break;
+
+					default:
+						printf("> MavLink message %d from %d/%d\n",
+							message.msgid, message.sysid, message.compid);
+						break;
 				}
 			}
 		}
@@ -1090,58 +873,47 @@ void* __MAVLINK_THREAD__(void* arg) {
 
 extern const char font_14_23[];
 extern uint32_t frames_lost;
-
 float rx_rate = 0;
 
 // array size is 7602
 extern const char openipc[];
 
-int32_t map_range(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min,
-	int32_t out_max) {
+int32_t map_range(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max) {
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 void* __OSD_THREAD__(void* arg) {
 	struct _fbg* fbg = fbg_fbdevSetup(NULL, HI_FALSE, vo_width, vo_height);
-
-	struct _fbg_img* bb_font_img =
-		fbg_loadPNGFromMemory(fbg, font_14_23, 26197);
+	struct _fbg_img* bb_font_img = fbg_loadPNGFromMemory(fbg, font_14_23, 26197);
 	struct _fbg_font* bbfont = fbg_createFont(fbg, bb_font_img, 14, 23, 33);
 	struct _fbg_img* openipc_img = fbg_loadPNGFromMemory(fbg, openipc, 11761);
 
 	while (1) {
 		fbg_clear(fbg, 0);
 		fbg_draw(fbg);
-
 		uint32_t x_center = fbg->width / 2;
 
-		// - Artificial Horizon
-		{
-			int32_t offset_pitch = telemetry_pitch * 4;
-			int32_t offset_roll = telemetry_roll * 4;
-			int32_t y_pos_left =
-				((int32_t)fbg->height / 2 - 2 + offset_pitch + offset_roll);
-			int32_t y_pos_right =
-				((int32_t)fbg->height / 2 - 2 + offset_pitch - offset_roll);
-			for (int i = 0; i < 4; i++) {
-				if (y_pos_left > 0 && y_pos_left < fbg->height &&
-					y_pos_right > 0 && y_pos_right < fbg->height) {
-					fbg_line(fbg, x_center - 180, y_pos_left + i,
-						x_center + 180, y_pos_right + i, 255, 255, 255);
-				}
+		// Artificial Horizon
+		int32_t offset_pitch = telemetry_pitch * 4;
+		int32_t offset_roll = telemetry_roll * 4;
+		int32_t y_pos_left = ((int32_t)fbg->height / 2 - 2 + offset_pitch + offset_roll);
+		int32_t y_pos_right = ((int32_t)fbg->height / 2 - 2 + offset_pitch - offset_roll);
+
+		for (int i = 0; i < 4; i++) {
+			if (y_pos_left > 0 && y_pos_left < fbg->height &&
+				y_pos_right > 0 && y_pos_right < fbg->height) {
+				fbg_line(fbg, x_center - 180, y_pos_left + i,
+					x_center + 180, y_pos_right + i, 255, 255, 255);
 			}
 		}
 
-		// - Vertical Speedometer
-		{
-			int32_t offset_vspeed = telemetry_vspeed * 5;
-			int32_t y_pos_vspeed =
-				((int32_t)fbg->height / 2 - 2 - offset_vspeed);
-			for (int i = 0; i < 8; i++) {
-				if (y_pos_vspeed > 0 && y_pos_vspeed < fbg->height) {
-					fbg_line(fbg, x_center + 242 + i, fbg->height / 2,
-						x_center + 242 + i, y_pos_vspeed, 255, 255, 255);
-				}
+		// Vertical Speedometer
+		int32_t offset_vspeed = telemetry_vspeed * 5;
+		int32_t y_pos_vspeed = ((int32_t)fbg->height / 2 - 2 - offset_vspeed);
+		for (int i = 0; i < 8; i++) {
+			if (y_pos_vspeed > 0 && y_pos_vspeed < fbg->height) {
+				fbg_line(fbg, x_center + 242 + i, fbg->height / 2,
+					x_center + 242 + i, y_pos_vspeed, 255, 255, 255);
 			}
 		}
 
@@ -1156,76 +928,75 @@ void* __OSD_THREAD__(void* arg) {
 				fbg->height / 2 - 120 + i * 10 + 1, 255, 255, 255);
 
 			fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10,
-				x_center + 240 + width, fbg->height / 2 - 120 + i * 10, 255,
-				255, 255);
+				x_center + 240 + width, fbg->height / 2 - 120 + i * 10, 255, 255, 255);
 			fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10 + 1,
-				x_center + 240 + width, fbg->height / 2 - 120 + i * 10 + 1, 255,
-				255, 255);
+				x_center + 240 + width, fbg->height / 2 - 120 + i * 10 + 1, 255, 255, 255);
 		}
 
-		// - OSD telemetry
-		{
-			char msg[16];
-			memset(msg, 0x00, sizeof(msg));
-			sprintf(msg, "ALT:%.00fM", telemetry_altitude);
-			fbg_write(fbg, msg, x_center + (20) + 260, fbg->height / 2 - 8);
-			sprintf(msg, "SPD:%.00fKM/H", telemetry_gspeed);
-			fbg_write(fbg, msg, x_center - (16 * 3) - 360, fbg->height / 2 - 8);
-			sprintf(msg, "VSPD:%.00fM/S", telemetry_vspeed);
-			fbg_write(fbg, msg, x_center + (20) + 260, fbg->height / 2 + 22);
-			sprintf(msg, "BAT:%.02fV", telemetry_battery / 1000);
-			fbg_write(fbg, msg, 40, fbg->height - 30);
-			sprintf(msg, "CUR:%.02fA", telemetry_current / 100);
-			fbg_write(fbg, msg, 40, fbg->height - 60);
-			sprintf(msg, "THR:%.00f%%", telemetry_throttle);
-			fbg_write(fbg, msg, 40, fbg->height - 90);
-			sprintf(msg, "SATS:%.00f", telemetry_sats);
-			fbg_write(fbg, msg, x_center + 520, fbg->height - 30);
-			sprintf(msg, "HDG:%.00f", telemetry_hdg);
-			fbg_write(fbg, msg, x_center + 520, fbg->height - 120);
-			sprintf(c1, "%.00f", telemetry_lat);
-			if (telemetry_lat < 10000000) {
-				insertString(c1, "LON:0.", 0);
-			};
-			if (telemetry_lat > 9999999) {
-				if (numOfChars(c1) == 8) {
-					insertString(c1, ".", 1);
-				} else {
-					insertString(c1, ".", 2);
-				};
-				insertString(c1, "LAT:", 0);
-			};
-			fbg_write(fbg, c1, x_center + 440, fbg->height - 90);
-			sprintf(c2, "%.00f", telemetry_lon);
-			if (telemetry_lon < 10000000) {
-				insertString(c2, "LON:0.", 0);
-			};
-			if (telemetry_lon > 9999999) {
-				if (numOfChars(c2) == 8) {
-					insertString(c2, ".", 1);
-				} else {
-					insertString(c2, ".", 2);
-				};
-				insertString(c2, "LON:", 0);
-			};
-			fbg_write(fbg, c2, x_center + 440, fbg->height - 60);
-			// sprintf(msg, "PITCH:%.00f", telemetry_pitch);
-			// fbg_write(fbg, msg, x_center + 440,         fbg->height - 140);
-			// sprintf(msg, "ROLL:%.00f", telemetry_roll);
-			// fbg_write(fbg, msg, x_center + 440,         fbg->height - 170);
-			sprintf(msg, "RSSI:%.00f", telemetry_rssi);
-			fbg_write(fbg, msg, x_center - 50, fbg->height - 30);
-			sprintf(msg, "DIST:%.03fM", telemetry_distance);
-			fbg_write(fbg, msg, x_center - 350, fbg->height - 30);
+		// OSD telemetry
+		char msg[16];
+		memset(msg, 0x00, sizeof(msg));
+		sprintf(msg, "ALT:%.00fM", telemetry_altitude);
+		fbg_write(fbg, msg, x_center + (20) + 260, fbg->height / 2 - 8);
+		sprintf(msg, "SPD:%.00fKM/H", telemetry_gspeed);
+		fbg_write(fbg, msg, x_center - (16 * 3) - 360, fbg->height / 2 - 8);
+		sprintf(msg, "VSPD:%.00fM/S", telemetry_vspeed);
+		fbg_write(fbg, msg, x_center + (20) + 260, fbg->height / 2 + 22);
+		sprintf(msg, "BAT:%.02fV", telemetry_battery / 1000);
+		fbg_write(fbg, msg, 40, fbg->height - 30);
+		sprintf(msg, "CUR:%.02fA", telemetry_current / 100);
+		fbg_write(fbg, msg, 40, fbg->height - 60);
+		sprintf(msg, "THR:%.00f%%", telemetry_throttle);
+		fbg_write(fbg, msg, 40, fbg->height - 90);
+		sprintf(msg, "SATS:%.00f", telemetry_sats);
+		fbg_write(fbg, msg, x_center + 520, fbg->height - 30);
+		sprintf(msg, "HDG:%.00f", telemetry_hdg);
+		fbg_write(fbg, msg, x_center + 520, fbg->height - 120);
+		sprintf(c1, "%.00f", telemetry_lat);
+
+		if (telemetry_lat < 10000000) {
+			insertString(c1, "LON:0.", 0);
 		}
 
+		if (telemetry_lat > 9999999) {
+			if (numOfChars(c1) == 8) {
+				insertString(c1, ".", 1);
+			} else {
+				insertString(c1, ".", 2);
+			}
+			insertString(c1, "LAT:", 0);
+		}
+
+		fbg_write(fbg, c1, x_center + 440, fbg->height - 90);
+		sprintf(c2, "%.00f", telemetry_lon);
+		if (telemetry_lon < 10000000) {
+			insertString(c2, "LON:0.", 0);
+		}
+
+		if (telemetry_lon > 9999999) {
+			if (numOfChars(c2) == 8) {
+				insertString(c2, ".", 1);
+			} else {
+				insertString(c2, ".", 2);
+			}
+			insertString(c2, "LON:", 0);
+		}
+
+		fbg_write(fbg, c2, x_center + 440, fbg->height - 60);
+		// sprintf(msg, "PITCH:%.00f", telemetry_pitch);
+		// fbg_write(fbg, msg, x_center + 440, fbg->height - 140);
+		// sprintf(msg, "ROLL:%.00f", telemetry_roll);
+		// fbg_write(fbg, msg, x_center + 440, fbg->height - 170);
+		sprintf(msg, "RSSI:%.00f", telemetry_rssi);
+		fbg_write(fbg, msg, x_center - 50, fbg->height - 30);
+		sprintf(msg, "DIST:%.03fM", telemetry_distance);
+		fbg_write(fbg, msg, x_center - 350, fbg->height - 30);
 		fbg_image(fbg, openipc_img, 1280 - 160 - 80, 40);
 
-		// - Print rate stats
+		// Print rate stats
 		struct timespec current_timestamp;
 		if (!clock_gettime(CLOCK_MONOTONIC_COARSE, &current_timestamp)) {
-			double interval =
-				getTimeInterval(&current_timestamp, &last_timestamp);
+			double interval = getTimeInterval(&current_timestamp, &last_timestamp);
 			if (interval > 1) {
 				last_timestamp = current_timestamp;
 				rx_rate = (float)stats_rx_bytes / 1024.0f * 8;
@@ -1240,14 +1011,14 @@ void* __OSD_THREAD__(void* arg) {
 
 		memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
 		sprintf(hud_frames_rx, "Rate %.02f Kbit/s", rx_rate);
-		fbg_write(
-			fbg, hud_frames_rx, x_center - strlen(hud_frames_rx) / 2 * 16, 40);
+		fbg_write(fbg, hud_frames_rx, x_center - strlen(hud_frames_rx) / 2 * 16, 40);
 		float percent = rx_rate / (1024 * 10);
-		if (percent > 1)
+		if (percent > 1) {
 			percent = 1;
+		}
+
 		uint32_t width = (strlen(hud_frames_rx) * 16) * percent;
-		fbg_rect(fbg, x_center - strlen(hud_frames_rx) / 2 * 16, 64, width, 8,
-			255, 255, 255);
+		fbg_rect(fbg, x_center - strlen(hud_frames_rx) / 2 * 16, 64, width, 8, 255, 255, 255);
 		fbg_flip(fbg);
 		usleep(1);
 	}
