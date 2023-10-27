@@ -68,6 +68,7 @@ extern "C" {
 #define VER_E " NoLog"
 #endif
 
+#define DEV_MIPI "/dev/hi_mipi"
 
 #define ATTRIBUTE __attribute__((aligned (ALIGN_NUM)))
 

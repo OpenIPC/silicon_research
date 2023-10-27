@@ -1,10 +1,7 @@
 #include "main.h"
 
-// -------------------------------------------------------------------------------------------
-// --- VI device configuration profiles
-// -------------------------------------------------------------------------------------------
-VI_DEV_ATTR_S DEV_ATTR_IMX327_2M_BASE =
-{
+// VI device configuration profiles
+VI_DEV_ATTR_S DEV_ATTR_IMX327_2M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFF00000,    0x0},
@@ -45,8 +42,7 @@ VI_DEV_ATTR_S DEV_ATTR_IMX327_2M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_IMX307_2M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_IMX307_2M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFF00000,    0x0},
@@ -87,8 +83,7 @@ VI_DEV_ATTR_S DEV_ATTR_IMX307_2M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_SC2231_2M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_SC2231_2M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFC00000,    0x0},
@@ -128,8 +123,7 @@ VI_DEV_ATTR_S DEV_ATTR_SC2231_2M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_F37_2M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_F37_2M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFC00000,    0x0},
@@ -169,8 +163,7 @@ VI_DEV_ATTR_S DEV_ATTR_F37_2M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_SC2235_2M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_SC2235_2M_BASE = {
     VI_MODE_DIGITAL_CAMERA,
     VI_WORK_MODE_1Multiplex,
     {0xFFF00000,    0x0},
@@ -211,8 +204,7 @@ VI_DEV_ATTR_S DEV_ATTR_SC2235_2M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_SC4236_3M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_SC4236_3M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFC00000,    0x0},
@@ -252,8 +244,7 @@ VI_DEV_ATTR_S DEV_ATTR_SC4236_3M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_SC3235_3M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_SC3235_3M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFC00000,    0x0},
@@ -293,8 +284,7 @@ VI_DEV_ATTR_S DEV_ATTR_SC3235_3M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_GC2053_2M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_GC2053_2M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFC00000,    0x0},
@@ -334,8 +324,7 @@ VI_DEV_ATTR_S DEV_ATTR_GC2053_2M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_IMX335_5M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_IMX335_5M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFF00000,    0x0},
@@ -375,8 +364,7 @@ VI_DEV_ATTR_S DEV_ATTR_IMX335_5M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_IMX335_4M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_IMX335_4M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFF00000,    0x0},
@@ -416,8 +404,7 @@ VI_DEV_ATTR_S DEV_ATTR_IMX335_4M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_OS05A_5M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_OS05A_5M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFF00000,    0x0},
@@ -455,8 +442,7 @@ VI_DEV_ATTR_S DEV_ATTR_OS05A_5M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_OS05A_4M_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_OS05A_4M_BASE = {
     VI_MODE_MIPI,
     VI_WORK_MODE_1Multiplex,
     {0xFFF00000,    0x0},
@@ -494,8 +480,7 @@ VI_DEV_ATTR_S DEV_ATTR_OS05A_4M_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_BT656_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_BT656_BASE = {
     VI_MODE_BT656,
     VI_WORK_MODE_1Multiplex,
     {0x7f800000,    0x0},
@@ -527,8 +512,7 @@ VI_DEV_ATTR_S DEV_ATTR_BT656_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_BT601_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_BT601_BASE = {
     VI_MODE_BT601,
     VI_WORK_MODE_1Multiplex,
     {0xFF000000,    0x0},
@@ -566,8 +550,7 @@ VI_DEV_ATTR_S DEV_ATTR_BT601_BASE =
     DATA_RATE_X1
 };
 
-VI_DEV_ATTR_S DEV_ATTR_BT1120_BASE =
-{
+VI_DEV_ATTR_S DEV_ATTR_BT1120_BASE = {
     VI_MODE_BT1120_STANDARD,
     VI_WORK_MODE_1Multiplex,
     {0xFF000000,    0x00FF0000},
@@ -607,10 +590,7 @@ VI_DEV_ATTR_S DEV_ATTR_BT1120_BASE =
     DATA_RATE_X1
 };
 
-
-// -------------------------------------------------------------------------------------------
-// --- VI Pipe configuration profiles
-// -------------------------------------------------------------------------------------------
+// VI Pipe configuration profiles
 VI_PIPE_ATTR_S PIPE_ATTR_RAW10_420_3DNR_RFR = {
     VI_PIPE_BYPASS_NONE, HI_FALSE, HI_FALSE,
     0, 0,
@@ -645,9 +625,7 @@ VI_PIPE_ATTR_S PIPE_ATTR_RAW12_420_3DNR_RFR = {
     {-1, -1}
 };
 
-// -------------------------------------------------------------------------------------------
-// --- VI Channel configuration profiles
-// -------------------------------------------------------------------------------------------
+// VI Channel configuration profiles
 VI_CHN_ATTR_S CHN_ATTR_420_SDR8_LINEAR = {
     {0, 0},
     PIXEL_FORMAT_YVU_SEMIPLANAR_420,
@@ -658,4 +636,3 @@ VI_CHN_ATTR_S CHN_ATTR_420_SDR8_LINEAR = {
     0,
     { -1, -1}
 };
-

@@ -59,6 +59,8 @@ extern "C" {
 #define VER_E " NoLog"
 #endif
 
+#define DEV_MIPI "/dev/mipi"
+
 #define ATTRIBUTE __attribute__((aligned(ALIGN_NUM)))
 
 #define COMPAT_POINTER(ptr, type)                \

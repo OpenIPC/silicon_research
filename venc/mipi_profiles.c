@@ -1,8 +1,6 @@
 #include "main.h"
 
-// -------------------------------------------------------------------------------------------
-// --- MIPI configuration profiles
-// -------------------------------------------------------------------------------------------
+// MIPI configuration profiles
 combo_dev_attr_t MIPI_2lane_CHN0_SENSOR_SC4236_10BIT_3M_NOWDR_ATTR = {
 	.devno = 0,
 	.input_mode = INPUT_MODE_MIPI,
