@@ -84,7 +84,7 @@ int VO_HDMI_init(HI_HDMI_ID_E device_id, VO_INTF_SYNC_E interface_mode);
  * @param nal_buffer - Buffer for NAL reassembly
  * @param out_nal_size
  */
-uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size,
+uint8_t* decode_frame(uint8_t* rx_buffer, uint32_t rx_size,
 	uint32_t header_size, uint8_t* nal_buffer, uint32_t* out_nal_size);
 
 /* --- Console arguments parser --- */

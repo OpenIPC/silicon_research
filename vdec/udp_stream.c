@@ -3,7 +3,7 @@
 uint32_t frames_received = 0;
 static uint32_t in_nal_size = 0;
 
-uint8_t* decodeUDPFrame(uint8_t* rx_buffer, uint32_t rx_size,
+uint8_t* decode_frame(uint8_t* rx_buffer, uint32_t rx_size,
 	uint32_t header_size, uint8_t* nal_buffer, uint32_t* out_nal_size) {
 	rx_buffer += header_size;
 	rx_size -= header_size;

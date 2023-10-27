@@ -15,9 +15,6 @@ static HI_VOID HDMI_HotPlug_Proc(HI_VOID* pPrivateData) {
 	HI_HDMI_ATTR_S stAttr;
 	HI_HDMI_SINK_CAPABILITY_S stCaps;
 
-	//printf("EVENT: HPD\n");
-	//CHECK_POINTER_NO_RET(pPrivateData);
-
 	memset(&stAttr, 0, sizeof(HI_HDMI_ATTR_S));
 	memset(&stArgs, 0, sizeof(HDMI_ARGS_S));
 	memcpy(&stArgs, pPrivateData, sizeof(HDMI_ARGS_S));
@@ -90,9 +87,6 @@ char* insertString(char s1[], const char s2[], size_t pos) {
 
 static HI_VOID HDMI_UnPlug_Proc(HI_VOID* pPrivateData) {
 	HDMI_ARGS_S stArgs;
-	//printf("EVENT: UN-HPD\n");
-	//CHECK_POINTER_NO_RET(pPrivateData);
-
 	memset(&stArgs, 0, sizeof(HDMI_ARGS_S));
 	memcpy(&stArgs, pPrivateData, sizeof(HDMI_ARGS_S));
 	HI_MPI_HDMI_Stop(stArgs.enHdmi);
@@ -117,46 +111,46 @@ static HI_VOID HDMI_EventCallBack(
 }
 
 void printHelp() {
-	printf("\n"
-		   "\t\tOpenIPC FPV Decoder for HI3536 (%s)\n"
-		   "\n"
-		   "  Usage:\n"
-		   "    vdec [Arguments]\n"
-		   "\n"
-		   "  Arguments:\n"
-		   "    -p [Port]      - Listen port                       (Default: "
-		   "5000)\n"
-		   "    -c [Codec]     - Video codec                       (Default: "
-		   "h264)\n"
-		   "      h264           - H264\n"
-		   "      h265           - H265\n"
-		   "\n"
-		   "    -d [Format]    - Data format                       (Default: "
-		   "stream)\n"
-		   "      stream         - Incoming data is stream\n"
-		   "      frame          - Incoming data is frame\n"
-		   "\n"
-		   "    -m [Mode]        - Screen output mode                (Default: "
-		   "720p60)\n"
-		   "      720p60         - 1280 x 720    @ 60 fps\n"
-		   "      1080p60        - 1920 x 1080   @ 60 fps\n"
-		   "      1024x768x60    - 1024 x 768    @ 60 fps\n"
-		   "      1366x768x60    - 1366 x 768    @ 60 fps\n"
-		   "      1280x1024x60   - 1280 x 1024   @ 60 fps\n"
-		   "\n"
-		   "    -w [Path]              - Write stream into file\n"
-		   "\n"
-		   "    --osd                  - Enable OSD\n"
-		   "    --mavlink-port [port]  - MavLink Rx port                   "
-		   "(Default: 14550)\n"
-		   "    --bg-r [Value]         - Background color red component    "
-		   "(Default: 0)\n"
-		   "    --bg-g [Value]         - Background color green component  "
-		   "(Default: 96)\n"
-		   "    --bg-b [Value]         - Background color blue component   "
-		   "(Default: 0)\n"
-		   "\n",
-		__DATE__);
+	printf(
+		"\n\t\tOpenIPC FPV Decoder for HI3536 (%s)\n"
+		"\n"
+		"  Usage:\n"
+		"    vdec [Arguments]\n"
+		"\n"
+		"  Arguments:\n"
+		"    -p [Port]      - Listen port                       (Default: "
+		"5000)\n"
+		"    -c [Codec]     - Video codec                       (Default: "
+		"h264)\n"
+		"      h264           - H264\n"
+		"      h265           - H265\n"
+		"\n"
+		"    -d [Format]    - Data format                       (Default: "
+		"stream)\n"
+		"      stream         - Incoming data is stream\n"
+		"      frame          - Incoming data is frame\n"
+		"\n"
+		"    -m [Mode]        - Screen output mode                (Default: "
+		"720p60)\n"
+		"      720p60         - 1280 x 720    @ 60 fps\n"
+		"      1080p60        - 1920 x 1080   @ 60 fps\n"
+		"      1024x768x60    - 1024 x 768    @ 60 fps\n"
+		"      1366x768x60    - 1366 x 768    @ 60 fps\n"
+		"      1280x1024x60   - 1280 x 1024   @ 60 fps\n"
+		"\n"
+		"    -w [Path]              - Write stream into file\n"
+		"\n"
+		"    --osd                  - Enable OSD\n"
+		"    --mavlink-port [port]  - MavLink Rx port                   "
+		"(Default: 14550)\n"
+		"    --bg-r [Value]         - Background color red component    "
+		"(Default: 0)\n"
+		"    --bg-g [Value]         - Background color green component  "
+		"(Default: 96)\n"
+		"    --bg-b [Value]         - Background color blue component   "
+		"(Default: 0)\n"
+		"\n", __DATE__
+	);
 }
 
 extern uint32_t frames_received;
@@ -183,7 +177,6 @@ int main(int argc, const char* argv[]) {
 
 	VPSS_GRP vpss_group_id = 0;
 	VPSS_CHN vpss_channel_id = 0;
-
 	VO_DEV vo_device_id = 0;
 	VO_LAYER vo_layer_id = 0;
 	VO_CHN vo_channel_id = 0;
@@ -193,7 +186,6 @@ int main(int argc, const char* argv[]) {
 
 	const char* write_stream_path = 0;
 	int write_stream_file = -1;
-
 	int enable_osd = 0;
 	int codec_mode_stream = 1;
 	PAYLOAD_TYPE_E codec_id = PT_H264;
@@ -608,7 +600,7 @@ int main(int argc, const char* argv[]) {
 		}
 
 		// Decode UDP stream
-		stream.pu8Addr = decodeUDPFrame(rx_buffer + 8, rx,
+		stream.pu8Addr = decode_frame(rx_buffer + 8, rx,
 			rtp_header, nal_buffer, &stream.u32Len);
 		if (!stream.pu8Addr) {
 			continue;
@@ -933,12 +925,14 @@ void* __OSD_THREAD__(void* arg) {
 		fbg_write(fbg, msg, x_center - (16 * 3) - 360, fbg->height / 2 - 8);
 		sprintf(msg, "VSPD:%.00fM/S", telemetry_vspeed);
 		fbg_write(fbg, msg, x_center + (20) + 260, fbg->height / 2 + 22);
+
 		sprintf(msg, "BAT:%.02fV", telemetry_battery / 1000);
 		fbg_write(fbg, msg, 40, fbg->height - 30);
 		sprintf(msg, "CUR:%.02fA", telemetry_current / 100);
 		fbg_write(fbg, msg, 40, fbg->height - 60);
 		sprintf(msg, "THR:%.00f%%", telemetry_throttle);
 		fbg_write(fbg, msg, 40, fbg->height - 90);
+
 		sprintf(msg, "SATS:%.00f", telemetry_sats);
 		fbg_write(fbg, msg, x_center + 520, fbg->height - 30);
 		sprintf(msg, "HDG:%.00f", telemetry_hdg);
@@ -974,10 +968,10 @@ void* __OSD_THREAD__(void* arg) {
 		}
 
 		fbg_write(fbg, c2, x_center + 440, fbg->height - 60);
-		// sprintf(msg, "PITCH:%.00f", telemetry_pitch);
-		// fbg_write(fbg, msg, x_center + 440, fbg->height - 140);
-		// sprintf(msg, "ROLL:%.00f", telemetry_roll);
-		// fbg_write(fbg, msg, x_center + 440, fbg->height - 170);
+		//sprintf(msg, "PITCH:%.00f", telemetry_pitch);
+		//fbg_write(fbg, msg, x_center + 440, fbg->height - 140);
+		//sprintf(msg, "ROLL:%.00f", telemetry_roll);
+		//fbg_write(fbg, msg, x_center + 440, fbg->height - 170);
 		sprintf(msg, "RSSI:%.00f", telemetry_rssi);
 		fbg_write(fbg, msg, x_center - 50, fbg->height - 30);
 		sprintf(msg, "DIST:%.03fM", telemetry_distance);

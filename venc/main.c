@@ -22,8 +22,7 @@ uint32_t tx_buffer_used = 0;
 
 void printHelp() {
 	printf(
-		"\n"
-		"\t\tOpenIPC FPV Streamer for HiSilicon/Goke (%s)\n"
+		"\n\t\tOpenIPC FPV Streamer for HiSilicon/Goke (%s)\n"
 		"\n"
 		"  Usage:\n"
 		"    venc [Arguments]\n"
@@ -102,8 +101,8 @@ void printHelp() {
 		"\n"
 		"    --roi          - Enable ROI\n"
 		"    --roi-qp [QP]  - ROI quality points              (Default: 20)\n"
-		"\n",
-		__DATE__);
+		"\n", __DATE__
+	);
 }
 
 uint8_t stream_mode = 0;
@@ -210,8 +209,7 @@ int main(int argc, const char* argv[]) {
 			sensor_width = image_width = 1280;
 			sensor_height = image_height = 720;
 			isp_framerate = 45;
-
-			// v200 IMX307 1080P
+		// v200 IMX307 1080P
 		} else if (!strcmp(value, "200_imx307F")) {
 			goke_version = 200;
 			sensor_type = IMX307;
@@ -219,16 +217,14 @@ int main(int argc, const char* argv[]) {
 			sensor_height = image_height = 1080;
 			sensor_framerate = 30;
 			isp_framerate = 30;
-
-			// v300 IMX307 720P
+		// v300 IMX307 720P
 		} else if (!strcmp(value, "300_imx307B")) {
 			goke_version = 300;
 			sensor_type = IMX307;
 			sensor_width = image_width = 1280;
 			sensor_height = image_height = 720;
 			isp_framerate = 45;
-
-			// v300 IMX307 1080P
+		// v300 IMX307 1080P
 		} else if (!strcmp(value, "300_imx307F")) {
 			goke_version = 300;
 			sensor_type = IMX307;
@@ -236,8 +232,7 @@ int main(int argc, const char* argv[]) {
 			sensor_height = image_height = 1080;
 			sensor_framerate = 30;
 			isp_framerate = 30;
-
-			// v300 IMX335 4MP
+		// v300 IMX335 4MP
 		} else if (!strcmp(value, "300_imx335F")) {
 			goke_version = 300;
 			sensor_type = IMX335;
@@ -246,7 +241,6 @@ int main(int argc, const char* argv[]) {
 			sensor_framerate = 25;
 			isp_framerate = 25;
 			block_count = 4;
-
 		} else {
 			printf("> ERROR: Unknown version [%s]\n", value);
 			exit(1);
@@ -298,7 +292,6 @@ int main(int argc, const char* argv[]) {
 		} else if (!strcmp(value, "264cbr")) {
 			rc_codec = PT_H264;
 			rc_mode = VENC_RC_MODE_H264CBR;
-
 		} else if (!strcmp(value, "265avbr")) {
 			rc_codec = PT_H265;
 			rc_mode = VENC_RC_MODE_H265AVBR;
@@ -311,12 +304,10 @@ int main(int argc, const char* argv[]) {
 		} else if (!strcmp(value, "265cbr")) {
 			rc_codec = PT_H265;
 			rc_mode = VENC_RC_MODE_H265CBR;
-
 		} else {
 			printf("> ERROR: Unsuported codec [%s]\n", value);
 			exit(1);
 		}
-
 		continue;
 	}
 
@@ -361,7 +352,7 @@ int main(int argc, const char* argv[]) {
 		if (!strcmp(value, "D1")) {
 			image_width = 720;
 			image_height = 480;
-		} else if (!strcmp(value, "960h")) {
+		} else if (!strcmp(value, "960p")) {
 			image_width = 960;
 			image_height = 576;
 		} else if (!strcmp(value, "1.3MP")) {
@@ -611,8 +602,8 @@ int main(int argc, const char* argv[]) {
 	sns_object->pfnSetBusInfo(vi_pipe_id, bus);
 
 	// Register ISP libraries in sensor driver
-	ALG_LIB_S ae_lib; // Auto exposure library
-	ALG_LIB_S awb_lib; // Auto white balance library
+	ALG_LIB_S ae_lib;
+	ALG_LIB_S awb_lib;
 
 	ae_lib.s32Id = 0;
 	awb_lib.s32Id = 0;
