@@ -724,12 +724,6 @@ void* __MAVLINK_THREAD__(void* arg) {
 						// handle_heartbeat(&message);
 						break;
 
-					case MAVLINK_MSG_ID_ALTITUDE:
-						mavlink_altitude_t alt;
-						mavlink_msg_altitude_decode(&message, &alt);
-						telemetry_altitude = alt.altitude_relative;
-						break;
-
 					case MAVLINK_MSG_ID_SYS_STATUS:
 						mavlink_sys_status_t bat;
 						mavlink_msg_sys_status_decode(&message, &bat);
@@ -824,6 +818,7 @@ void* __MAVLINK_THREAD__(void* arg) {
 						mavlink_msg_vfr_hud_decode(&message, &vfr);
 						telemetry_gspeed = vfr.groundspeed * 3.6;
 						telemetry_vspeed = vfr.climb;
+						telemetry_altitude = vfr.alt;
 						break;
 
 					case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
@@ -892,7 +887,7 @@ void* __OSD_THREAD__(void* arg) {
 
 		// Vertical Speedometer
 		int32_t offset_vspeed = telemetry_vspeed * 5;
-		int32_t y_pos_vspeed = ((int32_t)fbg->height / 2 - 2 - offset_vspeed);
+		int32_t y_pos_vspeed = ((int32_t)fbg->height / 2 - offset_vspeed);
 		for (int i = 0; i < 8; i++) {
 			if (y_pos_vspeed > 0 && y_pos_vspeed < fbg->height) {
 				fbg_line(fbg, x_center + 242 + i, fbg->height / 2,
@@ -934,9 +929,9 @@ void* __OSD_THREAD__(void* arg) {
 		fbg_write(fbg, msg, 40, fbg->height - 90);
 
 		sprintf(msg, "SATS:%.00f", telemetry_sats);
-		fbg_write(fbg, msg, x_center + 520, fbg->height - 30);
+		fbg_write(fbg, msg, fbg->width - 140, fbg->height - 30);
 		sprintf(msg, "HDG:%.00f", telemetry_hdg);
-		fbg_write(fbg, msg, x_center + 520, fbg->height - 120);
+		fbg_write(fbg, msg, fbg->width - 140, fbg->height - 120);
 		sprintf(c1, "%.00f", telemetry_lat);
 
 		if (telemetry_lat < 10000000) {
@@ -952,7 +947,7 @@ void* __OSD_THREAD__(void* arg) {
 			insertString(c1, "LAT:", 0);
 		}
 
-		fbg_write(fbg, c1, x_center + 440, fbg->height - 90);
+		fbg_write(fbg, c1, fbg->width - 240, fbg->height - 90);
 		sprintf(c2, "%.00f", telemetry_lon);
 		if (telemetry_lon < 10000000) {
 			insertString(c2, "LON:0.", 0);
@@ -967,7 +962,7 @@ void* __OSD_THREAD__(void* arg) {
 			insertString(c2, "LON:", 0);
 		}
 
-		fbg_write(fbg, c2, x_center + 440, fbg->height - 60);
+		fbg_write(fbg, c2, fbg->width - 240, fbg->height - 60);
 		//sprintf(msg, "PITCH:%.00f", telemetry_pitch);
 		//fbg_write(fbg, msg, x_center + 440, fbg->height - 140);
 		//sprintf(msg, "ROLL:%.00f", telemetry_roll);
@@ -976,7 +971,7 @@ void* __OSD_THREAD__(void* arg) {
 		fbg_write(fbg, msg, x_center - 50, fbg->height - 30);
 		sprintf(msg, "DIST:%.03fM", telemetry_distance);
 		fbg_write(fbg, msg, x_center - 350, fbg->height - 30);
-		fbg_image(fbg, openipc_img, 1280 - 160 - 80, 40);
+		fbg_image(fbg, openipc_img, fbg->width - 240, 40);
 
 		// Print rate stats
 		struct timespec current_timestamp;
