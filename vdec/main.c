@@ -137,8 +137,24 @@ void printHelp() {
 		"      1024x768x60    - 1024 x 768    @ 60 fps\n"
 		"      1366x768x60    - 1366 x 768    @ 60 fps\n"
 		"      1280x1024x60   - 1280 x 1024   @ 60 fps\n"
+    "      1600x1200x60   - 1600 x 1200   @ 60 fps\n" 
+    "      2560x1440x30   - 2560 x 1440   @ 30 fps\n"
 		"\n"
 		"    -w [Path]              - Write stream into file\n"
+    "\n"
+    "    --ar [mode]        - Aspect ratio mode                (Default: keep)\n"
+    "      keep               - Keep stream aspect ratio\n"
+    "      stretch            - Stretch to output resolution\n"
+    "      manual             - Manual image size definition\n"
+    "\n"
+    "    --ar-bg-r [Value]  - Fill color red component          (Default: 0)\n"
+    "    --ar-bg-g [Value]  - Fill color green component        (Default: 0)\n"
+    "    --ar-bg-b [Value]  - Fill color blue component         (Default: 0)\n"
+    "\n"
+    "    --ar-x [Value]     - Image position X\n"
+    "    --ar-y [Value]     - Image position Y\n"
+    "    --ar-w [Value]     - Image width\n"
+    "    --ar-h [Value]     - Image height\n"
 		"\n"
 		"    --osd                  - Enable OSD\n"
 		"    --mavlink-port [port]  - MavLink Rx port                   "
@@ -171,8 +187,6 @@ int main(int argc, const char* argv[]) {
 	uint32_t vo_framerate = 60;
 
 	VDEC_CHN vdec_channel_id = 0;
-	uint32_t vdec_max_width = 1920;
-	uint32_t vdec_max_height = 1080;
 	int ret = 0;
 
 	VPSS_GRP vpss_group_id = 0;
@@ -189,6 +203,11 @@ int main(int argc, const char* argv[]) {
 	int enable_osd = 0;
 	int codec_mode_stream = 1;
 	PAYLOAD_TYPE_E codec_id = PT_H264;
+
+  ASPECT_RATIO_E  vo_layer_aspect_ratio   = ASPECT_RATIO_AUTO;
+  uint32_t        vo_layer_fill_color     = 0;
+  RECT_S          vo_layer_aspect_ratio_rect;
+  memset(&vo_layer_aspect_ratio_rect, 0x00, sizeof(vo_layer_aspect_ratio_rect));
 
 	// Load console arguments
 	__BeginParseConsoleArguments__(printHelp) __OnArgument("-p") {
@@ -247,6 +266,16 @@ int main(int argc, const char* argv[]) {
 			vo_width = 1280;
 			vo_height = 1024;
 			vo_framerate = 60;
+    } else if (!strcmp(mode, "1600x1200x60")) {
+      vo_mode       = VO_OUTPUT_1600x1200_60;
+      vo_width      = 1600;
+      vo_height     = 1200;
+      vo_framerate  = 60;
+    } else if (!strcmp(mode, "2560x1440x30")) {
+      vo_mode       = VO_OUTPUT_2560x1440_30;
+      vo_width      = 2560;
+      vo_height     = 1440;
+      vo_framerate  = 30;
 		} else {
 			printf("> ERROR: Unsupported video mode [%s]\n", mode);
 		}
@@ -288,7 +317,62 @@ int main(int argc, const char* argv[]) {
 		continue;
 	}
 
+    __OnArgument("--ar") {
+      const char* mode = __ArgValue;
+      if      (!strcmp(mode, "keep"))     vo_layer_aspect_ratio = ASPECT_RATIO_AUTO;
+      else if (!strcmp(mode, "stretch"))  vo_layer_aspect_ratio = ASPECT_RATIO_NONE;
+      else if (!strcmp(mode, "manual"))   vo_layer_aspect_ratio = ASPECT_RATIO_MANUAL;
+      else {
+        printf("> ERROR: Unsupported aspect ratio mode [%s]\n", mode);
+      }
+      continue;
+    }
+    __OnArgument("--ar-bg-r") {
+      uint8_t v = atoi(__ArgValue);
+      vo_layer_fill_color &= ~(0xFF << 16);
+      vo_layer_fill_color |= (v << 16);
+      continue;
+    }
+    
+    __OnArgument("--ar-bg-g") {
+      uint8_t v = atoi(__ArgValue);
+      vo_layer_fill_color &= ~(0xFF << 8);
+      vo_layer_fill_color |= (v << 8);
+      continue;
+    }
+    
+    __OnArgument("--ar-bg-b") {
+      uint8_t v = atoi(__ArgValue);
+      vo_layer_fill_color &= ~(0xFF);
+      vo_layer_fill_color |= (v);
+      continue;
+    }
+    
+    __OnArgument("--ar-x") {
+      vo_layer_aspect_ratio_rect.s32X = ALIGN_UP(atoi(__ArgValue), 2);
+      continue;
+    }
+    __OnArgument("--ar-y") {
+      vo_layer_aspect_ratio_rect.s32Y = ALIGN_UP(atoi(__ArgValue), 2);
+      continue;
+    }
+    __OnArgument("--ar-w") {
+      vo_layer_aspect_ratio_rect.u32Width = ALIGN_UP(atoi(__ArgValue), 2);
+      continue;
+    }
+    __OnArgument("--ar-h") {
+      vo_layer_aspect_ratio_rect.u32Height = ALIGN_UP(atoi(__ArgValue), 2);
+      continue;
+    }
+
 	__EndParseConsoleArguments__
+
+  // - Calculate maximum video settings
+  uint32_t  vdec_max_width    = ALIGN_UP(2592, DEFAULT_ALIGN);
+  uint32_t  vdec_max_height   = ALIGN_UP(1944, DEFAULT_ALIGN);
+  
+  uint32_t  vo_layer_max_width  = MIN2(1920, vo_width);
+  uint32_t  vo_layer_max_height = MIN2(1200, vo_height);
 
 	// Reset previous configuration
 	ret = HI_MPI_SYS_Exit();
@@ -352,11 +436,10 @@ int main(int argc, const char* argv[]) {
 	memset(&vb_conf, 0x00, sizeof(vb_conf));
 	vb_conf.u32MaxPoolCnt = 1;
 	vb_conf.astCommPool[0].u32BlkCnt = 4;
-	vb_conf.astCommPool[0].u32BlkSize = vdec_max_width * vdec_max_height * 3;
+	vb_conf.astCommPool[0].u32BlkSize = 0;
 
 	// Calculate required size for video buffer
-	VB_PIC_BLK_SIZE(vdec_max_width, vdec_max_height,
-		codec_id, vb_conf.astCommPool[0].u32BlkSize);
+	VB_PIC_BLK_SIZE(vdec_max_width, vdec_max_height, codec_id, vb_conf.astCommPool[0].u32BlkSize);
 
 	printf("> VDEC picture block size = %d\n", vb_conf.astCommPool[0].u32BlkSize);
 
@@ -378,8 +461,11 @@ int main(int argc, const char* argv[]) {
 		return 1;
 	}
 
+  // - Set partitioning mode
+  HI_MPI_VO_SetVideoLayerPartitionMode(vo_layer_id, VO_PART_MODE_SINGLE);
+
 	// Initialize VO
-	VO_init(vo_device_id, VO_INTF_HDMI, vo_mode, vo_framerate, background_color);
+	VO_init(vo_device_id, VO_INTF_HDMI | VO_INTF_VGA, vo_mode, vo_framerate, background_color);
 
 	// Initialize HDMI
 	VO_HDMI_init(0, vo_mode);
@@ -390,7 +476,7 @@ int main(int argc, const char* argv[]) {
 		return ret;
 	}
 
-	printf("> VO framerate = %d\n", vo_framerate);
+	printf("> VO: %dx%d @ %d\n", vo_width, vo_height, vo_framerate);
 
 	// Configure video layer
 	VO_VIDEO_LAYER_ATTR_S layer_config;
@@ -403,16 +489,16 @@ int main(int argc, const char* argv[]) {
 
 	layer_config.enPixFormat = PIXEL_FORMAT_YUV_SEMIPLANAR_420;
 	layer_config.bDoubleFrame = HI_FALSE;
-	layer_config.bClusterMode = HI_TRUE;
+	layer_config.bClusterMode = HI_FALSE;
 	layer_config.u32DispFrmRt = vo_framerate;
 
-	layer_config.stDispRect.u32Width = vo_width;
-	layer_config.stDispRect.u32Height = vo_height;
+	layer_config.stDispRect.u32Width = vo_layer_max_width;
+	layer_config.stDispRect.u32Height = vo_layer_max_height;
 	layer_config.stDispRect.s32X = 0;
 	layer_config.stDispRect.s32Y = 0;
 
-	layer_config.stImageSize.u32Width = vo_width;
-	layer_config.stImageSize.u32Height = vo_height;
+	layer_config.stImageSize.u32Width = vo_layer_max_width;
+	layer_config.stImageSize.u32Height = vo_layer_max_height;
 
 	ret = HI_MPI_VO_SetVideoLayerAttr(vo_layer_id, &layer_config);
 	if (ret != HI_SUCCESS) {
@@ -436,11 +522,11 @@ int main(int argc, const char* argv[]) {
 	}
 
 	channel_config.bDeflicker = HI_FALSE;
-	channel_config.u32Priority = 0;
+	channel_config.u32Priority = VO_MAX_PRIORITY;
 	channel_config.stRect.s32X = 0;
 	channel_config.stRect.s32Y = 0;
-	channel_config.stRect.u32Width = vo_width;
-	channel_config.stRect.u32Height = vo_height;
+	channel_config.stRect.u32Width = vo_layer_max_width;
+	channel_config.stRect.u32Height = vo_layer_max_height;
 
 	ret = HI_MPI_VO_SetChnAttr(vo_layer_id, vo_channel_id, &channel_config);
 	if (ret != HI_SUCCESS) {
@@ -453,12 +539,26 @@ int main(int argc, const char* argv[]) {
 		printf("ERROR: Unable to enable video channel\n");
 		return 1;
 	}
+	
+  // - Configure aspect ratio
+  { VO_CHN_PARAM_S param;
+    HI_MPI_VO_GetChnParam(vo_layer_id, vo_channel_id, &param);
+    param.stAspectRatio.enMode      = vo_layer_aspect_ratio;
+    param.stAspectRatio.u32BgColor  = vo_layer_fill_color;
+    param.stAspectRatio.stVideoRect = vo_layer_aspect_ratio_rect;
+    
+    { ret = HI_MPI_VO_SetChnParam(vo_layer_id, vo_channel_id, &param);
+      if (ret != HI_SUCCESS) {
+        printf("> ERROR: Unable to set channel param\n");
+      }
+    }
+  }
 
 	// Start VDEC at 1920x1080 maximum resolution
 	VDEC_CHN_ATTR_S config;
 	memset(&config, 0x00, sizeof(config));
 	config.enType = codec_id;
-	config.u32BufSize = vdec_max_width * vdec_max_height * 3;
+	config.u32BufSize = vdec_max_width * vdec_max_height * 3 / 2;
 	config.u32Priority = 128;
 	config.u32PicWidth = vdec_max_width;
 	config.u32PicHeight = vdec_max_height;
