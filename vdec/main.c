@@ -839,10 +839,10 @@ void* __MAVLINK_THREAD__(void* arg) {
               telemetry_throttle = 0;
             }
             telemetry_arm = rc_channels_raw.chan5_raw;
-                                                telemetry_resolution = rc_channels_raw.chan8_raw;
-                                                if (telemetry_resolution > 1700) {
-                                                        system("/root/resolution.sh");
-                                                }
+            telemetry_resolution = rc_channels_raw.chan8_raw;
+            if (telemetry_resolution > 1700) {
+              system("/root/resolution.sh");
+            }
             break;
 
           case MAVLINK_MSG_ID_GPS_RAW_INT:

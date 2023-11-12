@@ -1,27 +1,27 @@
 /*
-	Copyright (c) 2018, 2019, 2020 Julien Verneuil
-	All rights reserved.
+  Copyright (c) 2018, 2019, 2020 Julien Verneuil
+  All rights reserved.
 
-	Redistribution and use in source and binary forms, with or without
-	modification, are permitted provided that the following conditions are met:
-		* Redistributions of source code must retain the above copyright
-		notice, this list of conditions and the following disclaimer.
-		* Redistributions in binary form must reproduce the above copyright
-		notice, this list of conditions and the following disclaimer in the
-		documentation and/or other materials provided with the distribution.
-		* Neither the name of the organization nor the
-		names of its contributors may be used to endorse or promote products
-		derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+    * Neither the name of the organization nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
    ARE DISCLAIMED. IN NO EVENT SHALL Julien Verneuil BE LIABLE FOR ANY DIRECT,
    INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
    THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
@@ -48,15 +48,15 @@
 #define lfds720_ringbuffer_n_state lfds711_ringbuffer_state
 #define lfds720_freelist_n_state lfds711_freelist_state
 #define LFDS720_PAL_ATOMIC_ISOLATION_LENGTH_IN_BYTES                           \
-	LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES
+  LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES
 #define lfds720_ringbuffer_n_init_valid_on_current_logical_core                \
-	lfds711_ringbuffer_init_valid_on_current_logical_core
+  lfds711_ringbuffer_init_valid_on_current_logical_core
 #define lfds720_freelist_n_init_valid_on_current_logical_core                  \
-	lfds711_freelist_init_valid_on_current_logical_core
+  lfds711_freelist_init_valid_on_current_logical_core
 #define LFDS720_FREELIST_N_SET_VALUE_IN_ELEMENT                                \
-	LFDS711_FREELIST_SET_VALUE_IN_ELEMENT
+  LFDS711_FREELIST_SET_VALUE_IN_ELEMENT
 #define LFDS720_FREELIST_N_GET_VALUE_FROM_ELEMENT                              \
-	LFDS711_FREELIST_GET_VALUE_FROM_ELEMENT
+  LFDS711_FREELIST_GET_VALUE_FROM_ELEMENT
 #define lfds720_freelist_n_threadsafe_push lfds711_freelist_push
 #define lfds720_freelist_n_threadsafe_pop lfds711_freelist_pop
 #define lfds720_ringbuffer_n_cleanup lfds711_ringbuffer_cleanup
@@ -66,7 +66,7 @@
 #define lfds720_misc_flag lfds711_misc_flag
 #define LFDS720_MISC_FLAG_RAISED LFDS711_MISC_FLAG_RAISED
 #define LFDS720_MISC_MAKE_VALID_ON_CURRENT_LOGICAL_CORE_INITS_COMPLETED_BEFORE_NOW_ON_ANY_OTHER_PHYSICAL_CORE \
-	LFDS711_MISC_MAKE_VALID_ON_CURRENT_LOGICAL_CORE_INITS_COMPLETED_BEFORE_NOW_ON_ANY_OTHER_LOGICAL_CORE
+  LFDS711_MISC_MAKE_VALID_ON_CURRENT_LOGICAL_CORE_INITS_COMPLETED_BEFORE_NOW_ON_ANY_OTHER_LOGICAL_CORE
 #define lfds720_pal_uint_t lfds711_pal_uint_t
 #else
 #include "liblfds720.h"
@@ -79,181 +79,181 @@
 //! RGBA color data structure
 /*! Hold RGBA components [0,255]*/
 struct _fbg_rgb {
-	unsigned char r;
-	unsigned char g;
-	unsigned char b;
-	unsigned char a;
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
+  unsigned char a;
 };
 
 //! HSL color data structure
 /*! Hold HSL components S/L [0,1], HUE [0, 360]*/
 struct _fbg_hsl {
-	int h;
-	float s;
-	float l;
+  int h;
+  float s;
+  float l;
 };
 
 //! Image data structure
 /*! Hold images informations and data */
 struct _fbg_img {
-	//! RGB image data (bpp depend on framebuffer settings)
-	unsigned char* data;
+  //! RGB image data (bpp depend on framebuffer settings)
+  unsigned char* data;
 
-	//! Image width in pixels
-	unsigned int width;
-	//! Image height in pixels
-	unsigned int height;
+  //! Image width in pixels
+  unsigned int width;
+  //! Image height in pixels
+  unsigned int height;
 };
 
 //! Bitmap font data structure
 /*! Hold bitmap font informations and associated image */
 struct _fbg_font {
-	//! Pre-computed X glyphs coordinates
-	int* glyph_coord_x;
-	//! Pre-computed Y glyphs coordinates
-	int* glyph_coord_y;
+  //! Pre-computed X glyphs coordinates
+  int* glyph_coord_x;
+  //! Pre-computed Y glyphs coordinates
+  int* glyph_coord_y;
 
-	//! Width of a glyph
-	int glyph_width;
-	//! Height of a glyph
-	int glyph_height;
+  //! Width of a glyph
+  int glyph_width;
+  //! Height of a glyph
+  int glyph_height;
 
-	//! First ASCII character of the bitmap font file
-	unsigned char first_char;
+  //! First ASCII character of the bitmap font file
+  unsigned char first_char;
 
-	//! Associated font image data structure
-	struct _fbg_img* bitmap;
+  //! Associated font image data structure
+  struct _fbg_img* bitmap;
 };
 
 //! FB Graphics context data structure
 /*! Hold all data related to a FBG context */
 struct _fbg {
-	//! Framebuffer real data length (with BPP)
-	int size;
+  //! Framebuffer real data length (with BPP)
+  int size;
 
-	//! Front / display buffer
-	unsigned char* disp_buffer;
-	//! Back buffer
-	/*! All FB Graphics functions draw into this buffer. */
-	unsigned char* back_buffer;
-	//! Temporary buffer
-	unsigned char* temp_buffer;
+  //! Front / display buffer
+  unsigned char* disp_buffer;
+  //! Back buffer
+  /*! All FB Graphics functions draw into this buffer. */
+  unsigned char* back_buffer;
+  //! Temporary buffer
+  unsigned char* temp_buffer;
 
-	//! Wether to allow context resize.
-	int allow_resizing;
+  //! Wether to allow context resize.
+  int allow_resizing;
 
-	//! Wether to allow FBG to allocate its internal buffers
-	int initialize_buffers;
+  //! Wether to allow FBG to allocate its internal buffers
+  int initialize_buffers;
 
-	//! Current fill color
-	/*! Default to black. */
-	struct _fbg_rgb fill_color;
+  //! Current fill color
+  /*! Default to black. */
+  struct _fbg_rgb fill_color;
 
-	//! Current text color
-	/*! Default to white. */
-	struct _fbg_rgb text_color;
+  //! Current text color
+  /*! Default to white. */
+  struct _fbg_rgb text_color;
 
-	//! Current text background color (based on colorkey value)
-	/*! Default to black. */
-	struct _fbg_rgb text_background;
+  //! Current text background color (based on colorkey value)
+  /*! Default to black. */
+  struct _fbg_rgb text_background;
 
-	//! Current text color key
-	/*! Default to black. */
-	unsigned char text_colorkey;
+  //! Current text color key
+  /*! Default to black. */
+  unsigned char text_colorkey;
 
-	//! Text background alpha value
-	/*! Default to transparent. */
-	int text_alpha;
+  //! Text background alpha value
+  /*! Default to transparent. */
+  int text_alpha;
 
-	//! Current font
-	/*! No fonts is loaded by default and the first loaded font will be assigned
-	 * automatically as the current font. */
-	struct _fbg_font current_font;
+  //! Current font
+  /*! No fonts is loaded by default and the first loaded font will be assigned
+   * automatically as the current font. */
+  struct _fbg_font current_font;
 
-	//! Display width in pixels
-	int width;
-	//! Display height in pixels
-	int height;
-	//! Display lenght in pixels (width * height)
-	int width_n_height;
-	//! Display components amount (3 = 24 BPP / 4 = 32 BPP)
-	int components;
-	//! Offset to add in case of 32 BPP
-	int comp_offset;
-	//! Internal buffers line length
-	int line_length;
+  //! Display width in pixels
+  int width;
+  //! Display height in pixels
+  int height;
+  //! Display lenght in pixels (width * height)
+  int width_n_height;
+  //! Display components amount (3 = 24 BPP / 4 = 32 BPP)
+  int components;
+  //! Offset to add in case of 32 BPP
+  int comp_offset;
+  //! Internal buffers line length
+  int line_length;
 
-	//! Requested new display width (resize event)
-	int new_width;
-	//! Requested new display height (resize event)
-	int new_height;
+  //! Requested new display width (resize event)
+  int new_width;
+  //! Requested new display height (resize event)
+  int new_height;
 
-	//! Current FPS
+  //! Current FPS
 #ifdef FBG_PARALLEL
-	atomic_uint_fast16_t fps;
+  atomic_uint_fast16_t fps;
 #else
-	int16_t fps;
+  int16_t fps;
 #endif
 
-	//! Current FPS as a string
-	char fps_char[10];
+  //! Current FPS as a string
+  char fps_char[10];
 
-	//! First frame time for the current second
-	struct timeval fps_start;
-	//! Last frame time for the current second
-	struct timeval fps_stop;
+  //! First frame time for the current second
+  struct timeval fps_start;
+  //! Last frame time for the current second
+  struct timeval fps_stop;
 
-	//! Frame counter for the current second
-	int frame;
+  //! Frame counter for the current second
+  int frame;
 
-	//! Flag indicating a BGR framebuffer
-	int bgr;
+  //! Flag indicating a BGR framebuffer
+  int bgr;
 
-	//! Backend resize function
-	void (*backend_resize)(
-		struct _fbg* fbg, unsigned int new_width, unsigned int new_height);
-	//! User-defined resize function
-	void (*user_resize)(
-		struct _fbg* fbg, unsigned int new_width, unsigned int new_height);
-	//! User-defined flip function
-	void (*user_flip)(struct _fbg* fbg);
-	//! User-defined draw function
-	void (*user_draw)(struct _fbg* fbg);
-	//! User-defined free function
-	void (*user_free)(struct _fbg* fbg);
-	//! User-defined context structure
-	void* user_context;
+  //! Backend resize function
+  void (*backend_resize)(
+    struct _fbg* fbg, unsigned int new_width, unsigned int new_height);
+  //! User-defined resize function
+  void (*user_resize)(
+    struct _fbg* fbg, unsigned int new_width, unsigned int new_height);
+  //! User-defined flip function
+  void (*user_flip)(struct _fbg* fbg);
+  //! User-defined draw function
+  void (*user_draw)(struct _fbg* fbg);
+  //! User-defined free function
+  void (*user_free)(struct _fbg* fbg);
+  //! User-defined context structure
+  void* user_context;
 
-	//! currently processed task buffer (assigned before compositing function is
-	//! called in fbg_draw)
-	// unsigned char *curr_task_buffer;
+  //! currently processed task buffer (assigned before compositing function is
+  //! called in fbg_draw)
+  // unsigned char *curr_task_buffer;
 
 #ifdef FBG_PARALLEL
-	//! Total number of actual parallel tasks
-	unsigned int parallel_tasks;
+  //! Total number of actual parallel tasks
+  unsigned int parallel_tasks;
 
-	//! pthread array of tasks
-	pthread_t* tasks;
+  //! pthread array of tasks
+  pthread_t* tasks;
 
-	//! Array of tasks data structure
-	struct _fbg_fragment** fragments;
+  //! Array of tasks data structure
+  struct _fbg_fragment** fragments;
 
-	//! FBG synchronization barrier
-	pthread_barrier_t* sync_barrier;
+  //! FBG synchronization barrier
+  pthread_barrier_t* sync_barrier;
 
-	//! Task id associated to that FBG context
-	int task_id;
+  //! Task id associated to that FBG context
+  int task_id;
 
-	//! FBG context running state
-	atomic_int state;
+  //! FBG context running state
+  atomic_int state;
 
-	//! Ringbuffer queue length (1 by default, best settings with sync. since we
-	//! just wait till all threads finish) Note : This settings may have an
-	//! impact on feedback effects (since it will pick sequentially buffers from
-	//! the list, thus allowing a number of "past" rendered frame which may not
-	//! be what you want with regular feedback effects but also may be what you
-	//! want for other effects like unlimited blobs...)
-	unsigned int fragment_queue_size;
+  //! Ringbuffer queue length (1 by default, best settings with sync. since we
+  //! just wait till all threads finish) Note : This settings may have an
+  //! impact on feedback effects (since it will pick sequentially buffers from
+  //! the list, thus allowing a number of "past" rendered frame which may not
+  //! be what you want with regular feedback effects but also may be what you
+  //! want for other effects like unlimited blobs...)
+  unsigned int fragment_queue_size;
 #endif
 };
 
@@ -262,49 +262,49 @@ struct _fbg {
 //! Freelist data structure
 /*! Hold pre-allocated data associated with a task */
 struct _fbg_freelist_data {
-	struct lfds720_freelist_n_element freelist_element;
+  struct lfds720_freelist_n_element freelist_element;
 
-	unsigned char* buffer;
+  unsigned char* buffer;
 };
 #endif
 
 //! Task (fragment) data structure
 /*! Hold a task data */
 struct _fbg_fragment {
-	//! Fragment running state
-	atomic_int state;
+  //! Fragment running state
+  atomic_int state;
 
-	//! Task own FBG context
-	struct _fbg* fbg;
+  //! Task own FBG context
+  struct _fbg* fbg;
 
 #ifdef FBG_LFDS
-	//! Ringbuffer element
-	struct lfds720_ringbuffer_n_element* ringbuffer_element;
-	//! Ringbuffer state
-	struct lfds720_ringbuffer_n_state* ringbuffer_state;
+  //! Ringbuffer element
+  struct lfds720_ringbuffer_n_element* ringbuffer_element;
+  //! Ringbuffer state
+  struct lfds720_ringbuffer_n_state* ringbuffer_state;
 
-	//! Freelist state
-	struct lfds720_freelist_n_state* freelist_state;
+  //! Freelist state
+  struct lfds720_freelist_n_state* freelist_state;
 
-	//! Pre-allocated tasks data
-	struct _fbg_freelist_data* fbg_freelist_data;
+  //! Pre-allocated tasks data
+  struct _fbg_freelist_data* fbg_freelist_data;
 
-	//! Temporary task data
-	struct _fbg_freelist_data* tmp_fbg_freelist_data;
+  //! Temporary task data
+  struct _fbg_freelist_data* tmp_fbg_freelist_data;
 #endif
 
-	//! thread <> main thread synchronization
-	atomic_int sync_wait;
+  //! thread <> main thread synchronization
+  atomic_int sync_wait;
 
-	//! User-defined task start function
-	void* (*user_fragment_start)(struct _fbg* fbg);
-	//! User-defined task function
-	void (*user_fragment)(struct _fbg* fbg, void* user_data);
-	//! User-defined task end function
-	void (*user_fragment_stop)(struct _fbg* fbg, void* user_data);
+  //! User-defined task start function
+  void* (*user_fragment_start)(struct _fbg* fbg);
+  //! User-defined task function
+  void (*user_fragment)(struct _fbg* fbg, void* user_data);
+  //! User-defined task end function
+  void (*user_fragment_stop)(struct _fbg* fbg, void* user_data);
 
-	//! User-defined data
-	void* user_data;
+  //! User-defined data
+  void* user_data;
 };
 #endif
 
@@ -326,11 +326,11 @@ struct _fbg_fragment {
   library functions \sa fbg_close()
 */
 extern struct _fbg* fbg_customSetup(int width, int height, int components,
-	int initialize_buffers, int allow_resizing, void* user_context,
-	void (*user_draw)(struct _fbg* fbg), void (*user_flip)(struct _fbg* fbg),
-	void (*backend_resize)(
-		struct _fbg* fbg, unsigned int new_width, unsigned int new_height),
-	void (*user_free)(struct _fbg* fbg));
+  int initialize_buffers, int allow_resizing, void* user_context,
+  void (*user_draw)(struct _fbg* fbg), void (*user_flip)(struct _fbg* fbg),
+  void (*backend_resize)(
+    struct _fbg* fbg, unsigned int new_width, unsigned int new_height),
+  void (*user_free)(struct _fbg* fbg));
 
 //! free up the memory associated with a FB Graphics context and close the
 //! framebuffer device
@@ -347,8 +347,8 @@ extern void fbg_close(struct _fbg* fbg);
   \sa fbg_resize(), fbg_pushResize()
 */
 void fbg_setResizeCallback(
-	struct _fbg* fbg, void (*user_resize)(struct _fbg* fbg,
-						  unsigned int new_width, unsigned int new_height));
+  struct _fbg* fbg, void (*user_resize)(struct _fbg* fbg,
+              unsigned int new_width, unsigned int new_height));
 
 //! resize the FB Graphics context immediately
 //! note : prefer the usage of fbg_pushResize when integrating the resize event
@@ -407,7 +407,7 @@ extern void fbg_clear(struct _fbg* fbg, unsigned char brightness);
   \sa fbg_fpixel(), fbg_frect()
 */
 extern void fbg_fill(
-	struct _fbg* fbg, unsigned char r, unsigned char g, unsigned char b);
+  struct _fbg* fbg, unsigned char r, unsigned char g, unsigned char b);
 
 //! get the RGB value of a pixel
 /*!
@@ -417,7 +417,7 @@ extern void fbg_fill(
   \param color a pointer to a _fbg_rgb data structure
 */
 extern void fbg_getPixel(
-	struct _fbg* fbg, int x, int y, struct _fbg_rgb* color);
+  struct _fbg* fbg, int x, int y, struct _fbg_rgb* color);
 
 //! draw a pixel
 /*!
@@ -430,7 +430,7 @@ extern void fbg_getPixel(
   \sa fbg_fpixel(), fbg_pixela()
 */
 extern void fbg_pixel(struct _fbg* fbg, int x, int y, unsigned char r,
-	unsigned char g, unsigned char b);
+  unsigned char g, unsigned char b);
 
 //! draw a pixel with alpha component (alpha blending)
 /*!
@@ -444,7 +444,7 @@ extern void fbg_pixel(struct _fbg* fbg, int x, int y, unsigned char r,
   \sa fbg_fpixel(), fbg_pixel()
 */
 extern void fbg_pixela(struct _fbg* fbg, int x, int y, unsigned char r,
-	unsigned char g, unsigned char b, unsigned char a);
+  unsigned char g, unsigned char b, unsigned char a);
 
 //! fast pixel drawing which use the fill color set by fbg_fill()
 /*!
@@ -477,7 +477,7 @@ extern void fbg_plot(struct _fbg* fbg, int index, unsigned char value);
   \sa fbg_frect(), fbg_recta()
 */
 extern void fbg_rect(struct _fbg* fbg, int x, int y, int w, int h,
-	unsigned char r, unsigned char g, unsigned char b);
+  unsigned char r, unsigned char g, unsigned char b);
 
 //! draw a rectangle with alpha transparency
 /*!
@@ -493,7 +493,7 @@ extern void fbg_rect(struct _fbg* fbg, int x, int y, int w, int h,
   \sa fbg_frect(), fbg_rect()
 */
 extern void fbg_recta(struct _fbg* fbg, int x, int y, int w, int h,
-	unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+  unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
 //! fast rectangle drawing which use the fill color set by fbg_fill()
 /*!
@@ -518,7 +518,7 @@ extern void fbg_frect(struct _fbg* fbg, int x, int y, int w, int h);
   \sa fbg_vline, fbg_line()
 */
 extern void fbg_hline(struct _fbg* fbg, int x, int y, int w, unsigned char r,
-	unsigned char g, unsigned char b);
+  unsigned char g, unsigned char b);
 
 //! draw a vertical line
 /*!
@@ -532,7 +532,7 @@ extern void fbg_hline(struct _fbg* fbg, int x, int y, int w, unsigned char r,
   \sa fbg_hline, fbg_line()
 */
 extern void fbg_vline(struct _fbg* fbg, int x, int y, int h, unsigned char r,
-	unsigned char g, unsigned char b);
+  unsigned char g, unsigned char b);
 
 //! draw a line from two points (Bresenham algorithm)
 /*!
@@ -547,7 +547,7 @@ extern void fbg_vline(struct _fbg* fbg, int x, int y, int h, unsigned char r,
   \sa fbg_hline(), fbg_vline(), fbg_polygon()
 */
 extern void fbg_line(struct _fbg* fbg, int x1, int y1, int x2, int y2,
-	unsigned char r, unsigned char g, unsigned char b);
+  unsigned char r, unsigned char g, unsigned char b);
 
 //! draw a polygon
 /*!
@@ -559,7 +559,7 @@ extern void fbg_line(struct _fbg* fbg, int x1, int y1, int x2, int y2,
   \param b
 */
 extern void fbg_polygon(struct _fbg* fbg, int num_vertices, int* vertices,
-	unsigned char r, unsigned char g, unsigned char b);
+  unsigned char r, unsigned char g, unsigned char b);
 
 //! clear the background with a color
 /*!
@@ -570,7 +570,7 @@ extern void fbg_polygon(struct _fbg* fbg, int num_vertices, int* vertices,
   \sa fbg_clear()
 */
 extern void fbg_background(
-	struct _fbg* fbg, unsigned char r, unsigned char g, unsigned char b);
+  struct _fbg* fbg, unsigned char r, unsigned char g, unsigned char b);
 
 //! convert HSL values to RGB color
 /*!
@@ -601,7 +601,7 @@ extern void fbg_rgbToHsl(struct _fbg_hsl* color, float r, float g, float b);
   tasks
 */
 extern void fbg_draw(struct _fbg* fbg,
-	void (*user_mixing)(struct _fbg* fbg, unsigned char* buffer, int task_id));
+  void (*user_mixing)(struct _fbg* fbg, unsigned char* buffer, int task_id));
 #else
 //! draw to the screen
 /*!
@@ -625,7 +625,7 @@ extern void fbg_flip(struct _fbg* fbg);
   \sa fbg_freeImage(), fbg_image(), fbg_imageFlip(), fbg_createFont()
 */
 extern struct _fbg_img* fbg_createImage(
-	struct _fbg* fbg, unsigned int width, unsigned int height);
+  struct _fbg* fbg, unsigned int width, unsigned int height);
 
 #ifndef WITHOUT_STDIO
 //! load a PNG image from a file (lodePNG library)
@@ -640,7 +640,7 @@ extern struct _fbg_img* fbg_createImage(
 #ifndef WITHOUT_PNG
 extern struct _fbg_img* fbg_loadPNG(struct _fbg* fbg, const char* filename);
 extern struct _fbg_img* fbg_loadPNGFromMemory(
-	struct _fbg* fbg, const char* memory, int size);
+  struct _fbg* fbg, const char* memory, int size);
 #endif
 
 //! load a JPEG image from a file (NanoJPEG library)
@@ -667,7 +667,7 @@ extern struct _fbg_img* fbg_loadJPEG(struct _fbg* fbg, const char* filename);
 */
 #ifndef WITHOUT_STB_IMAGE
 extern struct _fbg_img* fbg_loadSTBImage(
-	struct _fbg* fbg, const char* filename);
+  struct _fbg* fbg, const char* filename);
 #endif
 
 //! load an image (PNG or JPEG)
@@ -694,7 +694,7 @@ extern struct _fbg_img* fbg_loadImage(struct _fbg* fbg, const char* filename);
 */
 #ifndef WITHOUT_STB_IMAGE
 extern struct _fbg_img* fbg_loadSTBImageFromMemory(
-	struct _fbg* fbg, const unsigned char* data, int size);
+  struct _fbg* fbg, const unsigned char* data, int size);
 #endif
 
 //! load an image from memory
@@ -708,7 +708,7 @@ extern struct _fbg_img* fbg_loadSTBImageFromMemory(
   fbg_imageScale(), fbg_imageColorkey()
 */
 extern struct _fbg_img* fbg_loadImageFromMemory(
-	struct _fbg* fbg, const unsigned char* data, int size);
+  struct _fbg* fbg, const unsigned char* data, int size);
 
 //! draw an image
 /*!
@@ -737,7 +737,7 @@ extern void fbg_image(struct _fbg* fbg, struct _fbg_img* img, int x, int y);
   fbg_imageScale(), fbg_image()
 */
 extern void fbg_imageColorkey(struct _fbg* fbg, struct _fbg_img* img, int x,
-	int y, int cr, int cg, int cb);
+  int y, int cr, int cg, int cb);
 
 //! draw a clipped image
 /*!
@@ -754,7 +754,7 @@ extern void fbg_imageColorkey(struct _fbg* fbg, struct _fbg_img* img, int x,
   fbg_imageScale(), fbg_imageColorkey()
 */
 extern void fbg_imageClip(struct _fbg* fbg, struct _fbg_img* img, int x, int y,
-	int cx, int cy, int cw, int ch);
+  int cx, int cy, int cw, int ch);
 
 //! flip an image vertically
 /*!
@@ -781,7 +781,7 @@ extern void fbg_imageFlip(struct _fbg_img* img);
   fbg_imageScale(), fbg_imageColorkey()
 */
 extern void fbg_imageEx(struct _fbg* fbg, struct _fbg_img* img, int x, int y,
-	float sx, float sy, int cx, int cy, int cw, int ch);
+  float sx, float sy, int cx, int cy, int cw, int ch);
 
 //! free the memory associated with an image
 /*!
@@ -802,7 +802,7 @@ extern void fbg_freeImage(struct _fbg_img* img);
   fbg_drawFramerate()
 */
 extern struct _fbg_font* fbg_createFont(struct _fbg* fbg, struct _fbg_img* img,
-	int glyph_width, int glyph_height, unsigned char first_char);
+  int glyph_width, int glyph_height, unsigned char first_char);
 
 //! set the current font
 /*!
@@ -821,7 +821,7 @@ extern void fbg_textFont(struct _fbg* fbg, struct _fbg_font* font);
   \sa fbg_createFont(), fbg_write(), fbg_textColorKey(), fbg_textBackground()
 */
 extern void fbg_textColor(
-	struct _fbg* fbg, unsigned char r, unsigned char g, unsigned char b);
+  struct _fbg* fbg, unsigned char r, unsigned char g, unsigned char b);
 
 //! set the current text background color (based on colorkey value!)
 /*!
@@ -856,7 +856,7 @@ extern void fbg_textColorKey(struct _fbg* fbg, unsigned char v);
   \sa fbg_createFont(), fbg_write(), fbg_textColorkey(), fbg_textBackground()
 */
 extern void fbg_text(struct _fbg* fbg, struct _fbg_font* fnt, char* text, int x,
-	int y, int r, int g, int b);
+  int y, int r, int g, int b);
 
 //! free the memory associated with a font
 /*!
@@ -877,7 +877,7 @@ extern void fbg_freeFont(struct _fbg_font* font);
   \param b
 */
 extern void fbg_drawFramerate(struct _fbg* fbg, struct _fbg_font* fnt, int task,
-	int x, int y, int r, int g, int b);
+  int x, int y, int r, int g, int b);
 
 //! get the framerate of a particular task
 /*!
@@ -916,10 +916,10 @@ extern float fbg_randf(float min, float max);
   \param parallel_tasks the number of parallel tasks to register
 */
 extern void fbg_createFragment(struct _fbg* fbg,
-	void* (*fragment_start)(struct _fbg* fbg),
-	void (*fragment)(struct _fbg* fbg, void* user_data),
-	void (*fragment_stop)(struct _fbg* fbg, void* user_data),
-	unsigned int parallel_tasks);
+  void* (*fragment_start)(struct _fbg* fbg),
+  void (*fragment)(struct _fbg* fbg, void* user_data),
+  void (*fragment_stop)(struct _fbg* fbg, void* user_data),
+  unsigned int parallel_tasks);
 #endif
 
 // ### Helper functions
@@ -941,8 +941,8 @@ extern void fbg_createFragment(struct _fbg* fbg,
   fbg_textBackground()
 */
 #define fbg_write(fbg, text, x, y)                                             \
-	fbg_text(fbg, &fbg->current_font, text, x, y, fbg->text_color.r,           \
-		fbg->text_color.g, fbg->text_color.b)
+  fbg_text(fbg, &fbg->current_font, text, x, y, fbg->text_color.r,           \
+    fbg->text_color.g, fbg->text_color.b)
 
 //! draw a scaled image (Nearest-neighbor algorithm)
 /*!
@@ -956,7 +956,7 @@ extern void fbg_createFragment(struct _fbg* fbg,
   fbg_imageClip(), fbg_freeImage(), fbg_image(), fbg_imageFlip(), fbg_imageEx()
 */
 #define fbg_imageScale(fbg, img, x, y, sx, sy)                                 \
-	fbg_imageEx(fbg, img, x, y, sx, sy, 0, 0, img->width, img->height)
+  fbg_imageEx(fbg, img, x, y, sx, sy, 0, 0, img->width, img->height)
 
 //! integer MAX Math function
 #define _FBG_MAX(a, b) ((a) > (b) ? a : b)

@@ -65,8 +65,8 @@
  * @param background_color - Background color
  */
 int VO_init(VO_DEV device_id, VO_INTF_TYPE_E interface_type,
-	VO_INTF_SYNC_E interface_mode, uint32_t framerate,
-	uint32_t background_color);
+  VO_INTF_SYNC_E interface_mode, uint32_t framerate,
+  uint32_t background_color);
 
 /**
  * @brief
@@ -85,18 +85,18 @@ int VO_HDMI_init(HI_HDMI_ID_E device_id, VO_INTF_SYNC_E interface_mode);
  * @param out_nal_size
  */
 uint8_t* decode_frame(uint8_t* rx_buffer, uint32_t rx_size,
-	uint32_t header_size, uint8_t* nal_buffer, uint32_t* out_nal_size);
+  uint32_t header_size, uint8_t* nal_buffer, uint32_t* out_nal_size);
 
 /* --- Console arguments parser --- */
 #define __BeginParseConsoleArguments__(printHelpFunction) \
-	if (argc < 2 || (argc == 2 && (!strcmp(argv[1], "--help") || !strcmp(argv[1], "/?") \
-	|| !strcmp(argv[1], "/h")))) { printHelpFunction(); return 1; } \
-	for (int ArgID = 1; ArgID < argc; ArgID++) { const char* Arg = argv[ArgID];
+  if (argc < 2 || (argc == 2 && (!strcmp(argv[1], "--help") || !strcmp(argv[1], "/?") \
+  || !strcmp(argv[1], "/h")))) { printHelpFunction(); return 1; } \
+  for (int ArgID = 1; ArgID < argc; ArgID++) { const char* Arg = argv[ArgID];
 
 #define __OnArgument(Name) if (!strcmp(Arg, Name))
 #define __ArgValue (argc > ArgID + 1 ? argv[++ArgID] : "")
 #define __EndParseConsoleArguments__ \
-	else { printf("ERROR: Unknown argument\n"); return 1; } }
+  else { printf("ERROR: Unknown argument\n"); return 1; } }
 
 void* __OSD_THREAD__(void*);
 void* __MAVLINK_THREAD__(void*);
