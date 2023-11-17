@@ -238,11 +238,6 @@ struct _fbg* fbg_fbdevSetup(char* fb_device, int page_flipping,
 
 void fbg_fbdevDraw(struct _fbg* fbg) {
 	struct _fbg_fbdev_context* fbdev_context = fbg->user_context;
-#ifdef FBIO_WAITFORVSYNC
-	static int dummy = 0;
-	ioctl(fbdev_context->fd, FBIO_WAITFORVSYNC, &dummy);
-#endif
-
 	if (fbdev_context->page_flipping == 0) {
 		if (fbdev_context->vinfo.bits_per_pixel == 16) {
 			unsigned char* pix_pointer_src = fbg->disp_buffer;
