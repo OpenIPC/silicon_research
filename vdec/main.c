@@ -434,13 +434,17 @@ int main(int argc, const char* argv[]) {
 
   // Configure video buffer for decoder
   memset(&vb_conf, 0x00, sizeof(vb_conf));
-  vb_conf.u32MaxPoolCnt = 1;
+  vb_conf.u32MaxPoolCnt = 2;
   vb_conf.astCommPool[0].u32BlkCnt = 4;
   vb_conf.astCommPool[0].u32BlkSize = 0;
+  vb_conf.astCommPool[1].u32BlkCnt = 2;
+  vb_conf.astCommPool[1].u32BlkSize = 0;
 
   // Calculate required size for video buffer
   VB_PIC_BLK_SIZE(vdec_max_width, vdec_max_height, codec_id, vb_conf.astCommPool[0].u32BlkSize);
-  printf("> VDEC picture block size = %d\n", vb_conf.astCommPool[0].u32BlkSize);
+  VB_PMV_BLK_SIZE(vdec_max_width, vdec_max_height, codec_id, vb_conf.astCommPool[1].u32BlkSize);
+  printf("> VDEC picture block size = %d, %d\n",
+    vb_conf.astCommPool[0].u32BlkSize, vb_conf.astCommPool[1].u32BlkSize);
 
   ret = HI_MPI_VB_SetModPoolConf(VB_UID_VDEC, &vb_conf);
   if (ret != HI_SUCCESS) {
