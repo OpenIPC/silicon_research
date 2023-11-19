@@ -1,4 +1,4 @@
-VDEC := main.c udp_stream.c vo.c \
+VDEC := main.c udp_stream.c vo.c recorder.c \
 	fbg_fbdev.c fbgraphics.c font_16x16.c lodepng/lodepng.c nanojpeg/nanojpeg.c
 LIB := -lmpi -lhdmi -ljpeg -ldnvqe -lupvqe -lVoiceEngine -lm
 

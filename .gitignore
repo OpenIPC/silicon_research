@@ -3,3 +3,5 @@ firmware
 toolchain
 vdec/vdec
 venc/venc
+.vscode/tasks.json
+.vscode/settings.json

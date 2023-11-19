@@ -1,4 +1,5 @@
 #include "main.h"
+#include "recorder.h"
 
 #define earthRadiusKm 6371.0
 
@@ -136,7 +137,8 @@ void printHelp() {
     "      1600x1200x60   - 1600 x 1200   @ 60 fps\n" 
     "      2560x1440x30   - 2560 x 1440   @ 30 fps\n"
     "\n"
-    "    -w [Path]        - Write stream into file\n"
+    "    -w [Path]        - DVR feature: saving video to file extention h265 (tested with SDcard reader)\n"
+    "      Example        -w /mnt/sda1/recorder/video1.h265\n"
     "\n"
     "    --ar [mode]      - Aspect ratio mode               (Default: keep)\n"
     "      keep             - Keep stream aspect ratio\n"
@@ -192,7 +194,6 @@ int main(int argc, const char* argv[]) {
   uint32_t background_color = 0x006000;
 
   const char* write_stream_path = 0;
-  int write_stream_file = -1;
   int enable_osd = 0;
   int codec_mode_stream = 1;
   PAYLOAD_TYPE_E codec_id = PT_H264;
@@ -668,9 +669,8 @@ int main(int argc, const char* argv[]) {
   uint8_t* nal_buffer = malloc(1024 * 1024);
 
   // Open write file
-  if (write_stream_path) {
-    write_stream_file = open(write_stream_path, O_RDWR | O_CREAT,
-      S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+  if (codec_id == PT_H265 && write_stream_path) {
+    recorder_int(write_stream_path);
   }
 
   // Start ISP service thread
@@ -688,7 +688,7 @@ int main(int argc, const char* argv[]) {
   uint32_t frame_count = 0;
 
   while (1) {
-    int rx = recv(port, rx_buffer + 8, 4096, 0);
+    int rx = recv(port, rx_buffer+8, 4096, 0);
     if (rx <= 0) {
       usleep(1);
       continue;
@@ -717,26 +717,7 @@ int main(int argc, const char* argv[]) {
 
     stats_rx_bytes += stream.u32Len;
 
-    // Write file
-    if (write_stream_file != -1) {
-      uint32_t write_size = stream.u32Len;
-      uint32_t write_done = 0;
-
-      while (write_size) {
-        uint32_t chunk_size = MIN(write_size, write_buffer_capacity - write_buffer_size);
-        memcpy(write_buffer + write_buffer_size, stream.pu8Addr + write_done, chunk_size);
-        write_buffer_size += chunk_size;
-
-        // Flush buffer
-        if (write_buffer_size == write_buffer_capacity) {
-          write(write_stream_file, write_buffer, write_buffer_size);
-          write_buffer_size = 0;
-        }
-
-        write_size -= chunk_size;
-        write_done += chunk_size;
-      }
-    }
+    recorder_input_data(&stream);
 
     uint8_t type_avc = stream.pu8Addr[4] & 0x1F;
     uint8_t type_hevc = (stream.pu8Addr[4] >> 1) & 0x3F;
