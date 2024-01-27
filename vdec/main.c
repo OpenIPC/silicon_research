@@ -1022,7 +1022,7 @@ void* __OSD_THREAD__(void* arg) {
     sprintf(c1, "%.00f", telemetry_lat);
 
     if (telemetry_lat < 10000000) {
-      insertString(c1, "LON:0.", 0);
+      insertString(c1, "LAT:0.", 0);
     }
 
     if (telemetry_lat > 9999999) {
