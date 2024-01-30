@@ -731,6 +731,7 @@ float telemetry_roll = 0;
 float telemetry_yaw = 0;
 float telemetry_battery = 0;
 float telemetry_current = 0;
+float telemetry_current_consumed = 0;
 double telemetry_lat = 0;
 double telemetry_lon = 0;
 double telemetry_lat_base = 0;
@@ -812,6 +813,12 @@ void* __MAVLINK_THREAD__(void* arg) {
             mavlink_msg_sys_status_decode(&message, &bat);
             telemetry_battery = bat.voltage_battery;
             telemetry_current = bat.current_battery;
+            break;
+
+          case MAVLINK_MSG_ID_BATTERY_STATUS:
+            mavlink_battery_status_t batt;
+            mavlink_msg_battery_status_decode(&message, &batt);
+            telemetry_current_consumed = batt.current_consumed;
             break;
 
           case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
@@ -1010,10 +1017,12 @@ void* __OSD_THREAD__(void* arg) {
 
     sprintf(msg, "BAT:%.02fV", telemetry_battery / 1000);
     fbg_write(fbg, msg, 40, fbg->height - 30);
-    sprintf(msg, "CUR:%.02fA", telemetry_current / 100);
+    sprintf(msg, "CONS:%.00fmAh", telemetry_current_consumed / 100);
     fbg_write(fbg, msg, 40, fbg->height - 60);
-    sprintf(msg, "THR:%.00f%%", telemetry_throttle);
+    sprintf(msg, "CUR:%.02fA", telemetry_current / 100);
     fbg_write(fbg, msg, 40, fbg->height - 90);
+    sprintf(msg, "THR:%.00f%%", telemetry_throttle);
+    fbg_write(fbg, msg, 40, fbg->height - 120);
 
     sprintf(msg, "SATS:%.00f", telemetry_sats);
     fbg_write(fbg, msg, fbg->width - 140, fbg->height - 30);
