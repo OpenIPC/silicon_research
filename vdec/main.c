@@ -1017,7 +1017,7 @@ void* __OSD_THREAD__(void* arg) {
 
     sprintf(msg, "BAT:%.02fV", telemetry_battery / 1000);
     fbg_write(fbg, msg, 40, fbg->height - 30);
-    sprintf(msg, "CONS:%.00fmAh", telemetry_current_consumed / 100);
+    sprintf(msg, "CONS:%.00fmAh", telemetry_current_consumed);
     fbg_write(fbg, msg, 40, fbg->height - 60);
     sprintf(msg, "CUR:%.02fA", telemetry_current / 100);
     fbg_write(fbg, msg, 40, fbg->height - 90);
