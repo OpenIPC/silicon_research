@@ -2,7 +2,7 @@
 #include "recorder.h"
 
 #define earthRadiusKm 6371.0
-
+int osd_mode = 1;
 typedef struct hiHDMI_ARGS_S {
   HI_HDMI_ID_E enHdmi;
 } HDMI_ARGS_S;
@@ -119,7 +119,7 @@ void printHelp() {
     "    vdec [Arguments]\n"
     "\n"
     "  Arguments:\n"
-    "    -p [Port]      - Listen port                       (Default: 5000)\n"
+    "    -p [Port]      - Listen port                       (Default: 5600)\n"
     "    -c [Codec]     - Video codec                       (Default: h264)\n"
     "      h264           - H264\n"
     "      h265           - H265\n"
@@ -127,6 +127,10 @@ void printHelp() {
     "    -d [Format]    - Data format                       (Default: stream)\n"
     "      stream         - Incoming data is stream\n"
     "      frame          - Incoming data is frame\n"
+    "\n"
+    "    -t [Format]    - OSD Type                          (Default: normal)\n"
+    "      normal         - Regular OSD\n"
+    "      minimal        - Minimal OSD\n"
     "\n"
     "    -m [Mode]        - Screen output mode              (Default: 720p60)\n"
     "      720p60         - 1280 x 720    @ 60 fps\n"
@@ -189,7 +193,7 @@ int main(int argc, const char* argv[]) {
   VO_LAYER vo_layer_id = 0;
   VO_CHN vo_channel_id = 0;
 
-  uint16_t listen_port = 5000;
+  uint16_t listen_port = 5600;
   uint32_t background_color = 0x006000;
 
   const char* write_stream_path = 0;
@@ -207,7 +211,19 @@ int main(int argc, const char* argv[]) {
     listen_port = atoi(__ArgValue);
     continue;
   }
-
+  
+  __OnArgument("-t") {
+    const char* format = __ArgValue;
+    if (!strcmp(format, "minimal")) {
+      osd_mode = 0;
+    } else if (!strcmp(format, "normal")) {
+      osd_mode = 1;
+    } else {
+      printf("> ERROR: Unsupported OSD format [%s]\n", format);
+    }
+    continue;
+  }
+  
   __OnArgument("-c") {
     const char* codec = __ArgValue;
     if (!strcmp(codec, "h264")) {
@@ -964,6 +980,10 @@ void* __OSD_THREAD__(void* arg) {
     fbg_clear(fbg, 0);
     fbg_draw(fbg);
     uint32_t x_center = fbg->width / 2;
+    char msg[16];
+    memset(msg, 0x00, sizeof(msg));
+
+    if (osd_mode > 0){
 
     // Artificial Horizon
     int32_t offset_pitch = telemetry_pitch * 4;
@@ -1006,15 +1026,13 @@ void* __OSD_THREAD__(void* arg) {
     }
 
     // OSD telemetry
-    char msg[16];
-    memset(msg, 0x00, sizeof(msg));
     sprintf(msg, "ALT:%.00fM", telemetry_altitude);
     fbg_write(fbg, msg, x_center + (20) + 260, fbg->height / 2 - 8);
     sprintf(msg, "SPD:%.00fKM/H", telemetry_gspeed);
     fbg_write(fbg, msg, x_center - (16 * 3) - 360, fbg->height / 2 - 8);
     sprintf(msg, "VSPD:%.00fM/S", telemetry_vspeed);
     fbg_write(fbg, msg, x_center + (20) + 260, fbg->height / 2 + 22);
-
+    }
     sprintf(msg, "BAT:%.02fV", telemetry_battery / 1000);
     fbg_write(fbg, msg, 40, fbg->height - 30);
     sprintf(msg, "CONS:%.00fmAh", telemetry_current_consumed);
@@ -1023,7 +1041,7 @@ void* __OSD_THREAD__(void* arg) {
     fbg_write(fbg, msg, 40, fbg->height - 90);
     sprintf(msg, "THR:%.00f%%", telemetry_throttle);
     fbg_write(fbg, msg, 40, fbg->height - 120);
-
+    if (osd_mode > 0){
     sprintf(msg, "SATS:%.00f", telemetry_sats);
     fbg_write(fbg, msg, fbg->width - 140, fbg->height - 30);
     sprintf(msg, "HDG:%.00f", telemetry_hdg);
@@ -1063,10 +1081,11 @@ void* __OSD_THREAD__(void* arg) {
     //fbg_write(fbg, msg, x_center + 440, fbg->height - 140);
     //sprintf(msg, "ROLL:%.00f", telemetry_roll);
     //fbg_write(fbg, msg, x_center + 440, fbg->height - 170);
-    sprintf(msg, "RSSI:%.00f", telemetry_rssi);
-    fbg_write(fbg, msg, x_center - 50, fbg->height - 30);
     sprintf(msg, "DIST:%.03fM", telemetry_distance);
     fbg_write(fbg, msg, x_center - 350, fbg->height - 30);
+    }
+    sprintf(msg, "RSSI:%.00f", telemetry_rssi);
+    fbg_write(fbg, msg, x_center - 50, fbg->height - 30);
     fbg_image(fbg, openipc_img, fbg->width - 240, 40);
 
     // Print rate stats
@@ -1075,26 +1094,35 @@ void* __OSD_THREAD__(void* arg) {
       double interval = getTimeInterval(&current_timestamp, &last_timestamp);
       if (interval > 1) {
         last_timestamp = current_timestamp;
-        rx_rate = (float)stats_rx_bytes / 1024.0f * 8;
+        rx_rate = ((float)stats_rx_bytes+(((float)stats_rx_bytes*25)/100)) / 1024.0f * 8;
         stats_rx_bytes = 0;
       }
     }
 
     char hud_frames_rx[32];
+    if (osd_mode > 0){
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
     sprintf(hud_frames_rx, "RX Packets %d", frames_received);
     fbg_write(fbg, hud_frames_rx, x_center - 450, 40);
-
+    }
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
     sprintf(hud_frames_rx, "Rate %.02f Kbit/s", rx_rate);
+    if (osd_mode > 0){
     fbg_write(fbg, hud_frames_rx, x_center - strlen(hud_frames_rx) / 2 * 16, 40);
+    } else {
+    fbg_write(fbg, hud_frames_rx, fbg->width - 300, fbg->height - 60);
+    }
     float percent = rx_rate / (1024 * 10);
     if (percent > 1) {
       percent = 1;
     }
 
     uint32_t width = (strlen(hud_frames_rx) * 16) * percent;
+    if (osd_mode > 0){
     fbg_rect(fbg, x_center - strlen(hud_frames_rx) / 2 * 16, 64, width, 8, 255, 255, 255);
+    } else {
+    fbg_rect(fbg, fbg->width - 300, fbg->height - 36, width, 8, 255, 255, 255);
+    }
     fbg_flip(fbg);
     usleep(1);
   }
