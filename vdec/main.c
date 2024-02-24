@@ -1111,6 +1111,26 @@ void* __OSD_THREAD__(void* arg) {
     fbg_write(fbg, hud_frames_rx, x_center - strlen(hud_frames_rx) / 2 * 16, 40);
     } else {
     fbg_write(fbg, hud_frames_rx, fbg->width - 300, fbg->height - 60);
+    sprintf(msg, "%.2d:%.2d:%.2d:%.2d",hours,minutes,seconds,milliseconds);
+    fbg_write(fbg, msg, fbg->width - 300, fbg->height - 90);
+    if (telemetry_arm > 1700){
+      ++milliseconds;
+    }
+    if(milliseconds == 99){
+       milliseconds = 0;
+       ++seconds;
+    }
+    if(seconds == 60){
+       milliseconds = 0;
+       seconds = 0;
+       ++minutes;
+    }
+    if(minutes == 60){
+       milliseconds = 0;
+       seconds = 0;
+       minutes = 0;
+       ++hours;  
+    }
     }
     float percent = rx_rate / (1024 * 10);
     if (percent > 1) {
