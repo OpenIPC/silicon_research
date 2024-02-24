@@ -975,7 +975,8 @@ void* __OSD_THREAD__(void* arg) {
   struct _fbg_img* bb_font_img = fbg_loadPNGFromMemory(fbg, font_14_23, 26197);
   struct _fbg_font* bbfont = fbg_createFont(fbg, bb_font_img, 14, 23, 33);
   struct _fbg_img* openipc_img = fbg_loadPNGFromMemory(fbg, openipc, 11761);
-
+  int hours = 0 , minutes = 0 , seconds = 0 , milliseconds = 0;
+  
   while (1) {
     fbg_clear(fbg, 0);
     fbg_draw(fbg);
