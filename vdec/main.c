@@ -2,6 +2,7 @@
 #include "recorder.h"
 
 #define earthRadiusKm 6371.0
+#define BILLION 1000000000L
 int osd_mode = 1;
 typedef struct hiHDMI_ARGS_S {
   HI_HDMI_ID_E enHdmi;
@@ -1100,6 +1101,13 @@ void* __OSD_THREAD__(void* arg) {
       }
     }
 
+    uint64_t diff;
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    sleep(1);
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+
     char hud_frames_rx[32];
     if (osd_mode > 0){
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
@@ -1112,25 +1120,18 @@ void* __OSD_THREAD__(void* arg) {
     fbg_write(fbg, hud_frames_rx, x_center - strlen(hud_frames_rx) / 2 * 16, 40);
     } else {
     fbg_write(fbg, hud_frames_rx, fbg->width - 300, fbg->height - 60);
-    sprintf(msg, "%.2d:%.2d:%.2d:%.2d",hours,minutes,seconds,milliseconds);
+    sprintf(msg, "TIME:%.2d:%.2d", minutes,seconds);
     fbg_write(fbg, msg, fbg->width - 300, fbg->height - 90);
     if (telemetry_arm > 1700){
-      ++milliseconds;
+      seconds = seconds + diff/1000000000;
     }
-    if(milliseconds == 99){
-       milliseconds = 0;
-       ++seconds;
-    }
-    if(seconds == 60){
-       milliseconds = 0;
+    if(seconds > 59){
        seconds = 0;
-       ++minutes;
+       ++minutes;  
     }
-    if(minutes == 60){
-       milliseconds = 0;
+    if(minutes > 59){
        seconds = 0;
        minutes = 0;
-       ++hours;  
     }
     }
     float percent = rx_rate / (1024 * 10);
