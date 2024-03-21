@@ -1,10 +1,10 @@
 /*
  * gcc vdec-stdout.c -o vdec-stdout -s -Wall
- * 
+ *
  * Usage:
  * ./vdec-stdout 5600 | ffplay -i -
- * ./vdec-stdout 5600 | gst-launch-1.0 fdsrc ! decodebin ! fpsdisplaysink
- * 
+ * ./vdec-stdout 5600 | gst-launch-1.0 fdsrc ! decodebin ! fpsdisplaysink sync=false
+ *
  */
 
 #include <stdio.h>
@@ -19,7 +19,7 @@
 static int nal_size = 0;
 static bool nal_start = false;
 
-static int decode_frame(char* rx_buffer, int rx_length, int header_size, char* nal_buffer) {
+static int decode_frame(char *rx_buffer, int rx_length, int header_size, char *nal_buffer) {
 	rx_buffer += header_size;
 	rx_length -= header_size;
 
@@ -85,8 +85,7 @@ static int decode_frame(char* rx_buffer, int rx_length, int header_size, char* n
 	return 0;
 }
 
-int main(int argc, const char* argv[]) {
-	int udp_sock = socket(AF_INET, SOCK_DGRAM, 0);
+int main(int argc, const char *argv[]) {
 	int rtp_port = 5600;
 
 	if (argc > 1) {
@@ -98,6 +97,7 @@ int main(int argc, const char* argv[]) {
 	address.sin_port = htons(rtp_port);
 	address.sin_addr.s_addr = INADDR_ANY;
 
+	int udp_sock = socket(AF_INET, SOCK_DGRAM, 0);
 	bind(udp_sock, (struct sockaddr*)&address, sizeof(struct sockaddr_in));
 
 	char *rx_buffer = malloc(BUFFER_SIZE);
