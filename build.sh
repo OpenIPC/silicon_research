@@ -2,15 +2,15 @@
 DL="https://github.com/openipc/firmware/releases/download/latest"
 
 if [ "$1" = "vdec" ] || [ "$1" = "osd" ]; then
-	CC=cortex_a7-gcc12-glibc-4_9
+	CC=cortex_a7-gcc13-glibc-4_9
 else
-	CC=cortex_a7_thumb2-gcc12-musl-4_9
+	CC=cortex_a7_thumb2-gcc13-musl-4_9
 fi
 
 GCC=$PWD/toolchain/$CC/bin/arm-linux-gcc
 
 if [ ! -e toolchain/$CC ]; then
-	wget -c -nv --show-progress $DL/$CC.tgz -P $PWD
+	wget -c -q --show-progress $DL/$CC.tgz -P $PWD
 	mkdir -p toolchain/$CC
 	tar -xf $CC.tgz -C toolchain/$CC --strip-components=1 || exit 1
 	rm -f $CC.tgz

@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <endian.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 

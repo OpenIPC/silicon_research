@@ -139,7 +139,7 @@ void printHelp() {
     "      1024x768x60    - 1024 x 768    @ 60 fps\n"
     "      1366x768x60    - 1366 x 768    @ 60 fps\n"
     "      1280x1024x60   - 1280 x 1024   @ 60 fps\n"
-    "      1600x1200x60   - 1600 x 1200   @ 60 fps\n" 
+    "      1600x1200x60   - 1600 x 1200   @ 60 fps\n"
     "      2560x1440x30   - 2560 x 1440   @ 30 fps\n"
     "\n"
     "    -w [Path]        - DVR feature: saving video to file extention h265 (tested with SDcard reader)\n"
@@ -248,7 +248,7 @@ int main(int argc, const char* argv[]) {
     listen_port = atoi(__ArgValue);
     continue;
   }
-  
+
   __OnArgument("-t") {
     const char* format = __ArgValue;
     if (!strcmp(format, "minimal")) {
@@ -260,7 +260,7 @@ int main(int argc, const char* argv[]) {
     }
     continue;
   }
-  
+
   __OnArgument("-c") {
     const char* codec = __ArgValue;
     if (!strcmp(codec, "h264")) {
@@ -399,7 +399,7 @@ int main(int argc, const char* argv[]) {
     osd_element4y = atoi(__ArgValue);
     continue;
   }
-  
+
   __OnArgument("-osd_ele5x") {
     osd_element5x = atoi(__ArgValue);
     continue;
@@ -758,7 +758,7 @@ int main(int argc, const char* argv[]) {
     printf("ERROR: Unable to enable video channel\n");
     return 1;
   }
-  
+
   // Configure aspect ratio
   VO_CHN_PARAM_S param;
   HI_MPI_VO_GetChnParam(vo_layer_id, vo_channel_id, &param);
@@ -1189,8 +1189,6 @@ void* __OSD_THREAD__(void* arg) {
     char msg[16];
     memset(msg, 0x00, sizeof(msg));
 
-    if (osd_mode > 0){
-
     // Artificial Horizon
     int32_t offset_pitch = telemetry_pitch * 4;
     int32_t offset_roll = telemetry_roll * 4;
@@ -1231,7 +1229,7 @@ void* __OSD_THREAD__(void* arg) {
         x_center + 240 + width, fbg->height / 2 - 120 + i * 10 + 1, 255, 255, 255);
     }
 
-       // OSD telemetry
+    // OSD telemetry
     sprintf(msg, "ALT:%.00fM", telemetry_altitude);
     fbg_write(fbg, msg, osd_element1x*resX_multiplier, osd_element1y*resY_multiplier);
     sprintf(msg, "SPD:%.00fKM/H", telemetry_gspeed);
@@ -1314,28 +1312,33 @@ void* __OSD_THREAD__(void* arg) {
     fbg_write(fbg, hud_frames_rx, osd_element16x*resX_multiplier, osd_element16y*resY_multiplier);
     sprintf(msg, "TIME:%.2d:%.2d", minutes,seconds);
     fbg_write(fbg, msg, osd_element17x*resX_multiplier, osd_element17y*resY_multiplier);
-    if (telemetry_arm > 1700){
-      seconds = seconds + diff/1000000000;
+
+    if (telemetry_arm > 1700) {
+       seconds = seconds + diff/1000000000;
     }
-    if(seconds > 59){
+
+    if (seconds > 59) {
        seconds = 0;
        ++minutes;
     }
-    if(minutes > 59){
+
+    if (minutes > 59) {
        seconds = 0;
        minutes = 0;
     }
+
     float percent = rx_rate / (1024 * 10);
     if (percent > 1) {
-      percent = 1;
+       percent = 1;
     }
 
     uint32_t width = (strlen(hud_frames_rx) * 16) * percent;
-    if (osd_mode > 0){
-    fbg_rect(fbg, x_center - strlen(hud_frames_rx) / 2 * 16, 64, width, 8, 255, 255, 255);
+    if (osd_mode > 0) {
+       fbg_rect(fbg, x_center - strlen(hud_frames_rx) / 2 * 16, 64, width, 8, 255, 255, 255);
     } else {
-    fbg_rect(fbg, fbg->width - 300, fbg->height - 36, width, 8, 255, 255, 255);
+       fbg_rect(fbg, fbg->width - 300, fbg->height - 36, width, 8, 255, 255, 255);
     }
+
     fbg_flip(fbg);
     usleep(1);
   }
