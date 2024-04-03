@@ -177,6 +177,42 @@ double getTimeInterval(struct timespec* timestamp, struct timespec* last_meansur
        (timestamp->tv_nsec - last_meansure_timestamp->tv_nsec) / 1000000000.;
 }
 
+uint16_t osd_element1x = 0;
+uint16_t osd_element1y = 0;
+uint16_t osd_element2x = 0;
+uint16_t osd_element2y = 0;
+uint16_t osd_element3x = 0;
+uint16_t osd_element3y = 0;
+uint16_t osd_element4x = 0;
+uint16_t osd_element4y = 0;
+uint16_t osd_element5x = 0;
+uint16_t osd_element5y = 0;
+uint16_t osd_element6x = 0;
+uint16_t osd_element6y = 0;
+uint16_t osd_element7x = 0;
+uint16_t osd_element7y = 0;
+uint16_t osd_element8x = 0;
+uint16_t osd_element8y = 0;
+uint16_t osd_element9x = 0;
+uint16_t osd_element9y = 0;
+uint16_t osd_element10x = 0;
+uint16_t osd_element10y = 0;
+uint16_t osd_element11x = 0;
+uint16_t osd_element11y = 0;
+uint16_t osd_element12x = 0;
+uint16_t osd_element12y = 0;
+uint16_t osd_element13x = 0;
+uint16_t osd_element13y = 0;
+uint16_t osd_element14x = 0;
+uint16_t osd_element14y = 0;
+uint16_t osd_element15x = 0;
+uint16_t osd_element15y = 0;
+uint16_t osd_element16x = 0;
+uint16_t osd_element16y = 0;
+uint16_t osd_element17x = 0;
+uint16_t osd_element17y = 0;
+uint16_t osd_element18x = 0;
+uint16_t osd_element18y = 0;
 uint16_t mavlink_port = 14550;
 uint32_t vo_width = 1280;
 uint32_t vo_height = 720;
@@ -325,6 +361,168 @@ int main(int argc, const char* argv[]) {
 
   __OnArgument("--mavlink-port") {
     mavlink_port = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele1x") {
+    osd_element1x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele1y") {
+    osd_element1y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele2x") {
+    osd_element2x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele2y") {
+    osd_element2y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele3x") {
+    osd_element3x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele3y") {
+    osd_element3y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele4x") {
+    osd_element4x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele4y") {
+    osd_element4y = atoi(__ArgValue);
+    continue;
+  }
+  
+  __OnArgument("-osd_ele5x") {
+    osd_element5x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele5y") {
+    osd_element5y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele6x") {
+    osd_element6x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele6y") {
+    osd_element6y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele7x") {
+    osd_element7x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele7y") {
+    osd_element7y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele8x") {
+    osd_element8x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele8y") {
+    osd_element8y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele9x") {
+    osd_element9x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele9y") {
+    osd_element9y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele10x") {
+    osd_element10x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele10y") {
+    osd_element10y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele11x") {
+    osd_element11x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele11y") {
+    osd_element11y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele12x") {
+    osd_element12x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele12y") {
+    osd_element12y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele13x") {
+    osd_element13x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele13y") {
+    osd_element13y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele14x") {
+    osd_element14x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele14y") {
+    osd_element14y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele15x") {
+    osd_element15x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele15y") {
+    osd_element15y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele16x") {
+    osd_element16x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele16y") {
+    osd_element16y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele17x") {
+    osd_element17x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele17y") {
+    osd_element17y = atoi(__ArgValue);
+    continue;
+  }
+
+  __OnArgument("-osd_ele18x") {
+    osd_element18x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele18y") {
+    osd_element18y = atoi(__ArgValue);
     continue;
   }
 
@@ -977,7 +1175,13 @@ void* __OSD_THREAD__(void* arg) {
   struct _fbg_font* bbfont = fbg_createFont(fbg, bb_font_img, 14, 23, 33);
   struct _fbg_img* openipc_img = fbg_loadPNGFromMemory(fbg, openipc, 11761);
   int hours = 0 , minutes = 0 , seconds = 0 , milliseconds = 0;
-  
+  double resX_multiplier = 1;
+  double resY_multiplier = 1;
+  if (fbg->height == 1080) {
+    resX_multiplier = 1.5;
+    resY_multiplier = 1.5;
+  }
+
   while (1) {
     fbg_clear(fbg, 0);
     fbg_draw(fbg);
@@ -990,8 +1194,8 @@ void* __OSD_THREAD__(void* arg) {
     // Artificial Horizon
     int32_t offset_pitch = telemetry_pitch * 4;
     int32_t offset_roll = telemetry_roll * 4;
-    int32_t y_pos_left = ((int32_t)fbg->height / 2 - 2 + offset_pitch + offset_roll);
-    int32_t y_pos_right = ((int32_t)fbg->height / 2 - 2 + offset_pitch - offset_roll);
+    int32_t y_pos_left = ((int32_t)fbg->height / 2 - osd_element18x*resX_multiplier + offset_pitch + offset_roll);
+    int32_t y_pos_right = ((int32_t)fbg->height / 2 - osd_element18y*resY_multiplier + offset_pitch - offset_roll);
 
     for (int i = 0; i < 4; i++) {
       if (y_pos_left > 0 && y_pos_left < fbg->height &&
@@ -1027,27 +1231,25 @@ void* __OSD_THREAD__(void* arg) {
         x_center + 240 + width, fbg->height / 2 - 120 + i * 10 + 1, 255, 255, 255);
     }
 
-    // OSD telemetry
+       // OSD telemetry
     sprintf(msg, "ALT:%.00fM", telemetry_altitude);
-    fbg_write(fbg, msg, x_center + (20) + 260, fbg->height / 2 - 8);
+    fbg_write(fbg, msg, osd_element1x*resX_multiplier, osd_element1y*resY_multiplier);
     sprintf(msg, "SPD:%.00fKM/H", telemetry_gspeed);
-    fbg_write(fbg, msg, x_center - (16 * 3) - 360, fbg->height / 2 - 8);
+    fbg_write(fbg, msg, osd_element2x*resX_multiplier, osd_element2y*resY_multiplier);
     sprintf(msg, "VSPD:%.00fM/S", telemetry_vspeed);
-    fbg_write(fbg, msg, x_center + (20) + 260, fbg->height / 2 + 22);
-    }
+    fbg_write(fbg, msg, osd_element3x*resX_multiplier, osd_element3y*resY_multiplier);
     sprintf(msg, "BAT:%.02fV", telemetry_battery / 1000);
-    fbg_write(fbg, msg, 40, fbg->height - 30);
+    fbg_write(fbg, msg, osd_element4x, osd_element4y*resY_multiplier);
     sprintf(msg, "CONS:%.00fmAh", telemetry_current_consumed);
-    fbg_write(fbg, msg, 40, fbg->height - 60);
+    fbg_write(fbg, msg, osd_element5x, osd_element5y*resY_multiplier);
     sprintf(msg, "CUR:%.02fA", telemetry_current / 100);
-    fbg_write(fbg, msg, 40, fbg->height - 90);
+    fbg_write(fbg, msg, osd_element6x, osd_element6y*resY_multiplier);
     sprintf(msg, "THR:%.00f%%", telemetry_throttle);
-    fbg_write(fbg, msg, 40, fbg->height - 120);
-    if (osd_mode > 0){
+    fbg_write(fbg, msg, osd_element7x, osd_element7y*resY_multiplier);
     sprintf(msg, "SATS:%.00f", telemetry_sats);
-    fbg_write(fbg, msg, fbg->width - 140, fbg->height - 30);
+    fbg_write(fbg, msg, osd_element8x*resX_multiplier, osd_element8y*resY_multiplier);
     sprintf(msg, "HDG:%.00f", telemetry_hdg);
-    fbg_write(fbg, msg, fbg->width - 140, fbg->height - 120);
+    fbg_write(fbg, msg, osd_element9x*resX_multiplier, osd_element9y*resY_multiplier);
     sprintf(c1, "%.00f", telemetry_lat);
 
     if (telemetry_lat < 10000000) {
@@ -1063,7 +1265,7 @@ void* __OSD_THREAD__(void* arg) {
       insertString(c1, "LAT:", 0);
     }
 
-    fbg_write(fbg, c1, fbg->width - 240, fbg->height - 90);
+    fbg_write(fbg, c1, osd_element10x*resX_multiplier, osd_element10y*resY_multiplier);
     sprintf(c2, "%.00f", telemetry_lon);
     if (telemetry_lon < 10000000) {
       insertString(c2, "LON:0.", 0);
@@ -1078,17 +1280,12 @@ void* __OSD_THREAD__(void* arg) {
       insertString(c2, "LON:", 0);
     }
 
-    fbg_write(fbg, c2, fbg->width - 240, fbg->height - 60);
-    //sprintf(msg, "PITCH:%.00f", telemetry_pitch);
-    //fbg_write(fbg, msg, x_center + 440, fbg->height - 140);
-    //sprintf(msg, "ROLL:%.00f", telemetry_roll);
-    //fbg_write(fbg, msg, x_center + 440, fbg->height - 170);
+    fbg_write(fbg, c2, osd_element11x*resX_multiplier, osd_element11y*resY_multiplier);
     sprintf(msg, "DIST:%.03fM", telemetry_distance);
-    fbg_write(fbg, msg, x_center - 350, fbg->height - 30);
-    }
+    fbg_write(fbg, msg, osd_element12x*resX_multiplier, osd_element12y*resY_multiplier);
     sprintf(msg, "RSSI:%.00f", telemetry_rssi);
-    fbg_write(fbg, msg, x_center - 50, fbg->height - 30);
-    fbg_image(fbg, openipc_img, fbg->width - 240, 40);
+    fbg_write(fbg, msg, osd_element13x*resX_multiplier, osd_element13y*resY_multiplier);
+    fbg_image(fbg, openipc_img, osd_element14x*resX_multiplier, osd_element14y*resY_multiplier);
 
     // Print rate stats
     struct timespec current_timestamp;
@@ -1109,30 +1306,24 @@ void* __OSD_THREAD__(void* arg) {
     diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
 
     char hud_frames_rx[32];
-    if (osd_mode > 0){
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
     sprintf(hud_frames_rx, "RX Packets %d", frames_received);
-    fbg_write(fbg, hud_frames_rx, x_center - 450, 40);
-    }
+    fbg_write(fbg, hud_frames_rx, osd_element15x*resX_multiplier, osd_element15y*resY_multiplier);
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
     sprintf(hud_frames_rx, "Rate %.02f Kbit/s", rx_rate);
-    if (osd_mode > 0){
-    fbg_write(fbg, hud_frames_rx, x_center - strlen(hud_frames_rx) / 2 * 16, 40);
-    } else {
-    fbg_write(fbg, hud_frames_rx, fbg->width - 300, fbg->height - 60);
+    fbg_write(fbg, hud_frames_rx, osd_element16x*resX_multiplier, osd_element16y*resY_multiplier);
     sprintf(msg, "TIME:%.2d:%.2d", minutes,seconds);
-    fbg_write(fbg, msg, fbg->width - 300, fbg->height - 90);
+    fbg_write(fbg, msg, osd_element17x*resX_multiplier, osd_element17y*resY_multiplier);
     if (telemetry_arm > 1700){
       seconds = seconds + diff/1000000000;
     }
     if(seconds > 59){
        seconds = 0;
-       ++minutes;  
+       ++minutes;
     }
     if(minutes > 59){
        seconds = 0;
        minutes = 0;
-    }
     }
     float percent = rx_rate / (1024 * 10);
     if (percent > 1) {
