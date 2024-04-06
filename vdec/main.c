@@ -1188,7 +1188,7 @@ void* __OSD_THREAD__(void* arg) {
     uint32_t x_center = fbg->width / 2;
     char msg[16];
     memset(msg, 0x00, sizeof(msg));
-
+    if (osd_element18x > 0){
     // Artificial Horizon
     int32_t offset_pitch = telemetry_pitch * 4;
     int32_t offset_roll = telemetry_roll * 4;
@@ -1228,26 +1228,26 @@ void* __OSD_THREAD__(void* arg) {
       fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10 + 1,
         x_center + 240 + width, fbg->height / 2 - 120 + i * 10 + 1, 255, 255, 255);
     }
-
+    }
     // OSD telemetry
     sprintf(msg, "ALT:%.00fM", telemetry_altitude);
-    fbg_write(fbg, msg, osd_element1x*resX_multiplier, osd_element1y*resY_multiplier);
+    if (osd_element1x > 0){fbg_write(fbg, msg, osd_element1x*resX_multiplier, osd_element1y*resY_multiplier);}
     sprintf(msg, "SPD:%.00fKM/H", telemetry_gspeed);
-    fbg_write(fbg, msg, osd_element2x*resX_multiplier, osd_element2y*resY_multiplier);
+    if (osd_element2x > 0){fbg_write(fbg, msg, osd_element2x*resX_multiplier, osd_element2y*resY_multiplier);}
     sprintf(msg, "VSPD:%.00fM/S", telemetry_vspeed);
-    fbg_write(fbg, msg, osd_element3x*resX_multiplier, osd_element3y*resY_multiplier);
+    if (osd_element3x > 0){fbg_write(fbg, msg, osd_element3x*resX_multiplier, osd_element3y*resY_multiplier);}
     sprintf(msg, "BAT:%.02fV", telemetry_battery / 1000);
-    fbg_write(fbg, msg, osd_element4x, osd_element4y*resY_multiplier);
+    if (osd_element4x > 0){fbg_write(fbg, msg, osd_element4x, osd_element4y*resY_multiplier);}
     sprintf(msg, "CONS:%.00fmAh", telemetry_current_consumed);
-    fbg_write(fbg, msg, osd_element5x, osd_element5y*resY_multiplier);
+    if (osd_element5x > 0){fbg_write(fbg, msg, osd_element5x, osd_element5y*resY_multiplier);}
     sprintf(msg, "CUR:%.02fA", telemetry_current / 100);
-    fbg_write(fbg, msg, osd_element6x, osd_element6y*resY_multiplier);
+    if (osd_element6x > 0){fbg_write(fbg, msg, osd_element6x, osd_element6y*resY_multiplier);}
     sprintf(msg, "THR:%.00f%%", telemetry_throttle);
-    fbg_write(fbg, msg, osd_element7x, osd_element7y*resY_multiplier);
+    if (osd_element7x > 0){fbg_write(fbg, msg, osd_element7x, osd_element7y*resY_multiplier);}
     sprintf(msg, "SATS:%.00f", telemetry_sats);
-    fbg_write(fbg, msg, osd_element8x*resX_multiplier, osd_element8y*resY_multiplier);
+    if (osd_element8x > 0){fbg_write(fbg, msg, osd_element8x*resX_multiplier, osd_element8y*resY_multiplier);}
     sprintf(msg, "HDG:%.00f", telemetry_hdg);
-    fbg_write(fbg, msg, osd_element9x*resX_multiplier, osd_element9y*resY_multiplier);
+    if (osd_element9x > 0){fbg_write(fbg, msg, osd_element9x*resX_multiplier, osd_element9y*resY_multiplier);}
     sprintf(c1, "%.00f", telemetry_lat);
 
     if (telemetry_lat < 10000000) {
@@ -1263,7 +1263,7 @@ void* __OSD_THREAD__(void* arg) {
       insertString(c1, "LAT:", 0);
     }
 
-    fbg_write(fbg, c1, osd_element10x*resX_multiplier, osd_element10y*resY_multiplier);
+    if (osd_element10x > 0){fbg_write(fbg, c1, osd_element10x*resX_multiplier, osd_element10y*resY_multiplier);}
     sprintf(c2, "%.00f", telemetry_lon);
     if (telemetry_lon < 10000000) {
       insertString(c2, "LON:0.", 0);
@@ -1278,12 +1278,12 @@ void* __OSD_THREAD__(void* arg) {
       insertString(c2, "LON:", 0);
     }
 
-    fbg_write(fbg, c2, osd_element11x*resX_multiplier, osd_element11y*resY_multiplier);
+    if (osd_element11x > 0){fbg_write(fbg, c2, osd_element11x*resX_multiplier, osd_element11y*resY_multiplier);}
     sprintf(msg, "DIST:%.03fM", telemetry_distance);
-    fbg_write(fbg, msg, osd_element12x*resX_multiplier, osd_element12y*resY_multiplier);
+    if (osd_element12x > 0){fbg_write(fbg, msg, osd_element12x*resX_multiplier, osd_element12y*resY_multiplier);}
     sprintf(msg, "RSSI:%.00f", telemetry_rssi);
-    fbg_write(fbg, msg, osd_element13x*resX_multiplier, osd_element13y*resY_multiplier);
-    fbg_image(fbg, openipc_img, osd_element14x*resX_multiplier, osd_element14y*resY_multiplier);
+    if (osd_element13x > 0){fbg_write(fbg, msg, osd_element13x*resX_multiplier, osd_element13y*resY_multiplier);}
+    if (osd_element14x > 0){fbg_image(fbg, openipc_img, osd_element14x*resX_multiplier, osd_element14y*resY_multiplier);}
 
     // Print rate stats
     struct timespec current_timestamp;
@@ -1303,42 +1303,38 @@ void* __OSD_THREAD__(void* arg) {
     clock_gettime(CLOCK_MONOTONIC, &end);
     diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
 
+
     char hud_frames_rx[32];
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
     sprintf(hud_frames_rx, "RX Packets %d", frames_received);
-    fbg_write(fbg, hud_frames_rx, osd_element15x*resX_multiplier, osd_element15y*resY_multiplier);
+    if (osd_element15x > 0){fbg_write(fbg, hud_frames_rx, osd_element15x*resX_multiplier, osd_element15y*resY_multiplier);}
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
     sprintf(hud_frames_rx, "Rate %.02f Kbit/s", rx_rate);
-    fbg_write(fbg, hud_frames_rx, osd_element16x*resX_multiplier, osd_element16y*resY_multiplier);
+    if (osd_element16x > 0){fbg_write(fbg, hud_frames_rx, osd_element16x*resX_multiplier, osd_element16y*resY_multiplier);}
     sprintf(msg, "TIME:%.2d:%.2d", minutes,seconds);
-    fbg_write(fbg, msg, osd_element17x*resX_multiplier, osd_element17y*resY_multiplier);
-
-    if (telemetry_arm > 1700) {
-       seconds = seconds + diff/1000000000;
+    if (osd_element17x > 0){fbg_write(fbg, msg, osd_element17x*resX_multiplier, osd_element17y*resY_multiplier);}
+    if (telemetry_arm > 1700){
+      seconds = seconds + diff/1000000000;
     }
-
-    if (seconds > 59) {
+    if(seconds > 59){
        seconds = 0;
        ++minutes;
     }
-
-    if (minutes > 59) {
+    if(minutes > 59){
        seconds = 0;
        minutes = 0;
     }
-
     float percent = rx_rate / (1024 * 10);
     if (percent > 1) {
-       percent = 1;
+      percent = 1;
     }
 
     uint32_t width = (strlen(hud_frames_rx) * 16) * percent;
-    if (osd_mode > 0) {
-       fbg_rect(fbg, x_center - strlen(hud_frames_rx) / 2 * 16, 64, width, 8, 255, 255, 255);
+    if (osd_mode > 0){
+    fbg_rect(fbg, x_center - strlen(hud_frames_rx) / 2 * 16, 64, width, 8, 255, 255, 255);
     } else {
-       fbg_rect(fbg, fbg->width - 300, fbg->height - 36, width, 8, 255, 255, 255);
+    fbg_rect(fbg, fbg->width - 300, fbg->height - 36, width, 8, 255, 255, 255);
     }
-
     fbg_flip(fbg);
     usleep(1);
   }
