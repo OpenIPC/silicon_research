@@ -2,7 +2,6 @@
 #include "recorder.h"
 
 #define earthRadiusKm 6371.0
-int osd_mode = 1;
 typedef struct hiHDMI_ARGS_S {
   HI_HDMI_ID_E enHdmi;
 } HDMI_ARGS_S;
@@ -245,18 +244,6 @@ int main(int argc, const char* argv[]) {
   // Load console arguments
   __BeginParseConsoleArguments__(printHelp) __OnArgument("-p") {
     listen_port = atoi(__ArgValue);
-    continue;
-  }
-
-  __OnArgument("-t") {
-    const char* format = __ArgValue;
-    if (!strcmp(format, "minimal")) {
-      osd_mode = 0;
-    } else if (!strcmp(format, "normal")) {
-      osd_mode = 1;
-    } else {
-      printf("> ERROR: Unsupported OSD format [%s]\n", format);
-    }
     continue;
   }
 
@@ -1321,11 +1308,7 @@ void* __OSD_THREAD__(void* arg) {
     }
 
     uint32_t width = (strlen(hud_frames_rx) * 16) * percent;
-    if (osd_mode > 0){
-    fbg_rect(fbg, x_center - strlen(hud_frames_rx) / 2 * 16, 64, width, 8, 255, 255, 255);
-    } else {
-    fbg_rect(fbg, fbg->width - 300, fbg->height - 36, width, 8, 255, 255, 255);
-    }
+    fbg_rect(fbg, osd_element15x*resX_multiplier, (osd_element15y*resY_multiplier)+25, width, 5, 255, 255, 255);
     fbg_flip(fbg);
     usleep(1);
   }
