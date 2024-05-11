@@ -2,7 +2,6 @@
 #include "recorder.h"
 
 #define earthRadiusKm 6371.0
-#define BILLION 1000000000L
 int osd_mode = 1;
 typedef struct hiHDMI_ARGS_S {
   HI_HDMI_ID_E enHdmi;
@@ -1289,20 +1288,15 @@ void* __OSD_THREAD__(void* arg) {
     struct timespec current_timestamp;
     if (!clock_gettime(CLOCK_MONOTONIC_COARSE, &current_timestamp)) {
       double interval = getTimeInterval(&current_timestamp, &last_timestamp);
+      if (telemetry_arm > 1700){
+        seconds = seconds + interval;
+      }
       if (interval > 1) {
         last_timestamp = current_timestamp;
         rx_rate = ((float)stats_rx_bytes+(((float)stats_rx_bytes*25)/100)) / 1024.0f * 8;
         stats_rx_bytes = 0;
       }
     }
-
-    uint64_t diff;
-    struct timespec start, end;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-    sleep(1);
-    clock_gettime(CLOCK_MONOTONIC, &end);
-    diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-
 
     char hud_frames_rx[32];
     memset(hud_frames_rx, 0, sizeof(hud_frames_rx));
@@ -1313,9 +1307,6 @@ void* __OSD_THREAD__(void* arg) {
     if (osd_element16x > 0){fbg_write(fbg, hud_frames_rx, osd_element16x*resX_multiplier, osd_element16y*resY_multiplier);}
     sprintf(msg, "TIME:%.2d:%.2d", minutes,seconds);
     if (osd_element17x > 0){fbg_write(fbg, msg, osd_element17x*resX_multiplier, osd_element17y*resY_multiplier);}
-    if (telemetry_arm > 1700){
-      seconds = seconds + diff/1000000000;
-    }
     if(seconds > 59){
        seconds = 0;
        ++minutes;
