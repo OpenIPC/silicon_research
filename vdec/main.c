@@ -1308,7 +1308,7 @@ void* __OSD_THREAD__(void* arg) {
     }
 
     uint32_t width = (strlen(hud_frames_rx) * 16) * percent;
-    fbg_rect(fbg, osd_element15x*resX_multiplier, (osd_element15y*resY_multiplier)+25, width, 5, 255, 255, 255);
+    fbg_rect(fbg, (osd_element16x*resX_multiplier)-25, (osd_element16y*resY_multiplier)+25, width, 5, 255, 255, 255);
     fbg_flip(fbg);
     usleep(1);
   }
