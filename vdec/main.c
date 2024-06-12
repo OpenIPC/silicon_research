@@ -948,6 +948,7 @@ float telemetry_gspeed = 0;
 float telemetry_vspeed = 0;
 float telemetry_rssi = 0;
 float telemetry_throttle = 0;
+float telemetry_raw_imu = 0;
 float telemetry_resolution = 0;
 float telemetry_arm = 0;
 float armed = 0;
@@ -1008,7 +1009,15 @@ void* __MAVLINK_THREAD__(void* arg) {
           case MAVLINK_MSG_ID_HEARTBEAT:
             // handle_heartbeat(&message);
             break;
-
+          
+          case MAVLINK_MSG_ID_RAW_IMU:
+            {
+              mavlink_raw_imu_t imu;
+              mavlink_msg_raw_imu_decode(&message, &imu);
+              osd_vars.telemetry_raw_imu = imu.temperature;
+            }
+            break;
+          
           case MAVLINK_MSG_ID_SYS_STATUS:
             mavlink_sys_status_t bat;
             mavlink_msg_sys_status_decode(&message, &bat);
@@ -1230,6 +1239,8 @@ void* __OSD_THREAD__(void* arg) {
     if (osd_element6x > 0){fbg_write(fbg, msg, osd_element6x, osd_element6y*resY_multiplier);}
     sprintf(msg, "THR:%.00f%%", telemetry_throttle);
     if (osd_element7x > 0){fbg_write(fbg, msg, osd_element7x, osd_element7y*resY_multiplier);}
+    sprintf(msg, "TEMP:%.00fC", telemetry_raw_imu/100);
+    if (osd_element7x > 0){fbg_write(fbg, msg, osd_element7x, (osd_element7y+30)*resY_multiplier);}
     sprintf(msg, "SATS:%.00f", telemetry_sats);
     if (osd_element8x > 0){fbg_write(fbg, msg, osd_element8x*resX_multiplier, osd_element8y*resY_multiplier);}
     sprintf(msg, "HDG:%.00f", telemetry_hdg);
