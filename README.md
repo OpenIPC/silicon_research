@@ -59,8 +59,8 @@ killall majestic
 | osd_ele15 | # RX Packets     |
 | osd_ele16 | # RATE           |
 | osd_ele17 | # TIME           |
-| osd_ele18 | # TEMP           |
-| osd_ele19 | # HOR            |
+| osd_ele18 | # HOR            |
+| osd_ele19 | # TEMP           |
 
 
 

@@ -1196,12 +1196,12 @@ void* __OSD_THREAD__(void* arg) {
     char msg[16];
     memset(msg, 0x00, sizeof(msg));
 
-    if (osd_element19x > 0){
+    if (osd_element18x > 0){
       // Artificial Horizon
       int32_t offset_pitch = telemetry_pitch * 4;
       int32_t offset_roll = telemetry_roll * 4;
-      int32_t y_pos_left = ((int32_t)fbg->height / 2 - osd_element19x*resX_multiplier + offset_pitch + offset_roll);
-      int32_t y_pos_right = ((int32_t)fbg->height / 2 - osd_element19y*resY_multiplier + offset_pitch - offset_roll);
+      int32_t y_pos_left = ((int32_t)fbg->height / 2 - osd_element18x*resX_multiplier + offset_pitch + offset_roll);
+      int32_t y_pos_right = ((int32_t)fbg->height / 2 - osd_element18y*resY_multiplier + offset_pitch - offset_roll);
 
       for (int i = 0; i < 4; i++) {
         if (y_pos_left > 0 && y_pos_left < fbg->height &&
@@ -1331,7 +1331,7 @@ void* __OSD_THREAD__(void* arg) {
     }
 
     sprintf(msg, "TEMP:%.00fC", telemetry_raw_imu/100);
-    if (osd_element18x > 0){fbg_write(fbg, msg, osd_element18x, osd_element18y*resY_multiplier);}
+    if (osd_element19x > 0){fbg_write(fbg, msg, osd_element19x, osd_element19y*resY_multiplier);}
       
 
     uint32_t width = (strlen(hud_frames_rx) * 16) * percent;
