@@ -211,6 +211,8 @@ uint16_t osd_element17x = 0;
 uint16_t osd_element17y = 0;
 uint16_t osd_element18x = 0;
 uint16_t osd_element18y = 0;
+uint16_t osd_element19x = 0;
+uint16_t osd_element19y = 0;
 uint16_t mavlink_port = 14550;
 uint32_t vo_width = 1280;
 uint32_t vo_height = 720;
@@ -511,6 +513,16 @@ int main(int argc, const char* argv[]) {
     osd_element18y = atoi(__ArgValue);
     continue;
   }
+
+  __OnArgument("-osd_ele19x") {
+    osd_element19x = atoi(__ArgValue);
+    continue;
+  }
+  __OnArgument("-osd_ele19y") {
+    osd_element19y = atoi(__ArgValue);
+    continue;
+  }
+  
 
   __OnArgument("--ar") {
     const char* mode = __ArgValue;
@@ -1183,47 +1195,49 @@ void* __OSD_THREAD__(void* arg) {
     uint32_t x_center = fbg->width / 2;
     char msg[16];
     memset(msg, 0x00, sizeof(msg));
-    if (osd_element18x > 0){
-    // Artificial Horizon
-    int32_t offset_pitch = telemetry_pitch * 4;
-    int32_t offset_roll = telemetry_roll * 4;
-    int32_t y_pos_left = ((int32_t)fbg->height / 2 - osd_element18x*resX_multiplier + offset_pitch + offset_roll);
-    int32_t y_pos_right = ((int32_t)fbg->height / 2 - osd_element18y*resY_multiplier + offset_pitch - offset_roll);
 
-    for (int i = 0; i < 4; i++) {
-      if (y_pos_left > 0 && y_pos_left < fbg->height &&
-        y_pos_right > 0 && y_pos_right < fbg->height) {
-        fbg_line(fbg, x_center - 180, y_pos_left + i,
-          x_center + 180, y_pos_right + i, 255, 255, 255);
+    if (osd_element19x > 0){
+      // Artificial Horizon
+      int32_t offset_pitch = telemetry_pitch * 4;
+      int32_t offset_roll = telemetry_roll * 4;
+      int32_t y_pos_left = ((int32_t)fbg->height / 2 - osd_element19x*resX_multiplier + offset_pitch + offset_roll);
+      int32_t y_pos_right = ((int32_t)fbg->height / 2 - osd_element19y*resY_multiplier + offset_pitch - offset_roll);
+
+      for (int i = 0; i < 4; i++) {
+        if (y_pos_left > 0 && y_pos_left < fbg->height &&
+          y_pos_right > 0 && y_pos_right < fbg->height) {
+          fbg_line(fbg, x_center - 180, y_pos_left + i,
+            x_center + 180, y_pos_right + i, 255, 255, 255);
+        }
+      }
+
+      // Vertical Speedometer
+      int32_t offset_vspeed = telemetry_vspeed * 5;
+      int32_t y_pos_vspeed = ((int32_t)fbg->height / 2 - offset_vspeed);
+      for (int i = 0; i < 8; i++) {
+        if (y_pos_vspeed > 0 && y_pos_vspeed < fbg->height) {
+          fbg_line(fbg, x_center + 242 + i, fbg->height / 2,
+            x_center + 242 + i, y_pos_vspeed, 255, 255, 255);
+        }
+      }
+
+      for (int i = 0; i < 25; i++) {
+        uint32_t width = (i == 12) ? 10 : 0;
+
+        fbg_line(fbg, x_center - 240 - width,
+          fbg->height / 2 - 120 + i * 10, x_center - 220,
+          fbg->height / 2 - 120 + i * 10, 255, 255, 255);
+        fbg_line(fbg, x_center - 240 - width,
+          fbg->height / 2 - 120 + i * 10 + 1, x_center - 220,
+          fbg->height / 2 - 120 + i * 10 + 1, 255, 255, 255);
+
+        fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10,
+          x_center + 240 + width, fbg->height / 2 - 120 + i * 10, 255, 255, 255);
+        fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10 + 1,
+          x_center + 240 + width, fbg->height / 2 - 120 + i * 10 + 1, 255, 255, 255);
       }
     }
-
-    // Vertical Speedometer
-    int32_t offset_vspeed = telemetry_vspeed * 5;
-    int32_t y_pos_vspeed = ((int32_t)fbg->height / 2 - offset_vspeed);
-    for (int i = 0; i < 8; i++) {
-      if (y_pos_vspeed > 0 && y_pos_vspeed < fbg->height) {
-        fbg_line(fbg, x_center + 242 + i, fbg->height / 2,
-          x_center + 242 + i, y_pos_vspeed, 255, 255, 255);
-      }
-    }
-
-    for (int i = 0; i < 25; i++) {
-      uint32_t width = (i == 12) ? 10 : 0;
-
-      fbg_line(fbg, x_center - 240 - width,
-        fbg->height / 2 - 120 + i * 10, x_center - 220,
-        fbg->height / 2 - 120 + i * 10, 255, 255, 255);
-      fbg_line(fbg, x_center - 240 - width,
-        fbg->height / 2 - 120 + i * 10 + 1, x_center - 220,
-        fbg->height / 2 - 120 + i * 10 + 1, 255, 255, 255);
-
-      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10,
-        x_center + 240 + width, fbg->height / 2 - 120 + i * 10, 255, 255, 255);
-      fbg_line(fbg, x_center + 220, fbg->height / 2 - 120 + i * 10 + 1,
-        x_center + 240 + width, fbg->height / 2 - 120 + i * 10 + 1, 255, 255, 255);
-    }
-    }
+    
     // OSD telemetry
     sprintf(msg, "ALT:%.00fM", telemetry_altitude);
     if (osd_element1x > 0){fbg_write(fbg, msg, osd_element1x*resX_multiplier, osd_element1y*resY_multiplier);}
@@ -1239,8 +1253,6 @@ void* __OSD_THREAD__(void* arg) {
     if (osd_element6x > 0){fbg_write(fbg, msg, osd_element6x, osd_element6y*resY_multiplier);}
     sprintf(msg, "THR:%.00f%%", telemetry_throttle);
     if (osd_element7x > 0){fbg_write(fbg, msg, osd_element7x, osd_element7y*resY_multiplier);}
-    sprintf(msg, "TEMP:%.00fC", telemetry_raw_imu/100);
-    if (osd_element7x > 0){fbg_write(fbg, msg, osd_element7x, (osd_element7y+30)*resY_multiplier);}
     sprintf(msg, "SATS:%.00f", telemetry_sats);
     if (osd_element8x > 0){fbg_write(fbg, msg, osd_element8x*resX_multiplier, osd_element8y*resY_multiplier);}
     sprintf(msg, "HDG:%.00f", telemetry_hdg);
@@ -1317,6 +1329,10 @@ void* __OSD_THREAD__(void* arg) {
     if (percent > 1) {
       percent = 1;
     }
+
+    sprintf(msg, "TEMP:%.00fC", telemetry_raw_imu/100);
+    if (osd_element18x > 0){fbg_write(fbg, msg, osd_element18x, osd_element18y*resY_multiplier);}
+      
 
     uint32_t width = (strlen(hud_frames_rx) * 16) * percent;
     fbg_rect(fbg, (osd_element16x*resX_multiplier)-25, (osd_element16y*resY_multiplier)+25, width, 5, 255, 255, 255);

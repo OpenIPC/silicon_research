@@ -38,6 +38,32 @@ killall majestic
 /tmp/venc
 ```
 
+## Extra OSD
+
+| Element   | Description       |
+|-----------|-------------------|
+| osd_ele1  | # ALT            |
+| osd_ele2  | # SPD            |
+| osd_ele3  | $ VSPD           |
+| osd_ele4  | # BATT           |
+| osd_ele5  | # CONS           |
+| osd_ele6  | # CURR           |
+| osd_ele7  | # THR            |
+| osd_ele8  | # SATS           |
+| osd_ele9  | # HDG            |
+| osd_ele10 | # LAT            |
+| osd_ele11 | # LON            |
+| osd_ele12 | # DIST           |
+| osd_ele13 | # RSSI           |
+| osd_ele14 | # OpenIPC Image  |
+| osd_ele15 | # RX Packets     |
+| osd_ele16 | # RATE           |
+| osd_ele17 | # TIME           |
+| osd_ele18 | # TEMP           |
+| osd_ele19 | # HOR            |
+
+
+
 ### Links
 * https://github.com/svpcom/wfb-ng-osd
 * https://github.com/grz0zrg/fbg
