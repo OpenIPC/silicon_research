@@ -1,10 +1,10 @@
 #!/bin/bash
-DL="https://github.com/openipc/firmware/releases/download/latest"
+DL="https://github.com/openipc/firmware/releases/download/toolchain"
 
 if [ "$1" = "vdec" ] || [ "$1" = "osd" ]; then
-	CC=cortex_a7-gcc13-glibc-4_9
+ 	CC=toolchain.hisilicon-hi3536dv100
 else
-	CC=cortex_a7_thumb2-gcc13-musl-4_9
+	CC=toolchain.hisilicon-hi3516ev200
 fi
 
 GCC=$PWD/toolchain/$CC/bin/arm-linux-gcc
