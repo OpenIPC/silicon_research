@@ -921,7 +921,7 @@ int main(int argc, const char* argv[]) {
 
   // Enable slices (not available in frame mode)
   switch (rc_codec) {
-    case PT_H264:
+    case PT_H264: {
       VENC_H264_SLICE_SPLIT_S avc_param;
       HI_MPI_VENC_GetH264SliceSplit(venc_second_ch_id, &avc_param);
       avc_param.bSplitEnable = 1;
@@ -943,8 +943,9 @@ int main(int argc, const char* argv[]) {
       printf("> H264 slices is [%s] | Slice size = %d lines\n",
         avc_param.bSplitEnable ? "Enabled" : "Disabled", avc_param.u32MbLineNum);
       break;
+    }
 
-    case PT_H265:
+    case PT_H265: {
       VENC_H265_SLICE_SPLIT_S hevc_param;
       HI_MPI_VENC_GetH265SliceSplit(venc_second_ch_id, &hevc_param);
       hevc_param.bSplitEnable = 1;
@@ -966,6 +967,7 @@ int main(int argc, const char* argv[]) {
       printf("> H265 slices is [%s] | Slice size = %d lines\n",
         hevc_param.bSplitEnable ? "Enabled" : "Disabled", hevc_param.u32LcuLineNum);
       break;
+    }
   }
 
   VENC_REF_PARAM_S ref_param;
@@ -1211,7 +1213,7 @@ void transmit(int socket_handle, uint8_t* tx_buffer, uint32_t tx_size,
       break;
 
     // RTP mode
-    case 1:
+    case 1: {
       struct RTPHeader rtp_header;
       rtp_header.version = 0x80;
       rtp_header.sequence = htobe16(rtp_sequence++);
@@ -1233,6 +1235,7 @@ void transmit(int socket_handle, uint8_t* tx_buffer, uint32_t tx_size,
 
       sendmsg(socket_handle, &msg, 0);
       break;
+    }
   }
 }
 

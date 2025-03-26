@@ -3,6 +3,8 @@ DL="https://github.com/openipc/firmware/releases/download/toolchain"
 
 if [ "$1" = "vdec" ] || [ "$1" = "osd" ]; then
  	CC=toolchain.hisilicon-hi3536dv100
+elif [ "$1" = "venc-goke" ]; then
+	CC=toolchain.goke-gk7205v200
 else
 	CC=toolchain.hisilicon-hi3516ev200
 fi
