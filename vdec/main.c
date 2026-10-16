@@ -672,9 +672,16 @@ int main(int argc, const char* argv[]) {
     return 1;
   }
 
+  // Two display buffers keep a frame of latency off the screen, but only the
+  // patched vou.ko OpenIPC used to ship (bSaveBufMode) accepts them; the SDK's
+  // own vou.ko wants 3..15 and answers 2 with HI_ERR_VO_ILLEGAL_PARAM.
   ret = HI_MPI_VO_SetDispBufLen(vo_layer_id, 2);
   if (ret != HI_SUCCESS) {
-    printf("ERROR: Unable to set display buffer length\n");
+    printf("> Display buffer length 2 refused (0x%x), using 3\n", ret);
+    ret = HI_MPI_VO_SetDispBufLen(vo_layer_id, 3);
+  }
+  if (ret != HI_SUCCESS) {
+    printf("ERROR: Unable to set display buffer length = 0x%x\n", ret);
     return 1;
   }
 
