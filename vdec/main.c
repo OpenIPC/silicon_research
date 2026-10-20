@@ -1060,10 +1060,13 @@ void* __MAVLINK_THREAD__(void* arg) {
               telemetry_throttle = 0;
             }
             telemetry_arm = rc_channels_raw.chan5_raw;
-            telemetry_resolution = rc_channels_raw.chan8_raw;
-            if (telemetry_resolution > 1700) {
+            // Run the script once when the switch goes high, not on every
+            // RC message while it stays there: each system() is a fork+exec
+            // that stalls this thread, and the telemetry queues up behind it.
+            if (rc_channels_raw.chan8_raw > 1700 && telemetry_resolution <= 1700) {
               system("/root/resolution.sh");
             }
+            telemetry_resolution = rc_channels_raw.chan8_raw;
             break;
 
           case MAVLINK_MSG_ID_GPS_RAW_INT:
@@ -1166,7 +1169,11 @@ void* __MAVLINK_THREAD__(void* arg) {
       }
     }
 
-    usleep(1);
+    // No sleep here: recv() blocks until the next datagram (or the 100 ms
+    // timeout), and MavLink arrives one message per datagram. A usleep(1)
+    // is a whole tick on a HZ=100 kernel without high-resolution timers
+    // (Hi3536DV100), which capped parsing at 100 messages/s: a faster air
+    // side filled the socket buffer, and the OSD fell seconds behind.
   }
 
   return 0;
